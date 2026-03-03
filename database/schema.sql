@@ -1,11 +1,19 @@
 -- DDL for Inspections Android app (Room entities)
 -- Reference schema for backend use. Consistent with Room annotations.
 -- SQLite compatible.
+--
+-- NOTE: El backend (JPA/Hibernate) agrega los siguientes campos que no existen en Room:
+--   - users.passwordHash  (autenticación server-side)
+--   - users.enabled        (control de cuentas activas)
+-- El backend usa snake_case para nombres de columnas (Hibernate default naming strategy).
+-- Este archivo mantiene camelCase para compatibilidad con Room/SQLite.
 
 -- Users (no FKs)
 CREATE TABLE users (
     id TEXT PRIMARY KEY NOT NULL,
     email TEXT,
+    -- passwordHash TEXT,  -- Solo en backend (JPA), no en Room
+    -- enabled INTEGER,    -- Solo en backend (JPA), no en Room
     firstName TEXT,
     lastName TEXT,
     avatarImage TEXT,

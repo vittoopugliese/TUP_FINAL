@@ -9,8 +9,9 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "photos", indexes = {
-    @Index(name = "idx_photo_step",   columnList = "stepId"),
-    @Index(name = "idx_photo_device", columnList = "deviceId")
+        @Index(name = "idx_photo_media_url", columnList = "mediaUrl"),
+        @Index(name = "idx_photo_step", columnList = "stepId"),
+        @Index(name = "idx_photo_device", columnList = "deviceId")
 })
 public class Photo {
 
@@ -46,40 +47,96 @@ public class Photo {
 
     private Instant createdAt;
 
-    public Photo() {}
+    public Photo() {
+    }
 
     // ── Getters / Setters ──────────────────────────────────────────────────────
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getMediaUrl() { return mediaUrl; }
-    public void setMediaUrl(String mediaUrl) { this.mediaUrl = mediaUrl; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getMediaUrl() {
+        return mediaUrl;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
+    }
 
-    public String getFileDetailsJson() { return fileDetailsJson; }
-    public void setFileDetailsJson(String v) { this.fileDetailsJson = v; }
+    public String getName() {
+        return name;
+    }
 
-    public String getLocalPath() { return localPath; }
-    public void setLocalPath(String localPath) { this.localPath = localPath; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public Instant getTimestamp() { return timestamp; }
-    public void setTimestamp(Instant timestamp) { this.timestamp = timestamp; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getInspectorId() { return inspectorId; }
-    public void setInspectorId(String inspectorId) { this.inspectorId = inspectorId; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public String getStepId() { return stepId; }
-    public void setStepId(String stepId) { this.stepId = stepId; }
+    public String getFileDetailsJson() {
+        return fileDetailsJson;
+    }
 
-    public String getDeviceId() { return deviceId; }
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+    public void setFileDetailsJson(String v) {
+        this.fileDetailsJson = v;
+    }
 
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public String getLocalPath() {
+        return localPath;
+    }
+
+    public void setLocalPath(String localPath) {
+        this.localPath = localPath;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getInspectorId() {
+        return inspectorId;
+    }
+
+    public void setInspectorId(String inspectorId) {
+        this.inspectorId = inspectorId;
+    }
+
+    public String getStepId() {
+        return stepId;
+    }
+
+    public void setStepId(String stepId) {
+        this.stepId = stepId;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 }

@@ -10,10 +10,10 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "devices", indexes = {
-    @Index(name = "idx_device_zone",     columnList = "zoneId"),
-    @Index(name = "idx_device_location", columnList = "locationId"),
-    @Index(name = "idx_device_building", columnList = "buildingId"),
-    @Index(name = "idx_device_category", columnList = "deviceCategory")
+        @Index(name = "idx_device_zone", columnList = "zoneId"),
+        @Index(name = "idx_device_location", columnList = "locationId"),
+        @Index(name = "idx_device_building", columnList = "buildingId"),
+        @Index(name = "idx_device_category", columnList = "deviceCategory")
 })
 public class Device {
 
@@ -24,7 +24,6 @@ public class Device {
     private String zoneId;
     private String locationId;
     private String buildingId;
-    private String companyId;
     private String manufacturerId;
     private String modelId;
     private String deviceTypeId;
@@ -53,61 +52,144 @@ public class Device {
     private Instant createdAt;
     private Instant updatedAt;
 
-    public Device() {}
+    public Device() {
+    }
 
     // ── Getters / Setters ──────────────────────────────────────────────────────
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getZoneId() { return zoneId; }
-    public void setZoneId(String zoneId) { this.zoneId = zoneId; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getLocationId() { return locationId; }
-    public void setLocationId(String locationId) { this.locationId = locationId; }
+    public String getZoneId() {
+        return zoneId;
+    }
 
-    public String getBuildingId() { return buildingId; }
-    public void setBuildingId(String buildingId) { this.buildingId = buildingId; }
+    public void setZoneId(String zoneId) {
+        this.zoneId = zoneId;
+    }
 
-    public String getCompanyId() { return companyId; }
-    public void setCompanyId(String companyId) { this.companyId = companyId; }
+    public String getLocationId() {
+        return locationId;
+    }
 
-    public String getManufacturerId() { return manufacturerId; }
-    public void setManufacturerId(String v) { this.manufacturerId = v; }
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
+    }
 
-    public String getModelId() { return modelId; }
-    public void setModelId(String modelId) { this.modelId = modelId; }
+    public String getBuildingId() {
+        return buildingId;
+    }
 
-    public String getDeviceTypeId() { return deviceTypeId; }
-    public void setDeviceTypeId(String v) { this.deviceTypeId = v; }
+    public void setBuildingId(String buildingId) {
+        this.buildingId = buildingId;
+    }
 
-    public String getDeviceCategory() { return deviceCategory; }
-    public void setDeviceCategory(String v) { this.deviceCategory = v; }
+    public String getManufacturerId() {
+        return manufacturerId;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setManufacturerId(String v) {
+        this.manufacturerId = v;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getModelId() {
+        return modelId;
+    }
 
-    public Integer getDeviceSerialNumber() { return deviceSerialNumber; }
-    public void setDeviceSerialNumber(Integer v) { this.deviceSerialNumber = v; }
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
 
-    public Instant getInstallationDate() { return installationDate; }
-    public void setInstallationDate(Instant v) { this.installationDate = v; }
+    public String getDeviceTypeId() {
+        return deviceTypeId;
+    }
 
-    public Instant getExpirationDate() { return expirationDate; }
-    public void setExpirationDate(Instant v) { this.expirationDate = v; }
+    public void setDeviceTypeId(String v) {
+        this.deviceTypeId = v;
+    }
 
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public String getDeviceCategory() {
+        return deviceCategory;
+    }
 
-    public String getAttributeIds() { return attributeIds; }
-    public void setAttributeIds(String v) { this.attributeIds = v; }
+    public void setDeviceCategory(String v) {
+        this.deviceCategory = v;
+    }
 
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public String getName() {
+        return name;
+    }
 
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getDeviceSerialNumber() {
+        return deviceSerialNumber;
+    }
+
+    public void setDeviceSerialNumber(Integer v) {
+        this.deviceSerialNumber = v;
+    }
+
+    public Instant getInstallationDate() {
+        return installationDate;
+    }
+
+    public void setInstallationDate(Instant v) {
+        this.installationDate = v;
+    }
+
+    public Instant getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Instant v) {
+        this.expirationDate = v;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getAttributeIds() {
+        return attributeIds;
+    }
+
+    public void setAttributeIds(String v) {
+        this.attributeIds = v;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

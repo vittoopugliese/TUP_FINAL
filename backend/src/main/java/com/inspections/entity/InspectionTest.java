@@ -5,14 +5,15 @@ import java.time.Instant;
 
 /**
  * Entidad JPA para Test (procedimiento de verificación).
- * Renombrada InspectionTest para evitar conflicto con la palabra reservada SQL "TEST".
+ * Renombrada InspectionTest para evitar conflicto con la palabra reservada SQL
+ * "TEST".
  * Estados: PENDING, COMPLETED, FAILED.
  */
 @Entity
-@Table(name = "inspection_tests", indexes = {
-    @Index(name = "idx_test_device",     columnList = "deviceId"),
-    @Index(name = "idx_test_inspection", columnList = "inspectionId"),
-    @Index(name = "idx_test_status",     columnList = "status")
+@Table(name = "tests", indexes = {
+        @Index(name = "idx_test_device", columnList = "deviceId"),
+        @Index(name = "idx_test_inspection", columnList = "inspectionId"),
+        @Index(name = "idx_test_status", columnList = "status")
 })
 public class InspectionTest {
 
@@ -49,40 +50,96 @@ public class InspectionTest {
     private Instant createdAt;
     private Instant updatedAt;
 
-    public InspectionTest() {}
+    public InspectionTest() {
+    }
 
     // ── Getters / Setters ──────────────────────────────────────────────────────
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getDeviceId() { return deviceId; }
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getInspectionId() { return inspectionId; }
-    public void setInspectionId(String inspectionId) { this.inspectionId = inspectionId; }
+    public String getDeviceId() {
+        return deviceId;
+    }
 
-    public String getTestTemplateId() { return testTemplateId; }
-    public void setTestTemplateId(String v) { this.testTemplateId = v; }
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
 
-    public String getTestStepIds() { return testStepIds; }
-    public void setTestStepIds(String v) { this.testStepIds = v; }
+    public String getInspectionId() {
+        return inspectionId;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setInspectionId(String inspectionId) {
+        this.inspectionId = inspectionId;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getTestTemplateId() {
+        return testTemplateId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setTestTemplateId(String v) {
+        this.testTemplateId = v;
+    }
 
-    public boolean isApplicable() { return applicable; }
-    public void setApplicable(boolean applicable) { this.applicable = applicable; }
+    public String getTestStepIds() {
+        return testStepIds;
+    }
 
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public void setTestStepIds(String v) {
+        this.testStepIds = v;
+    }
 
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public boolean isApplicable() {
+        return applicable;
+    }
+
+    public void setApplicable(boolean applicable) {
+        this.applicable = applicable;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
