@@ -38,6 +38,7 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.disable())) // H2 console
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    "/**", // Permitir todo para desarrollo simplificado
                     "/api/auth/**",
                     "/h2-console/**",
                     "/swagger-ui/**",
@@ -51,6 +52,10 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    // simplificamos la seguridad del backend para permitir todas las peticiones (/**) sin necesidad de un token JWT obligatorio
+    // nos permite desarrollar los controladores y servicios mas rápido sin tener que ocuparnos de los authh headers en cada llamada
+    // y tambien porque nos comentaron desde el foro que no nos ocupemos en la seguridad
 
     @Bean
     public PasswordEncoder passwordEncoder() {

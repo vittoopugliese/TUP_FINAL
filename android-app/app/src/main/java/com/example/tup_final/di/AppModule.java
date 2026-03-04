@@ -1,8 +1,17 @@
 package com.example.tup_final.di;
 
+import com.example.tup_final.data.remote.ApiService;
 import dagger.Module;
+import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import javax.inject.Singleton;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base Hilt module for application-level dependencies.
@@ -11,4 +20,38 @@ import dagger.hilt.components.SingletonComponent;
 @Module
 @InstallIn(SingletonComponent.class)
 public final class AppModule {
+
+    private static final String BASE_URL = "http://10.0.2.2:8080/api/";
+
+    @Provides
+    @Singleton
+    public HttpLoggingInterceptor provideLoggingInterceptor() {
+        return new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+    }
+
+    @Provides
+    @Singleton
+    public OkHttpClient provideOkHttpClient(HttpLoggingInterceptor loggingInterceptor) {
+        return new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public Retrofit provideRetrofit(OkHttpClient okHttpClient) {
+        return new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(okHttpClient)
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public ApiService provideApiService(Retrofit retrofit) {
+        return retrofit.create(ApiService.class);
+    }
 }
