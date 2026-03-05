@@ -2,6 +2,8 @@ package com.example.tup_final;
 
 import android.app.Application;
 
+import com.example.tup_final.sync.SyncScheduler;
+
 import dagger.hilt.android.HiltAndroidApp;
 
 /**
@@ -10,4 +12,10 @@ import dagger.hilt.android.HiltAndroidApp;
  */
 @HiltAndroidApp
 public class InspectionsApplication extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        SyncScheduler.schedulePeriodic(this);
+    }
 }
