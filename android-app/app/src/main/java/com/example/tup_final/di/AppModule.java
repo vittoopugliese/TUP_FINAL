@@ -1,6 +1,7 @@
 package com.example.tup_final.di;
 
 import com.example.tup_final.data.remote.ApiService;
+import com.example.tup_final.data.remote.AuthApi;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -53,5 +54,11 @@ public final class AppModule {
     @Singleton
     public ApiService provideApiService(Retrofit retrofit) {
         return retrofit.create(ApiService.class);
+    }
+
+    @Provides
+    @Singleton
+    public AuthApi provideAuthApi(Retrofit retrofit) {
+        return retrofit.create(AuthApi.class);
     }
 }
