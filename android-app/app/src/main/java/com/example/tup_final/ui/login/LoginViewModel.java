@@ -17,15 +17,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 /**
  * ViewModel para la pantalla de Login.
- * Valida campos localmente antes de delegar al repositorio.
- * Expone loginResult como LiveData<Resource<LoginResponse>>.
+ * Valida campos localmente (formato de email, longitud de contraseña) antes de delegar al repositorio.
+ * Expone loginResult como LiveData<Resource<LoginResponse>> y errores de validación local.
  */
 @HiltViewModel
 public class LoginViewModel extends ViewModel {
 
+    private static final int MIN_PASSWORD_LENGTH = 6;
+
     private final AuthRepository authRepository;
 
     private final MediatorLiveData<Resource<LoginResponse>> loginResult = new MediatorLiveData<>();
+    private final MutableLiveData<String> emailError = new MutableLiveData<>();
+    private final MutableLiveData<String> passwordError = new MutableLiveData<>();
 
     @Inject
     public LoginViewModel(AuthRepository authRepository) {
@@ -40,6 +44,47 @@ public class LoginViewModel extends ViewModel {
     }
 
     /**
+     * LiveData para errores de formato de email.
+     */
+    public LiveData<String> getEmailError() {
+        return emailError;
+    }
+
+    /**
+     * LiveData para errores de longitud de contraseña.
+     */
+    public LiveData<String> getPasswordError() {
+        return passwordError;
+    }
+
+    /**
+     * Valida email y contraseña. Establece los valores de LiveData de error cuando la validación falla.
+     *
+     * @param email    email del usuario
+     * @param password contraseña del usuario
+     * @return true si tanto el email como la contraseña son válidos
+     */
+    public boolean validate(String email, String password) {
+        boolean valid = true;
+
+        if (email == null || email.trim().isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
+            emailError.setValue("error_email_invalid");
+            valid = false;
+        } else {
+            emailError.setValue(null);
+        }
+
+        if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
+            passwordError.setValue("error_password_short");
+            valid = false;
+        } else {
+            passwordError.setValue(null);
+        }
+
+        return valid;
+    }
+
+    /**
      * Ejecuta el login. Valida campos antes de llamar al backend.
      *
      * @param email    email del usuario
@@ -47,14 +92,8 @@ public class LoginViewModel extends ViewModel {
      */
     public void login(String email, String password) {
         // Validación local
-        if (email == null || email.trim().isEmpty()
-                || password == null || password.trim().isEmpty()) {
-            loginResult.setValue(Resource.error("Completá todos los campos."));
-            return;
-        }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
-            loginResult.setValue(Resource.error("Formato de email inválido."));
+        if (!validate(email, password)) {
+            // Los errores se establecen en emailError/passwordError LiveData por validate()
             return;
         }
 

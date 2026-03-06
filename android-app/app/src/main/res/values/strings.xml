@@ -1,13 +1,22 @@
 <resources>
     <string name="app_name">TUP_FINAL</string>
-
     <!-- Login -->
     <string name="login_title">Iniciar sesión</string>
     <string name="hint_email">Correo electrónico</string>
     <string name="hint_password">Contraseña</string>
-    <string name="btn_login">Iniciar sesión</string>
+    <string name="btn_login">Iniciar Sesión</string>
+    <!-- Errores de validación local -->
+    <string name="error_empty_fields">Completá todos los campos.</string>
+    <string name="error_invalid_email">Formato de email inválido.</string>
+    <!-- Errores de red/servidor -->
+    <string name="error_invalid_credentials">Credenciales inválidas. Verificá tu email y contraseña.</string>
+    <string name="error_forbidden">Cuenta deshabilitada o sin permisos de acceso.</string>
+    <string name="error_timeout">Tiempo de conexión agotado. Verificá tu conexión a internet.</string>
+    <string name="error_invalid_format">Error de formato en la respuesta del servidor.</string>
+    <string name="error_unknown">Error inesperado. Intentá más tarde.</string>
     <string name="error_email_invalid">Ingrese un correo electrónico válido</string>
     <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
+<<<<<<< HEAD
     <string name="link_forgot_password">¿Olvidaste tu contraseña?</string>
 
     <!-- Forgot Password -->
@@ -27,4 +36,6 @@
     <string name="btn_logout">Cerrar sesión</string>
     <string name="btn_cancel">Cancelar</string>
     <string name="btn_sync_and_logout">Sincronizar y cerrar sesión</string>
+=======
+>>>>>>> d0fa5ce (T211: Pantalla LoginActivity/LoginFragment con validación RFC 5322 y longitud)
 </resources>
