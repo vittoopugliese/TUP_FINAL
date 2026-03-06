@@ -171,6 +171,11 @@ public class AuthRepository {
         } else {
             throw new IOException("Server error: " + response.code());
         }
+        if (!cachedEmail.equalsIgnoreCase(email != null ? email.trim() : "")) {
+            return false;
+        }
+        String inputHash = hashPassword(password);
+        return inputHash != null && inputHash.equals(cachedHash);
     }
 
     /**
