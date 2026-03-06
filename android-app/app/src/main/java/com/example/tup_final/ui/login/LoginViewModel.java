@@ -3,59 +3,71 @@ package com.example.tup_final.ui.login;
 import android.util.Patterns;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import dagger.hilt.android.lifecycle.HiltViewModel;
+import com.example.tup_final.data.remote.dto.LoginResponse;
+import com.example.tup_final.data.repository.AuthRepository;
+import com.example.tup_final.util.Resource;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
 /**
- * ViewModel for login screen validation.
- * Validates email format (RFC 5322 via Patterns.EMAIL_ADDRESS) and password minimum length.
+ * ViewModel para la pantalla de Login.
+ * Valida campos localmente antes de delegar al repositorio.
+ * Expone loginResult como LiveData<Resource<LoginResponse>>.
  */
 @HiltViewModel
 public class LoginViewModel extends ViewModel {
 
-    private static final int MIN_PASSWORD_LENGTH = 6;
+    private final AuthRepository authRepository;
 
-    private final MutableLiveData<String> emailError = new MutableLiveData<>();
-    private final MutableLiveData<String> passwordError = new MutableLiveData<>();
+    private final MediatorLiveData<Resource<LoginResponse>> loginResult = new MediatorLiveData<>();
 
     @Inject
-    public LoginViewModel() {
-    }
-
-    public LiveData<String> getEmailError() {
-        return emailError;
-    }
-
-    public LiveData<String> getPasswordError() {
-        return passwordError;
+    public LoginViewModel(AuthRepository authRepository) {
+        this.authRepository = authRepository;
     }
 
     /**
-     * Validates email and password. Sets error LiveData values when validation fails.
-     *
-     * @return true if both email and password are valid
+     * Resultado observable del intento de login.
      */
-    public boolean validate(String email, String password) {
-        boolean valid = true;
+    public LiveData<Resource<LoginResponse>> getLoginResult() {
+        return loginResult;
+    }
 
-        if (email == null || email.trim().isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailError.setValue("error_email_invalid");
-            valid = false;
-        } else {
-            emailError.setValue(null);
+    /**
+     * Ejecuta el login. Valida campos antes de llamar al backend.
+     *
+     * @param email    email del usuario
+     * @param password contraseña del usuario
+     */
+    public void login(String email, String password) {
+        // Validación local
+        if (email == null || email.trim().isEmpty()
+                || password == null || password.trim().isEmpty()) {
+            loginResult.setValue(Resource.error("Completá todos los campos."));
+            return;
         }
 
-        if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
-            passwordError.setValue("error_password_short");
-            valid = false;
-        } else {
-            passwordError.setValue(null);
+        if (!Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
+            loginResult.setValue(Resource.error("Formato de email inválido."));
+            return;
         }
 
-        return valid;
+        // Indicar estado de carga
+        loginResult.setValue(Resource.loading());
+
+        // Delegar al repositorio y conectar su LiveData
+        LiveData<Resource<LoginResponse>> source = authRepository.login(email.trim(), password);
+        loginResult.addSource(source, resource -> {
+            loginResult.setValue(resource);
+            if (resource.getStatus() != Resource.Status.LOADING) {
+                loginResult.removeSource(source);
+            }
+        });
     }
 }

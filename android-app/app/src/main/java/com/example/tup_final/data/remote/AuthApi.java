@@ -1,6 +1,7 @@
 package com.example.tup_final.data.remote;
 
-import com.google.gson.JsonObject;
+import com.example.tup_final.data.remote.dto.LoginRequest;
+import com.example.tup_final.data.remote.dto.LoginResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -19,11 +20,11 @@ public interface AuthApi {
 
     /**
      * POST /api/auth/login
-     * Body esperado:
-     * { "email": "...", "password": "..." }
+     * Body: { "email": "...", "password": "..." }
+     * Response: { token, type, email, role, userId, fullName }
      */
     @POST("api/auth/login")
-    Call<JsonObject> login(@Body JsonObject request);
+    Call<LoginResponse> login(@Body LoginRequest request);
 
     /**
      * POST /api/auth/logout
@@ -47,4 +48,3 @@ public interface AuthApi {
     @POST("api/auth/forgot-password")
     Call<JsonObject> forgotPassword(@Body JsonObject request);
 }
-
