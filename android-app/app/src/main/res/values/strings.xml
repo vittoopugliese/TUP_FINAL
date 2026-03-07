@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">TUP_FINAL</string>
+
+    <!-- Login -->
+    <string name="login_title">Iniciar sesión</string>
+    <string name="hint_email">Correo electrónico</string>
+    <string name="hint_password">Contraseña</string>
+    <string name="btn_login">Iniciar sesión</string>
+    <string name="error_email_invalid">Ingrese un correo electrónico válido</string>
+    <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
 </resources>
