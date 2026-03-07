@@ -1,9 +1,14 @@
 package com.example.tup_final.di;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.example.tup_final.data.remote.ApiService;
+import com.example.tup_final.data.remote.AuthApi;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -53,5 +58,17 @@ public final class AppModule {
     @Singleton
     public ApiService provideApiService(Retrofit retrofit) {
         return retrofit.create(ApiService.class);
+    }
+
+    @Provides
+    @Singleton
+    public AuthApi provideAuthApi(Retrofit retrofit) {
+        return retrofit.create(AuthApi.class);
+    }
+
+    @Provides
+    @Singleton
+    public SharedPreferences provideAuthSharedPreferences(@ApplicationContext Context context) {
+        return context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
     }
 }
