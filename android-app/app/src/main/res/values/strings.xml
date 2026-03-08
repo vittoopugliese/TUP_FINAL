@@ -8,4 +8,12 @@
     <string name="btn_login">Iniciar sesión</string>
     <string name="error_email_invalid">Ingrese un correo electrónico válido</string>
     <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
+
+    <!-- Logout -->
+    <string name="logout_title">Cerrar sesión</string>
+    <string name="logout_message">¿Estás seguro que deseas cerrar sesión?</string>
+    <string name="logout_pending_message">Hay datos pendientes de sincronizar. ¿Deseas sincronizar y cerrar sesión?</string>
+    <string name="btn_logout">Cerrar sesión</string>
+    <string name="btn_cancel">Cancelar</string>
+    <string name="btn_sync_and_logout">Sincronizar y cerrar sesión</string>
 </resources>

@@ -57,6 +57,13 @@ public class AuthRepository {
     }
 
     /**
+     * Clears cached credentials from SharedPreferences (logout).
+     */
+    public void logout() {
+        prefs.edit().clear().apply();
+    }
+
+    /**
      * Validates credentials against cached values (offline mode).
      *
      * @return true if email and password hash match cached credentials
