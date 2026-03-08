@@ -22,6 +22,9 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+/**
+ * Home fragment with logout button and confirmation dialog.
+ */
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
 
@@ -57,7 +60,7 @@ public class HomeFragment extends Fragment {
                 });
 
         view.findViewById(R.id.btn_logout).setOnClickListener(v -> {
-            boolean hasPendingData = false;
+            boolean hasPendingData = false; // placeholder: no change queue yet
             LogoutDialogFragment.newInstance(hasPendingData)
                     .show(getParentFragmentManager(), "LogoutDialog");
         });
