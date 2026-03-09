@@ -10,6 +10,12 @@ import androidx.work.WorkManager;
 import com.bumptech.glide.Glide;
 import com.example.tup_final.data.local.AppDatabase;
 import com.example.tup_final.data.local.UserDao;
+=======
+import androidx.work.WorkManager;
+
+import com.bumptech.glide.Glide;
+import com.example.tup_final.data.local.AppDatabase;
+>>>>>>> 00187f6 (T2.2.1 y T2.2.2: Implementar diálogo de logout y limpieza completa de sesión)
 import com.example.tup_final.data.remote.AuthApi;
 import com.example.tup_final.ui.forgotpassword.ForgotPasswordViewModel.ResetResult;
 import com.google.gson.JsonObject;
@@ -51,6 +57,17 @@ public class AuthRepository {
         this.appDatabase = appDatabase;
         this.context = context;
         this.userDao = userDao;
+=======
+    private final AppDatabase appDatabase;
+    private final Context context;
+
+    @Inject
+    public AuthRepository(AuthApi authApi, SharedPreferences prefs,
+                          AppDatabase appDatabase, @ApplicationContext Context context) {
+        this.authApi = authApi;
+        this.prefs = prefs;
+        this.appDatabase = appDatabase;
+        this.context = context;
     }
 
     /**
