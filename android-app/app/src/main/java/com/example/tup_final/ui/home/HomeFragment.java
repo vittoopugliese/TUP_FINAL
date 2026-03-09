@@ -16,13 +16,12 @@ import com.example.tup_final.R;
 import com.example.tup_final.data.repository.AuthRepository;
 import com.example.tup_final.sync.SyncScheduler;
 
-import dagger.hilt.android.AndroidEntryPoint;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-/**
- * Home fragment with logout button and confirmation dialog.
- */
+import dagger.hilt.android.AndroidEntryPoint;
+
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
 
@@ -43,23 +42,24 @@ public class HomeFragment extends Fragment {
         textView.setText(R.string.app_name);
 
         getParentFragmentManager().setFragmentResultListener(
-                LogoutDialogFragment.REQUEST_KEY,
-                this,
-                (requestKey, result) -> {
+                LogoutDialogFragment.REQUEST_KEY, this, (key, result) -> {
                     boolean syncFirst = result.getBoolean(LogoutDialogFragment.RESULT_SYNC_FIRST, false);
                     if (syncFirst) {
                         SyncScheduler.enqueueOneTime(requireContext());
                     }
-                    authRepository.logout();
-                    NavController navController = NavHostFragment.findNavController(this);
-                    navController.navigate(R.id.action_home_to_login);
-                }
-        );
+                    Executors.newSingleThreadExecutor().execute(() -> {
+                        authRepository.logout();
+                        requireActivity().runOnUiThread(() ->
+                                NavHostFragment.findNavController(HomeFragment.this)
+                                        .navigate(R.id.action_home_to_login)
+                        );
+                    });
+                });
 
         view.findViewById(R.id.btn_logout).setOnClickListener(v -> {
-            boolean hasPendingData = false; // placeholder: no change queue yet
-            LogoutDialogFragment dialog = LogoutDialogFragment.newInstance(hasPendingData);
-            dialog.show(getParentFragmentManager(), "LogoutDialog");
+            boolean hasPendingData = false;
+            LogoutDialogFragment.newInstance(hasPendingData)
+                    .show(getParentFragmentManager(), "LogoutDialog");
         });
     }
 }

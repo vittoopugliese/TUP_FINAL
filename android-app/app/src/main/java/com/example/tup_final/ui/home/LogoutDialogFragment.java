@@ -11,8 +11,8 @@ import com.example.tup_final.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 /**
- * Confirmation dialog for logout. Shows different messages and buttons
- * depending on whether there is pending data to sync.
+ * Confirmation dialog for logout. Shows different messages depending on
+ * whether there is pending data to sync.
  */
 public class LogoutDialogFragment extends DialogFragment {
 
@@ -31,10 +31,15 @@ public class LogoutDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        boolean hasPendingData = getArguments() != null && getArguments().getBoolean(ARG_HAS_PENDING_DATA, false);
+        boolean hasPendingData = getArguments() != null
+                && getArguments().getBoolean(ARG_HAS_PENDING_DATA, false);
 
-        String message = hasPendingData ? getString(R.string.logout_pending_message) : getString(R.string.logout_message);
-        String positiveText = hasPendingData ? getString(R.string.btn_sync_and_logout) : getString(R.string.btn_logout);
+        String message = hasPendingData
+                ? getString(R.string.logout_pending_message)
+                : getString(R.string.logout_message);
+        String positiveText = hasPendingData
+                ? getString(R.string.btn_sync_and_logout)
+                : getString(R.string.btn_logout);
 
         return new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.logout_title)
@@ -44,7 +49,6 @@ public class LogoutDialogFragment extends DialogFragment {
                     Bundle result = new Bundle();
                     result.putBoolean(RESULT_SYNC_FIRST, hasPendingData);
                     getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
-                    dismiss();
                 })
                 .create();
     }

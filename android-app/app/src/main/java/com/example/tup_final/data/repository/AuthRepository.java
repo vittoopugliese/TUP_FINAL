@@ -1,7 +1,14 @@
 package com.example.tup_final.data.repository;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 
+import androidx.work.WorkManager;
+
+import com.bumptech.glide.Glide;
+import com.example.tup_final.data.local.AppDatabase;
 import com.example.tup_final.data.remote.AuthApi;
 import com.google.gson.JsonObject;
 
@@ -13,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import retrofit2.Response;
 
 /**
@@ -28,11 +36,36 @@ public class AuthRepository {
 
     private final AuthApi authApi;
     private final SharedPreferences prefs;
+    private final AppDatabase appDatabase;
+    private final Context context;
 
     @Inject
-    public AuthRepository(AuthApi authApi, SharedPreferences prefs) {
+    public AuthRepository(AuthApi authApi, SharedPreferences prefs,
+                          AppDatabase appDatabase, @ApplicationContext Context context) {
         this.authApi = authApi;
         this.prefs = prefs;
+        this.appDatabase = appDatabase;
+        this.context = context;
+    }
+
+    /**
+     * Performs full logout cleanup. Must be called from a background thread.
+     * 1) Notifies server  2) Clears SharedPreferences  3) Clears Room
+     * 4) Clears Glide cache  5) Cancels WorkManager tasks
+     */
+    public void logout() {
+        try {
+            authApi.logout().execute();
+        } catch (IOException ignored) { }
+
+        prefs.edit().clear().apply();
+
+        appDatabase.clearAllTables();
+
+        Glide.get(context).clearDiskCache();
+        new Handler(Looper.getMainLooper()).post(() -> Glide.get(context).clearMemory());
+
+        WorkManager.getInstance(context).cancelAllWork();
     }
 
     /**
