@@ -2,6 +2,7 @@ package com.inspections.service;
 
 import com.inspections.dto.AuthRequest;
 import com.inspections.dto.AuthResponse;
+import com.inspections.dto.ForgotPasswordRequest;
 import com.inspections.entity.User;
 import com.inspections.repository.UserRepository;
 import com.inspections.security.JwtUtil;
@@ -24,8 +25,8 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil) {
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
@@ -61,7 +62,8 @@ public class AuthService {
      */
     public AuthResponse refresh(String bearerToken) {
         String token = bearerToken.startsWith("Bearer ")
-                ? bearerToken.substring(7) : bearerToken;
+                ? bearerToken.substring(7)
+                : bearerToken;
 
         if (!jwtUtil.validateToken(token)) {
             throw new BadCredentialsException("Token inválido o expirado");
@@ -74,5 +76,23 @@ public class AuthService {
         String newToken = jwtUtil.generateToken(user.getEmail(), user.getRole());
         return new AuthResponse(newToken, user.getEmail(), user.getRole(),
                 user.getId(), user.getFullName());
+    }
+
+    /**
+     * Forgot password: verifica que el email esté registrado.
+     * En producción enviaría un email con link de reset; aquí solo valida la
+     * existencia.
+     *
+     * @param request contiene el email del usuario
+     * @return mensaje de confirmación
+     * @throws UsernameNotFoundException si el email no está registrado
+     */
+    public String forgotPassword(ForgotPasswordRequest request) {
+        userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "No se encontró una cuenta con el email: " + request.getEmail()));
+
+        // En producción: generar token de reset y enviar email
+        return "Se envió un enlace de recuperación al correo: " + request.getEmail();
     }
 }

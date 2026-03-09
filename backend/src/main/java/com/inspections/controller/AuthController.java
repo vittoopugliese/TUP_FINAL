@@ -2,6 +2,7 @@ package com.inspections.controller;
 
 import com.inspections.dto.AuthRequest;
 import com.inspections.dto.AuthResponse;
+import com.inspections.dto.ForgotPasswordRequest;
 import com.inspections.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,12 +10,15 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * Endpoints de autenticación.
  *
- * POST /api/auth/login    – Login con email/contraseña → JWT
- * POST /api/auth/logout   – Logout (client-side, stateless)
- * POST /api/auth/refresh  – Renovar token
+ * POST /api/auth/login – Login con email/contraseña → JWT
+ * POST /api/auth/logout – Logout (client-side, stateless)
+ * POST /api/auth/refresh – Renovar token
+ * POST /api/auth/forgot-password – Solicitar recuperación de contraseña
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -47,5 +51,13 @@ public class AuthController {
             @RequestHeader("Authorization") String authorizationHeader) {
         AuthResponse response = authService.refresh(authorizationHeader);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Forgot password", description = "Solicita recuperación de contraseña por email")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        String message = authService.forgotPassword(request);
+        return ResponseEntity.ok(Map.of("message", message));
     }
 }

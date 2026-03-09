@@ -42,6 +42,11 @@ public class LoginFragment extends Fragment {
 
         observeErrors();
         binding.btnLogin.setOnClickListener(v -> attemptLogin());
+
+        binding.textForgotPassword.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireView());
+            navController.navigate(R.id.action_login_to_forgotPassword);
+        });
     }
 
     private void observeErrors() {
