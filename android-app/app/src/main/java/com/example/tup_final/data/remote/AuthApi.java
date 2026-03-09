@@ -38,5 +38,13 @@ public interface AuthApi {
      */
     @POST("api/auth/refresh")
     Call<JsonObject> refresh(@Header("Authorization") String authorizationHeader);
+
+    /**
+     * POST /api/auth/forgot-password
+     * Body esperado:
+     * { "email": "..." }
+     */
+    @POST("api/auth/forgot-password")
+    Call<JsonObject> forgotPassword(@Body JsonObject request);
 }
 

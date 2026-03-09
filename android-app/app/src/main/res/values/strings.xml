@@ -8,6 +8,17 @@
     <string name="btn_login">Iniciar sesión</string>
     <string name="error_email_invalid">Ingrese un correo electrónico válido</string>
     <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="link_forgot_password">¿Olvidaste tu contraseña?</string>
+
+    <!-- Forgot Password -->
+    <string name="forgot_password_title">Recuperar contraseña</string>
+    <string name="forgot_password_description">Ingresá tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</string>
+    <string name="btn_send_reset">Enviar enlace</string>
+    <string name="back_to_login">Volver al inicio de sesión</string>
+    <string name="forgot_success_online">Se envió un enlace de recuperación a tu correo electrónico.</string>
+    <string name="forgot_success_offline">Tu solicitud fue registrada. Se enviará el correo cuando se restablezca la conexión.</string>
+    <string name="forgot_error_not_found">No se encontró una cuenta con ese correo electrónico.</string>
+    <string name="forgot_error_network">Error de conexión. Verificá tu conexión a internet.</string>
 
     <!-- Logout -->
     <string name="logout_title">Cerrar sesión</string>

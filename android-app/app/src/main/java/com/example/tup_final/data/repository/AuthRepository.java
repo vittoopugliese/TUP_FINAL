@@ -9,7 +9,9 @@ import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.example.tup_final.data.local.AppDatabase;
+import com.example.tup_final.data.local.UserDao;
 import com.example.tup_final.data.remote.AuthApi;
+import com.example.tup_final.ui.forgotpassword.ForgotPasswordViewModel.ResetResult;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -25,6 +27,7 @@ import retrofit2.Response;
 
 /**
  * Repository for authentication. Handles login online (via AuthApi) and offline (cached credentials).
+ * Also handles forgot-password flow with online/offline fallback.
  */
 @Singleton
 public class AuthRepository {
@@ -38,14 +41,16 @@ public class AuthRepository {
     private final SharedPreferences prefs;
     private final AppDatabase appDatabase;
     private final Context context;
+    private final UserDao userDao;
 
     @Inject
     public AuthRepository(AuthApi authApi, SharedPreferences prefs,
-                          AppDatabase appDatabase, @ApplicationContext Context context) {
+                          AppDatabase appDatabase, @ApplicationContext Context context, UserDao userDao) {
         this.authApi = authApi;
         this.prefs = prefs;
         this.appDatabase = appDatabase;
         this.context = context;
+        this.userDao = userDao;
     }
 
     /**
@@ -130,6 +135,57 @@ public class AuthRepository {
         }
     }
 
+    // ──────────────────────────────────────────────
+    // Forgot Password
+    // ──────────────────────────────────────────────
+
+    /**
+     * Solicita recuperación de contraseña.
+     * Intenta online primero; si falla por red, verifica offline en la BD local.
+     *
+     * @param email correo electrónico del usuario
+     * @return ResetResult indicando el resultado
+     */
+    public ResetResult requestPasswordReset(String email) {
+        try {
+            return requestPasswordResetOnline(email);
+        } catch (IOException e) {
+            return checkEmailExistsOffline(email);
+        }
+    }
+
+    /**
+     * Envía solicitud de recuperación al backend.
+     *
+     * @throws IOException si hay error de red
+     */
+    private ResetResult requestPasswordResetOnline(String email) throws IOException {
+        JsonObject body = new JsonObject();
+        body.addProperty("email", email);
+
+        Response<JsonObject> response = authApi.forgotPassword(body).execute();
+        if (response.isSuccessful()) {
+            return ResetResult.SUCCESS_ONLINE;
+        } else if (response.code() == 404) {
+            return ResetResult.ERROR_NOT_FOUND;
+        } else {
+            throw new IOException("Server error: " + response.code());
+        }
+    }
+
+    /**
+     * Verifica si el email existe en la base de datos local (Room).
+     * Usado como fallback cuando no hay conexión.
+     */
+    private ResetResult checkEmailExistsOffline(String email) {
+        if (userDao.getByEmail(email != null ? email.trim() : "") != null) {
+            return ResetResult.SUCCESS_OFFLINE;
+        }
+        return ResetResult.ERROR_NETWORK;
+    }
+
+    // ──────────────────────────────────────────────
+
     private void saveCredentials(String email, String password, JsonObject response) {
         String hash = hashPassword(password);
         if (hash == null) return;
@@ -168,3 +224,4 @@ public class AuthRepository {
         }
     }
 }
+
