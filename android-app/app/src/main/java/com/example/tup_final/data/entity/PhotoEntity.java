@@ -1,5 +1,6 @@
 package com.example.tup_final.data.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
@@ -18,6 +19,7 @@ import androidx.room.PrimaryKey;
 public class PhotoEntity {
 
     @PrimaryKey
+    @NonNull
     public String id;
     /** URL de descarga/vista. */
     public String mediaUrl;

@@ -1,5 +1,6 @@
 package com.example.tup_final.data.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
@@ -25,6 +26,7 @@ import androidx.room.PrimaryKey;
 
 public class ObservationEntity {
     @PrimaryKey
+    @NonNull
     public String id;
     /** FK para el Step. */
     public String testStepId;

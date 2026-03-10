@@ -5,6 +5,7 @@ com\inspections\entity\Location.class
 com\inspections\repository\UserRepository.class
 com\inspections\controller\AuthController.class
 com\inspections\entity\InspectionTest.class
+com\inspections\dto\ForgotPasswordRequest.class
 com\inspections\entity\Zone.class
 com\inspections\security\JwtUtil.class
 com\inspections\repository\TestRepository.class
