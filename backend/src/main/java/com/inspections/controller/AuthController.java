@@ -2,19 +2,26 @@ package com.inspections.controller;
 
 import com.inspections.dto.AuthRequest;
 import com.inspections.dto.AuthResponse;
+import com.inspections.dto.ForgotPasswordRequest;
+import com.inspections.dto.ResetPasswordRequest;
 import com.inspections.service.AuthService;
+import com.inspections.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * Endpoints de autenticación.
  *
- * POST /api/auth/login    – Login con email/contraseña → JWT
- * POST /api/auth/logout   – Logout (client-side, stateless)
- * POST /api/auth/refresh  – Renovar token
+ * POST /api/auth/login             – Login con email/contraseña → JWT
+ * POST /api/auth/logout            – Logout (client-side, stateless)
+ * POST /api/auth/refresh           – Renovar token
+ * POST /api/auth/forgot-password   – Solicitar recuperación de contraseña
+ * POST /api/auth/reset-password    – Restablecer contraseña con token
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -22,9 +29,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService,
+                          PasswordResetService passwordResetService) {
         this.authService = authService;
+        this.passwordResetService = passwordResetService;
     }
 
     @PostMapping("/login")
@@ -48,4 +58,34 @@ public class AuthController {
         AuthResponse response = authService.refresh(authorizationHeader);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Solicitar recuperación de contraseña",
+               description = "Genera un token de recuperación (15 min) y envía un email con el código")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.createPasswordResetToken(request.getEmail());
+        // Respuesta genérica por seguridad (no revelar si el email existía)
+        return ResponseEntity.ok(Map.of(
+                "message", "Si el email está registrado, recibirás un correo con instrucciones para restablecer tu contraseña."
+        ));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Restablecer contraseña",
+               description = "Valida el token de recuperación y establece la nueva contraseña")
+    public ResponseEntity<Map<String, String>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+            return ResponseEntity.ok(Map.of(
+                    "message", "Contraseña restablecida exitosamente. Ya podés iniciar sesión con tu nueva contraseña."
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
+    }
 }
+
