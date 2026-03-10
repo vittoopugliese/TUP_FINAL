@@ -2,17 +2,17 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2df30bbf05144e612df5ebce11cc1887",
+    "identityHash": "911a70c669dbdc9967d0d795179fd488",
     "entities": [
       {
         "tableName": "users",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `email` TEXT, `firstName` TEXT, `lastName` TEXT, `avatarImage` TEXT, `phoneNumber` TEXT, `role` TEXT, `lastLoginAt` TEXT, `createdAt` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `email` TEXT, `firstName` TEXT, `lastName` TEXT, `avatarImage` TEXT, `phoneNumber` TEXT, `role` TEXT, `lastLoginAt` TEXT, `createdAt` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "email",
@@ -84,13 +84,13 @@
       },
       {
         "tableName": "inspections",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `buildingId` TEXT, `type` TEXT, `status` TEXT, `scheduledDate` TEXT, `approvalDate` TEXT, `result` TEXT, `notes` TEXT, `signer` TEXT, `signed` INTEGER NOT NULL, `signDate` TEXT, `startedAt` TEXT, `inspectionReportId` TEXT, `inspectionTemplateId` TEXT, `coverPageId` TEXT, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `buildingId` TEXT, `type` TEXT, `status` TEXT, `scheduledDate` TEXT, `approvalDate` TEXT, `result` TEXT, `notes` TEXT, `signer` TEXT, `signed` INTEGER NOT NULL, `signDate` TEXT, `startedAt` TEXT, `inspectionReportId` TEXT, `inspectionTemplateId` TEXT, `coverPageId` TEXT, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "buildingId",
@@ -228,13 +228,13 @@
       },
       {
         "tableName": "locations",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `buildingId` TEXT, `name` TEXT, `details` TEXT, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `buildingId` TEXT, `name` TEXT, `details` TEXT, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "buildingId",
@@ -297,13 +297,13 @@
       },
       {
         "tableName": "zones",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `locationId` TEXT, `name` TEXT, `details` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`locationId`) REFERENCES `locations`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `locationId` TEXT, `name` TEXT, `details` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`locationId`) REFERENCES `locations`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "locationId",
@@ -357,13 +357,13 @@
       },
       {
         "tableName": "devices",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `zoneId` TEXT, `locationId` TEXT, `buildingId` TEXT, `manufacturerId` TEXT, `modelId` TEXT, `deviceTypeId` TEXT, `deviceCategory` TEXT, `name` TEXT, `description` TEXT, `deviceSerialNumber` INTEGER, `installationDate` TEXT, `expirationDate` TEXT, `enabled` INTEGER NOT NULL, `attributeIds` TEXT, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`zoneId`) REFERENCES `zones`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`locationId`) REFERENCES `locations`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `zoneId` TEXT, `locationId` TEXT, `buildingId` TEXT, `manufacturerId` TEXT, `modelId` TEXT, `deviceTypeId` TEXT, `deviceCategory` TEXT, `name` TEXT, `description` TEXT, `deviceSerialNumber` INTEGER, `installationDate` TEXT, `expirationDate` TEXT, `enabled` INTEGER NOT NULL, `attributeIds` TEXT, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`zoneId`) REFERENCES `zones`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`locationId`) REFERENCES `locations`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "zoneId",
@@ -533,13 +533,13 @@
       },
       {
         "tableName": "tests",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `deviceId` TEXT, `inspectionId` TEXT, `testTemplateId` TEXT, `testStepIds` TEXT, `name` TEXT, `description` TEXT, `status` TEXT, `applicable` INTEGER NOT NULL, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`deviceId`) REFERENCES `devices`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`inspectionId`) REFERENCES `inspections`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `deviceId` TEXT, `inspectionId` TEXT, `testTemplateId` TEXT, `testStepIds` TEXT, `name` TEXT, `description` TEXT, `status` TEXT, `applicable` INTEGER NOT NULL, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`deviceId`) REFERENCES `devices`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`inspectionId`) REFERENCES `inspections`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "deviceId",
@@ -664,13 +664,13 @@
       },
       {
         "tableName": "steps",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `testId` TEXT, `name` TEXT, `testStepType` TEXT, `applicable` INTEGER NOT NULL, `status` TEXT, `description` TEXT, `valueJson` TEXT, `minValue` REAL, `maxValue` REAL, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`testId`) REFERENCES `tests`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `testId` TEXT, `name` TEXT, `testStepType` TEXT, `applicable` INTEGER NOT NULL, `status` TEXT, `description` TEXT, `valueJson` TEXT, `minValue` REAL, `maxValue` REAL, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`testId`) REFERENCES `tests`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "testId",
@@ -781,13 +781,13 @@
       },
       {
         "tableName": "observations",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `testStepId` TEXT, `inspectionId` TEXT, `name` TEXT, `type` TEXT, `description` TEXT, `deficiencyTypeId` TEXT, `mediaId` TEXT, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`testStepId`) REFERENCES `steps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `testStepId` TEXT, `inspectionId` TEXT, `name` TEXT, `type` TEXT, `description` TEXT, `deficiencyTypeId` TEXT, `mediaId` TEXT, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`testStepId`) REFERENCES `steps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "testStepId",
@@ -895,13 +895,13 @@
       },
       {
         "tableName": "photos",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `mediaUrl` TEXT, `name` TEXT, `description` TEXT, `fileDetailsJson` TEXT, `localPath` TEXT, `timestamp` TEXT, `inspectorId` TEXT, `stepId` TEXT, `deviceId` TEXT, `createdAt` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `mediaUrl` TEXT, `name` TEXT, `description` TEXT, `fileDetailsJson` TEXT, `localPath` TEXT, `timestamp` TEXT, `inspectorId` TEXT, `stepId` TEXT, `deviceId` TEXT, `createdAt` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "mediaUrl",
@@ -985,13 +985,13 @@
       },
       {
         "tableName": "audit_logs",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT, `userId` TEXT, `entityType` TEXT, `entityId` TEXT, `action` TEXT, `metadataJson` TEXT, `createdAt` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `userId` TEXT, `entityType` TEXT, `entityId` TEXT, `action` TEXT, `metadataJson` TEXT, `createdAt` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "userId",
@@ -1080,7 +1080,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2df30bbf05144e612df5ebce11cc1887')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '911a70c669dbdc9967d0d795179fd488')"
     ]
   }
 }

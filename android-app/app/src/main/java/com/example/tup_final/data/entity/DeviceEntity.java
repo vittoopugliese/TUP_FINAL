@@ -1,5 +1,6 @@
 package com.example.tup_final.data.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
@@ -15,7 +16,7 @@ import androidx.room.PrimaryKey;
 
 @Entity(
     tableName = "devices",
-    indices = { @Index("zoneId"), @Index("locationId"), @Index("buildingId"), @Index("companyId"), @Index("deviceCategory") },
+    indices = { @Index("zoneId"), @Index("locationId"), @Index("buildingId"), @Index("deviceCategory") },
     foreignKeys = {
         @ForeignKey(
             entity = ZoneEntity.class,
@@ -34,6 +35,7 @@ import androidx.room.PrimaryKey;
 
 public class DeviceEntity {
     @PrimaryKey
+    @NonNull
     public String id;
     public String zoneId;
     public String locationId;
