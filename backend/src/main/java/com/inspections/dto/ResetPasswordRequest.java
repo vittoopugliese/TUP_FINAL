@@ -1,7 +1,7 @@
 package com.inspections.dto;
 
+import com.inspections.validation.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 /**
  * Request para restablecer la contraseña.
@@ -13,7 +13,7 @@ public class ResetPasswordRequest {
     private String token;
 
     @NotBlank(message = "La nueva contraseña es obligatoria")
-    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    @ValidPassword
     private String newPassword;
 
     public ResetPasswordRequest() {}
