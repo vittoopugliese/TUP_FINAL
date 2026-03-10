@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.example.tup_final.data.remote.ApiService;
 import com.example.tup_final.data.remote.AuthApi;
+import com.example.tup_final.data.remote.UserApi;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -64,6 +65,12 @@ public final class AppModule {
     @Singleton
     public AuthApi provideAuthApi(Retrofit retrofit) {
         return retrofit.create(AuthApi.class);
+    }
+
+    @Provides
+    @Singleton
+    public UserApi provideUserApi(Retrofit retrofit) {
+        return retrofit.create(UserApi.class);
     }
 
     @Provides

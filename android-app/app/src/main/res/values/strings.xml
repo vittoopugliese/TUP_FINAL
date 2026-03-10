@@ -35,4 +35,15 @@
     <string name="btn_logout">Cerrar sesión</string>
     <string name="btn_cancel">Cancelar</string>
     <string name="btn_sync_and_logout">Sincronizar y cerrar sesión</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Mi Perfil</string>
+    <string name="profile_email">Correo electrónico</string>
+    <string name="profile_phone">Teléfono</string>
+    <string name="profile_photo_description">Foto de perfil</string>
+    <string name="profile_no_phone">Sin teléfono registrado</string>
+    <string name="profile_no_name">Sin nombre</string>
+    <string name="btn_profile">Mi Perfil</string>
+    <string name="btn_back">Volver</string>
+    <string name="profile_error">Error al cargar el perfil</string>
 </resources>

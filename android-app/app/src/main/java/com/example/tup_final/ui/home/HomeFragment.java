@@ -64,5 +64,10 @@ public class HomeFragment extends Fragment {
             LogoutDialogFragment.newInstance(hasPendingData)
                     .show(getParentFragmentManager(), "LogoutDialog");
         });
+
+        // Navegar al perfil
+        view.findViewById(R.id.btn_profile).setOnClickListener(v ->
+                NavHostFragment.findNavController(HomeFragment.this)
+                        .navigate(R.id.action_home_to_profile));
     }
 }

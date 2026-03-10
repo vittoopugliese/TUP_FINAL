@@ -6,4 +6,10 @@
     </style>
 
     <style name="Theme.TUP_FINAL" parent="Base.Theme.TUP_FINAL" />
+
+    <!-- Estilo para imagen circular (ShapeableImageView) -->
+    <style name="ShapeAppearance.App.CircleImage" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
