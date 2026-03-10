@@ -16,7 +16,6 @@
     <string name="error_unknown">Error inesperado. Intentá más tarde.</string>
     <string name="error_email_invalid">Ingrese un correo electrónico válido</string>
     <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
-<<<<<<< HEAD
     <string name="link_forgot_password">¿Olvidaste tu contraseña?</string>
 
     <!-- Forgot Password -->
@@ -36,6 +35,4 @@
     <string name="btn_logout">Cerrar sesión</string>
     <string name="btn_cancel">Cancelar</string>
     <string name="btn_sync_and_logout">Sincronizar y cerrar sesión</string>
-=======
->>>>>>> d0fa5ce (T211: Pantalla LoginActivity/LoginFragment con validación RFC 5322 y longitud)
 </resources>

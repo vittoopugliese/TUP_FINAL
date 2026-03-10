@@ -45,11 +45,11 @@ public class LoginFragment extends Fragment {
 
         // Click en botón login
         binding.btnLogin.setOnClickListener(v -> {
-            String email = binding.editEmail.getText() != null
-                    ? binding.editEmail.getText().toString()
+            String email = binding.etEmail.getText() != null
+                    ? binding.etEmail.getText().toString()
                     : "";
-            String password = binding.editPassword.getText() != null
-                    ? binding.editPassword.getText().toString()
+            String password = binding.etPassword.getText() != null
+                    ? binding.etPassword.getText().toString()
                     : "";
 
             viewModel.login(email, password);

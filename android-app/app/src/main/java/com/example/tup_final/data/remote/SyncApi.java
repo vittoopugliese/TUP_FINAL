@@ -19,14 +19,14 @@ public interface SyncApi {
      * Envía cambios locales pendientes al backend.
      * Ejemplo de body: { "changes": [...], "lastSyncAt": "..." }
      */
-    @POST("api/sync/push")
+    @POST("sync/push")
     Call<JsonObject> pushChanges(@Body JsonObject payload);
 
     /**
      * Solicita cambios desde la última sincronización.
      * Ejemplo de body: { "lastSyncAt": "..." }
      */
-    @POST("api/sync/pull")
+    @POST("sync/pull")
     Call<JsonObject> pullChanges(@Body JsonObject payload);
 }
 

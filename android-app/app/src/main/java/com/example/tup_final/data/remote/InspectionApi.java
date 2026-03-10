@@ -24,19 +24,19 @@ import retrofit2.http.Path;
  */
 public interface InspectionApi {
 
-    @GET("api/inspections")
+    @GET("inspections")
     Call<List<JsonObject>> getInspections();
 
-    @GET("api/inspections/{id}")
+    @GET("inspections/{id}")
     Call<JsonObject> getInspection(@Path("id") String id);
 
-    @POST("api/inspections")
+    @POST("inspections")
     Call<JsonObject> createInspection(@Body JsonObject body);
 
-    @PUT("api/inspections/{id}")
+    @PUT("inspections/{id}")
     Call<JsonObject> updateInspection(@Path("id") String id, @Body JsonObject body);
 
-    @DELETE("api/inspections/{id}")
+    @DELETE("inspections/{id}")
     Call<Void> deleteInspection(@Path("id") String id);
 }
 

@@ -61,9 +61,10 @@ public class AuthService {
      * Refresh: valida el token actual y emite uno nuevo.
      */
     public AuthResponse refresh(String bearerToken) {
-        String token = bearerToken.startsWith("Bearer ")
-                ? bearerToken.substring(7)
-                : bearerToken;
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            throw new BadCredentialsException("Token inválido o faltante");
+        }
+        String token = bearerToken.substring(7);
 
         if (!jwtUtil.validateToken(token)) {
             throw new BadCredentialsException("Token inválido o expirado");

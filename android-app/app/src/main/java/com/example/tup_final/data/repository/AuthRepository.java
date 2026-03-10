@@ -5,25 +5,26 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.example.tup_final.data.local.AppDatabase;
 import com.example.tup_final.data.local.UserDao;
-=======
-import androidx.work.WorkManager;
-
-import com.bumptech.glide.Glide;
-import com.example.tup_final.data.local.AppDatabase;
->>>>>>> 00187f6 (T2.2.1 y T2.2.2: Implementar diálogo de logout y limpieza completa de sesión)
 import com.example.tup_final.data.remote.AuthApi;
+import com.example.tup_final.data.remote.dto.LoginRequest;
+import com.example.tup_final.data.remote.dto.LoginResponse;
 import com.example.tup_final.ui.forgotpassword.ForgotPasswordViewModel.ResetResult;
+import com.example.tup_final.util.Resource;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -48,6 +49,8 @@ public class AuthRepository {
     private final AppDatabase appDatabase;
     private final Context context;
     private final UserDao userDao;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
     public AuthRepository(AuthApi authApi, SharedPreferences prefs,
@@ -57,17 +60,6 @@ public class AuthRepository {
         this.appDatabase = appDatabase;
         this.context = context;
         this.userDao = userDao;
-=======
-    private final AppDatabase appDatabase;
-    private final Context context;
-
-    @Inject
-    public AuthRepository(AuthApi authApi, SharedPreferences prefs,
-                          AppDatabase appDatabase, @ApplicationContext Context context) {
-        this.authApi = authApi;
-        this.prefs = prefs;
-        this.appDatabase = appDatabase;
-        this.context = context;
     }
 
     /**
@@ -85,7 +77,7 @@ public class AuthRepository {
         appDatabase.clearAllTables();
 
         Glide.get(context).clearDiskCache();
-        new Handler(Looper.getMainLooper()).post(() -> Glide.get(context).clearMemory());
+        mainHandler.post(() -> Glide.get(context).clearMemory());
 
         WorkManager.getInstance(context).cancelAllWork();
     }
@@ -93,29 +85,19 @@ public class AuthRepository {
     /**
      * Attempts login via backend. On success, caches credentials locally.
      *
-     * @return JsonObject with token, userId, etc. on success
+     * @return LoginResponse on success
      * @throws IOException on network error
      */
-    public JsonObject loginOnline(String email, String password) throws IOException {
-        JsonObject body = new JsonObject();
-        body.addProperty("email", email);
-        body.addProperty("password", password);
-
-        Response<JsonObject> response = authApi.login(body).execute();
+    private LoginResponse loginOnline(String email, String password) throws IOException {
+        LoginRequest request = new LoginRequest(email, password);
+        Response<LoginResponse> response = authApi.login(request).execute();
         if (!response.isSuccessful() || response.body() == null) {
-            throw new IOException("Login failed: " + (response.code()));
+            throw new IOException("Login failed: " + response.code());
         }
 
-        JsonObject result = response.body();
+        LoginResponse result = response.body();
         saveCredentials(email, password, result);
         return result;
-    }
-
-    /**
-     * Clears cached credentials from SharedPreferences (logout).
-     */
-    public void logout() {
-        prefs.edit().clear().apply();
     }
 
     /**
@@ -123,7 +105,7 @@ public class AuthRepository {
      *
      * @return true if email and password hash match cached credentials
      */
-    public boolean loginOffline(String email, String password) {
+    private boolean loginOffline(String email, String password) {
         String cachedEmail = prefs.getString(PREFS_EMAIL, null);
         String cachedHash = prefs.getString(PREFS_PASSWORD_HASH, null);
         if (cachedEmail == null || cachedHash == null) {
@@ -138,18 +120,28 @@ public class AuthRepository {
 
     /**
      * Tries online login first. On network error, falls back to offline validation.
-     *
-     * @return JsonObject on success (from backend or built from cache), null on failure
+     * Returns LiveData for UI observation.
      */
-    public JsonObject login(String email, String password) {
-        try {
-            return loginOnline(email, password);
-        } catch (IOException e) {
-            if (loginOffline(email, password)) {
-                return buildOfflineResult();
+    public LiveData<Resource<LoginResponse>> login(String email, String password) {
+        MutableLiveData<Resource<LoginResponse>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                LoginResponse response = loginOnline(email, password);
+                mainHandler.post(() -> result.setValue(Resource.success(response)));
+            } catch (IOException e) {
+                if (loginOffline(email, password)) {
+                    LoginResponse offlineResponse = buildOfflineResult();
+                    mainHandler.post(() -> result.setValue(Resource.success(offlineResponse)));
+                } else {
+                    mainHandler.post(() -> result.setValue(
+                            Resource.error(e.getMessage() != null ? e.getMessage() : "Login failed")));
+                }
             }
-            return null;
-        }
+        });
+
+        return result;
     }
 
     // ──────────────────────────────────────────────
@@ -188,11 +180,6 @@ public class AuthRepository {
         } else {
             throw new IOException("Server error: " + response.code());
         }
-        if (!cachedEmail.equalsIgnoreCase(email != null ? email.trim() : "")) {
-            return false;
-        }
-        String inputHash = hashPassword(password);
-        return inputHash != null && inputHash.equals(cachedHash);
     }
 
     /**
@@ -208,12 +195,12 @@ public class AuthRepository {
 
     // ──────────────────────────────────────────────
 
-    private void saveCredentials(String email, String password, JsonObject response) {
+    private void saveCredentials(String email, String password, LoginResponse response) {
         String hash = hashPassword(password);
         if (hash == null) return;
 
-        String token = response.has("token") ? response.get("token").getAsString() : "";
-        String userId = response.has("userId") ? response.get("userId").getAsString() : "";
+        String token = response != null && response.getToken() != null ? response.getToken() : "";
+        String userId = response != null && response.getUserId() != null ? response.getUserId() : "";
 
         prefs.edit()
                 .putString(PREFS_EMAIL, email != null ? email.trim() : "")
@@ -223,12 +210,15 @@ public class AuthRepository {
                 .apply();
     }
 
-    private JsonObject buildOfflineResult() {
-        JsonObject result = new JsonObject();
-        result.addProperty("token", prefs.getString(PREFS_TOKEN, ""));
-        result.addProperty("userId", prefs.getString(PREFS_USER_ID, ""));
-        result.addProperty("offline", true);
-        return result;
+    private LoginResponse buildOfflineResult() {
+        return new LoginResponse(
+                prefs.getString(PREFS_TOKEN, ""),
+                "Bearer",
+                prefs.getString(PREFS_EMAIL, ""),
+                null,
+                prefs.getString(PREFS_USER_ID, ""),
+                null
+        );
     }
 
     private static String hashPassword(String password) {
@@ -246,4 +236,3 @@ public class AuthRepository {
         }
     }
 }
-

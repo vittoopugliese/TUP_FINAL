@@ -2,6 +2,7 @@ package com.example.tup_final.data.remote;
 
 import com.example.tup_final.data.remote.dto.LoginRequest;
 import com.example.tup_final.data.remote.dto.LoginResponse;
+import com.google.gson.JsonObject;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -23,21 +24,21 @@ public interface AuthApi {
      * Body: { "email": "...", "password": "..." }
      * Response: { token, type, email, role, userId, fullName }
      */
-    @POST("api/auth/login")
+    @POST("auth/login")
     Call<LoginResponse> login(@Body LoginRequest request);
 
     /**
      * POST /api/auth/logout
      * Backend es stateless: el cliente descarta el token.
      */
-    @POST("api/auth/logout")
+    @POST("auth/logout")
     Call<Void> logout();
 
     /**
      * POST /api/auth/refresh
      * Header: Authorization: Bearer <token>
      */
-    @POST("api/auth/refresh")
+    @POST("auth/refresh")
     Call<JsonObject> refresh(@Header("Authorization") String authorizationHeader);
 
     /**
@@ -45,6 +46,6 @@ public interface AuthApi {
      * Body esperado:
      * { "email": "..." }
      */
-    @POST("api/auth/forgot-password")
+    @POST("auth/forgot-password")
     Call<JsonObject> forgotPassword(@Body JsonObject request);
 }
