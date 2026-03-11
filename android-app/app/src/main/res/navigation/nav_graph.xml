@@ -35,6 +35,9 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_home_to_profile"
+            app:destination="@id/profileFragment" />
     </fragment>
 
     <fragment
@@ -42,5 +45,11 @@
         android:name="com.example.tup_final.ui.forgotpassword.ForgotPasswordFragment"
         android:label="@string/forgot_password_title"
         tools:layout="@layout/fragment_forgot_password" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.tup_final.ui.profile.ProfileFragment"
+        android:label="@string/profile_title"
+        tools:layout="@layout/fragment_profile" />
 </navigation>
 
