@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +35,8 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
- * Home fragment with inspections list, logout and profile buttons.
+ * Home fragment con lista de inspecciones en tarjetas.
+ * Muestra: edificio, fecha, estado (con color), días restantes.
  */
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
@@ -47,10 +49,10 @@ public class HomeFragment extends Fragment {
 
     private HomeViewModel viewModel;
     private InspectionAdapter adapter;
-    private RecyclerView recyclerInspections;
-    private ProgressBar progressInspections;
-    private TextView textEmptyOrError;
-
+    private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+    private TextView textEmpty;
+    private TextView textError;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -64,16 +66,33 @@ public class HomeFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
-        recyclerInspections = view.findViewById(R.id.recycler_inspections);
-        progressInspections = view.findViewById(R.id.progress_inspections);
-        textEmptyOrError = view.findViewById(R.id.text_inspections_empty_or_error);
+        // Vistas
+        recyclerView = view.findViewById(R.id.recycler_inspections);
+        progressBar = view.findViewById(R.id.progress_inspections);
+        textEmpty = view.findViewById(R.id.text_empty);
+        textError = view.findViewById(R.id.text_error);
 
+        // RecyclerView setup
         adapter = new InspectionAdapter();
-        recyclerInspections.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerInspections.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setAdapter(adapter);
 
+        // Botón perfil
+        ImageButton btnProfile = view.findViewById(R.id.btn_profile);
+        btnProfile.setOnClickListener(v ->
+                NavHostFragment.findNavController(HomeFragment.this)
+                        .navigate(R.id.action_home_to_profile));
+
+        // Botón logout
+        ImageButton btnLogout = view.findViewById(R.id.btn_logout);
+        btnLogout.setOnClickListener(v -> {
+            boolean hasPendingData = false;
+            LogoutDialogFragment.newInstance(hasPendingData)
+                    .show(getParentFragmentManager(), "LogoutDialog");
+        });
+
+        // Logout result listener
         viewModel.getInspections().observe(getViewLifecycleOwner(), this::onInspectionsChanged);
-
         getParentFragmentManager().setFragmentResultListener(
                 LogoutDialogFragment.REQUEST_KEY, this, (key, result) -> {
                     boolean syncFirst = result.getBoolean(LogoutDialogFragment.RESULT_SYNC_FIRST, false);
@@ -89,10 +108,38 @@ public class HomeFragment extends Fragment {
                     });
                 });
 
-        view.findViewById(R.id.btn_logout).setOnClickListener(v -> {
-            boolean hasPendingData = false; // placeholder: no change queue yet
-            LogoutDialogFragment.newInstance(hasPendingData)
-                    .show(getParentFragmentManager(), "LogoutDialog");
+        // Observar inspecciones
+        viewModel.getInspections().observe(getViewLifecycleOwner(), resource -> {
+            switch (resource.getStatus()) {
+                case LOADING:
+                    progressBar.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                    textEmpty.setVisibility(View.GONE);
+                    textError.setVisibility(View.GONE);
+                    break;
+
+                case SUCCESS:
+                    progressBar.setVisibility(View.GONE);
+                    textError.setVisibility(View.GONE);
+
+                    if (resource.getData() != null && !resource.getData().isEmpty()) {
+                        adapter.submitList(resource.getData());
+                        recyclerView.setVisibility(View.VISIBLE);
+                        textEmpty.setVisibility(View.GONE);
+                    } else {
+                        recyclerView.setVisibility(View.GONE);
+                        textEmpty.setVisibility(View.VISIBLE);
+                    }
+                    break;
+
+                case ERROR:
+                    progressBar.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.GONE);
+                    textEmpty.setVisibility(View.GONE);
+                    textError.setVisibility(View.VISIBLE);
+                    textError.setText(resource.getMessage());
+                    break;
+            }
         });
 
         view.findViewById(R.id.btn_profile).setOnClickListener(v ->

@@ -51,4 +51,3 @@ public final class DatabaseModule {
         return db.locationDao();
     }
 }
-
