@@ -56,6 +56,15 @@
     <string name="error_phone_invalid">Formato de teléfono inválido</string>
     <string name="profile_sync_pending">Guardado. Se sincronizará cuando haya conexión.</string>
 
+    <!-- Home / Inspections -->
+    <string name="home_title">Inspecciones</string>
+    <string name="inspections_empty">No hay inspecciones asignadas.</string>
+    <string name="inspections_error">No se pudieron cargar las inspecciones.</string>
+    <string name="inspection_type_unknown">Sin tipo</string>
+    <string name="inspection_status_unknown">Sin estado</string>
+    <string name="inspection_date_unknown">Sin fecha</string>
+    <string name="inspection_building_unknown">Sin edificio</string>
+
     <!-- Inspection Detail -->
     <string name="inspection_detail_title">Detalle de Inspección</string>
     <string name="tab_general_info">General Info</string>
