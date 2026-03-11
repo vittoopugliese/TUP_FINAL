@@ -64,4 +64,13 @@
     <string name="inspection_status_unknown">Sin estado</string>
     <string name="inspection_date_unknown">Sin fecha</string>
     <string name="inspection_building_unknown">Sin edificio</string>
+
+    <!-- Profile Photo Upload -->
+    <string name="profile_change_photo">Cambiar foto de perfil</string>
+    <string name="profile_take_photo">📷 Tomar foto</string>
+    <string name="profile_choose_gallery">🖼️ Elegir de galería</string>
+    <string name="profile_upload_error">Error al subir la imagen. Intentá de nuevo.</string>
+    <string name="profile_upload_success">Foto de perfil actualizada.</string>
+    <string name="profile_camera_denied">Se necesita permiso de cámara para tomar fotos.</string>
 </resources>
+

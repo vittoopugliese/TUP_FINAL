@@ -1,11 +1,20 @@
 package com.inspections.service;
 
+import com.inspections.dto.AvatarUploadResponse;
 import com.inspections.dto.UpdateProfileRequest;
 import com.inspections.dto.UserProfileResponse;
 import com.inspections.entity.User;
 import com.inspections.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Servicio para operaciones de usuario (perfil).
@@ -14,6 +23,12 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
+
+    @Value("${server.port:8080}")
+    private String serverPort;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -79,5 +94,48 @@ public class UserService {
                 user.getAvatarImage(),
                 user.getRole()
         );
+    }
+
+    /**
+     * Sube el avatar de un usuario.
+     * Guarda el archivo en uploads/avatars/{userId}.{ext} y actualiza la URL en la DB.
+     *
+     * @param userId ID del usuario
+     * @param file   Archivo de imagen (JPEG o PNG)
+     * @return AvatarUploadResponse con la URL pública del avatar
+     * @throws IOException si hay error al guardar el archivo
+     */
+    public AvatarUploadResponse uploadAvatar(String userId, MultipartFile file) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Usuario no encontrado con ID: " + userId));
+
+        // Validar tipo MIME
+        String contentType = file.getContentType();
+        if (contentType == null ||
+                (!contentType.equals("image/jpeg") && !contentType.equals("image/png"))) {
+            throw new IllegalArgumentException("Solo se permiten imágenes JPEG o PNG.");
+        }
+
+        // Determinar extensión
+        String extension = contentType.equals("image/png") ? ".png" : ".jpg";
+
+        // Crear directorio si no existe
+        Path avatarsDir = Paths.get(uploadDir, "avatars").toAbsolutePath().normalize();
+        Files.createDirectories(avatarsDir);
+
+        // Guardar archivo
+        String fileName = userId + extension;
+        Path filePath = avatarsDir.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Construir URL relativa para servir
+        String avatarUrl = "/uploads/avatars/" + fileName;
+
+        // Actualizar usuario
+        user.setAvatarImage(avatarUrl);
+        userRepository.save(user);
+
+        return new AvatarUploadResponse(avatarUrl);
     }
 }
