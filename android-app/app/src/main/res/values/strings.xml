@@ -46,4 +46,13 @@
     <string name="btn_profile">Mi Perfil</string>
     <string name="btn_back">Volver</string>
     <string name="profile_error">Error al cargar el perfil</string>
+    <string name="btn_edit">Editar</string>
+    <string name="btn_save">Guardar</string>
+    <string name="profile_first_name">Nombre</string>
+    <string name="profile_last_name">Apellido</string>
+    <string name="profile_edit_title">Editar perfil</string>
+    <string name="error_name_required">El nombre es obligatorio</string>
+    <string name="error_lastname_required">El apellido es obligatorio</string>
+    <string name="error_phone_invalid">Formato de teléfono inválido</string>
+    <string name="profile_sync_pending">Guardado. Se sincronizará cuando haya conexión.</string>
 </resources>

@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.tup_final.data.entity.UserEntity;
 import com.example.tup_final.data.local.UserDao;
 import com.example.tup_final.data.remote.UserApi;
+import com.example.tup_final.data.remote.dto.UpdateProfileRequest;
 import com.example.tup_final.data.remote.dto.UserProfileResponse;
 import com.example.tup_final.util.Resource;
 
@@ -18,6 +19,8 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import retrofit2.Response;
 
 /**
  * Repository para el perfil de usuario.
@@ -72,8 +75,61 @@ public class UserRepository {
         return result;
     }
 
+    /**
+     * Actualiza el perfil del usuario.
+     * 1) Guarda en Room (optimistic update)
+     * 2) Intenta enviar al backend
+     * 3) Si éxito: actualiza Room con respuesta
+     * 4) Si falla (offline): mantiene datos en Room, emite success con mensaje de sync pendiente
+     */
+    public LiveData<Resource<UserEntity>> updateProfile(String userId, UpdateProfileRequest request) {
+        MutableLiveData<Resource<UserEntity>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            UserEntity current = userDao.getById(userId);
+            if (current == null) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error("No se encontró el perfil. Recargá la pantalla.")));
+                return;
+            }
+
+            // 1) Optimistic update en Room
+            UserEntity updated = new UserEntity(
+                    current.id,
+                    current.email,
+                    request.getFirstName() != null ? request.getFirstName() : current.firstName,
+                    request.getLastName() != null ? request.getLastName() : current.lastName,
+                    request.getAvatarImage() != null ? request.getAvatarImage() : current.avatarImage,
+                    request.getPhoneNumber() != null ? request.getPhoneNumber() : current.phoneNumber,
+                    current.role,
+                    current.lastLoginAt,
+                    current.createdAt
+            );
+            userDao.update(updated);
+
+            // 2) Intentar enviar al backend
+            try {
+                Response<UserProfileResponse> response = userApi.updateProfile(userId, request).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    UserEntity fromBackend = mapToEntity(response.body());
+                    userDao.update(fromBackend);
+                    mainHandler.post(() -> result.setValue(Resource.success(fromBackend)));
+                } else {
+                    mainHandler.post(() -> result.setValue(
+                            Resource.success(updated))); // Local OK, sync pendiente
+                }
+            } catch (IOException e) {
+                // Offline o error de red: datos ya guardados en Room
+                mainHandler.post(() -> result.setValue(Resource.success(updated)));
+            }
+        });
+
+        return result;
+    }
+
     private UserProfileResponse fetchOnline(String userId) throws IOException {
-        retrofit2.Response<UserProfileResponse> response = userApi.getUserProfile(userId).execute();
+        Response<UserProfileResponse> response = userApi.getUserProfile(userId).execute();
         if (!response.isSuccessful() || response.body() == null) {
             throw new IOException("Error al obtener perfil: " + response.code());
         }

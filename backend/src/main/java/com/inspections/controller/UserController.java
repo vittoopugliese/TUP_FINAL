@@ -1,9 +1,11 @@
 package com.inspections.controller;
 
+import com.inspections.dto.UpdateProfileRequest;
 import com.inspections.dto.UserProfileResponse;
 import com.inspections.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
  * Endpoints de usuario (perfil).
  *
  * GET /api/users/{id} – Obtener perfil de usuario por ID
+ * PUT /api/users/{id} – Actualizar perfil de usuario
  */
 @RestController
 @RequestMapping("/api/users")
@@ -28,6 +31,16 @@ public class UserController {
                description = "Retorna los datos del perfil de un usuario por su ID")
     public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable String id) {
         UserProfileResponse profile = userService.getUserById(id);
+        return ResponseEntity.ok(profile);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar perfil de usuario",
+               description = "Actualiza firstName, lastName, phoneNumber y avatarImage del usuario")
+    public ResponseEntity<UserProfileResponse> updateProfile(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateProfileRequest request) {
+        UserProfileResponse profile = userService.updateProfile(id, request);
         return ResponseEntity.ok(profile);
     }
 }

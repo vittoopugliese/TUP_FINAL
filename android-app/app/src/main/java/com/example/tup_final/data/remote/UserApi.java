@@ -1,9 +1,12 @@
 package com.example.tup_final.data.remote;
 
+import com.example.tup_final.data.remote.dto.UpdateProfileRequest;
 import com.example.tup_final.data.remote.dto.UserProfileResponse;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 /**
@@ -11,6 +14,7 @@ import retrofit2.http.Path;
  *
  * Backend:
  * - GET /api/users/{id}
+ * - PUT /api/users/{id}
  */
 public interface UserApi {
 
@@ -20,4 +24,11 @@ public interface UserApi {
      */
     @GET("users/{id}")
     Call<UserProfileResponse> getUserProfile(@Path("id") String userId);
+
+    /**
+     * PUT /api/users/{id}
+     * Actualiza el perfil de un usuario.
+     */
+    @PUT("users/{id}")
+    Call<UserProfileResponse> updateProfile(@Path("id") String userId, @Body UpdateProfileRequest request);
 }
