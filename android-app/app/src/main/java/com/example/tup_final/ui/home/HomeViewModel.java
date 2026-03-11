@@ -15,7 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 /**
  * ViewModel para la pantalla Home.
- * Expone la lista de inspecciones del usuario con soporte online/offline.
+ * Carga la lista de inspecciones desde el InspectionRepository.
  */
 @HiltViewModel
 public class HomeViewModel extends ViewModel {
@@ -29,20 +29,20 @@ public class HomeViewModel extends ViewModel {
     }
 
     /**
-     * Obtiene las inspecciones asignadas al usuario.
+     * Retorna LiveData con la lista de inspecciones.
      * Carga automáticamente la primera vez.
      */
     public LiveData<Resource<List<InspectionEntity>>> getInspections() {
         if (inspections == null) {
-            refresh();
+            loadInspections();
         }
         return inspections;
     }
 
     /**
-     * Recarga las inspecciones desde el repositorio.
+     * Recarga las inspecciones desde el repository.
      */
-    public void refresh() {
+    public void loadInspections() {
         inspections = inspectionRepository.getInspections();
     }
 }
