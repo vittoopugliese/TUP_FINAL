@@ -13,7 +13,7 @@ import androidx.room.PrimaryKey;
 
 @Entity(
     tableName = "inspections",
-    indices = { @Index("buildingId"), @Index("status"), @Index("scheduledDate") }
+    indices = { @Index("buildingId"), @Index("locationId"), @Index("status"), @Index("scheduledDate") }
 )
 
 public class InspectionEntity {
@@ -22,6 +22,8 @@ public class InspectionEntity {
     public String id;
     /** FK para el edificio. */
     public String buildingId;
+    /** FK para la ubicación (Location). */
+    public String locationId;
     /** Tipo: Daily, Weekly, Monthly, Annually. */
     public String type;
     /** Estado: PENDING, IN_PROGRESS, DONE_FAILED, DONE_COMPLETED. */

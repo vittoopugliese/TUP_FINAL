@@ -33,7 +33,7 @@ import com.example.tup_final.data.entity.ZoneEntity;
         PhotoEntity.class,
         AuditLogEntity.class
     },
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 public abstract class AppDatabase extends RoomDatabase {
