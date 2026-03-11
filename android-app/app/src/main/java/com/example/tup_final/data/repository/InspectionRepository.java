@@ -109,4 +109,48 @@ public class InspectionRepository {
 
         return result;
     }
+
+    /**
+     * Obtiene los IDs de edificios únicos para poblar el filtro.
+     *
+     * @return LiveData con Resource que contiene la lista de buildingIds
+     */
+    public LiveData<Resource<List<String>>> getDistinctBuildingIds() {
+        MutableLiveData<Resource<List<String>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                List<String> buildingIds = inspectionDao.getDistinctBuildingIds();
+                mainHandler.post(() -> result.setValue(Resource.success(buildingIds)));
+            } catch (Exception e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error(e.getMessage() != null ? e.getMessage() : "Error al cargar edificios")));
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Obtiene los IDs de ubicaciones únicos para poblar el filtro.
+     *
+     * @return LiveData con Resource que contiene la lista de locationIds
+     */
+    public LiveData<Resource<List<String>>> getDistinctLocationIds() {
+        MutableLiveData<Resource<List<String>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                List<String> locationIds = inspectionDao.getDistinctLocationIds();
+                mainHandler.post(() -> result.setValue(Resource.success(locationIds)));
+            } catch (Exception e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error(e.getMessage() != null ? e.getMessage() : "Error al cargar ubicaciones")));
+            }
+        });
+
+        return result;
+    }
 }

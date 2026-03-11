@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,7 +22,11 @@ import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.data.repository.AuthRepository;
 import com.example.tup_final.sync.SyncScheduler;
 import com.example.tup_final.util.Resource;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -35,8 +39,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
- * Home fragment con lista de inspecciones en tarjetas.
- * Muestra: edificio, fecha, estado (con color), días restantes.
+ * Home fragment con lista de inspecciones y panel de filtros.
  */
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
@@ -49,10 +52,7 @@ public class HomeFragment extends Fragment {
 
     private HomeViewModel viewModel;
     private InspectionAdapter adapter;
-    private RecyclerView recyclerView;
-    private ProgressBar progressBar;
-    private TextView textEmpty;
-    private TextView textError;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -65,34 +65,120 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-
-        // Vistas
-        recyclerView = view.findViewById(R.id.recycler_inspections);
-        progressBar = view.findViewById(R.id.progress_inspections);
-        textEmpty = view.findViewById(R.id.text_empty);
-        textError = view.findViewById(R.id.text_error);
-
-        // RecyclerView setup
         adapter = new InspectionAdapter();
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(adapter);
 
-        // Botón perfil
-        ImageButton btnProfile = view.findViewById(R.id.btn_profile);
-        btnProfile.setOnClickListener(v ->
-                NavHostFragment.findNavController(HomeFragment.this)
-                        .navigate(R.id.action_home_to_profile));
+        setupRecyclerView(view);
+        setupFilterPanel(view);
+        observeData();
+        setupLogoutAndProfile(view);
+    }
 
-        // Botón logout
-        ImageButton btnLogout = view.findViewById(R.id.btn_logout);
-        btnLogout.setOnClickListener(v -> {
-            boolean hasPendingData = false;
-            LogoutDialogFragment.newInstance(hasPendingData)
-                    .show(getParentFragmentManager(), "LogoutDialog");
+    private void setupRecyclerView(View view) {
+        RecyclerView recycler = view.findViewById(R.id.recycler_inspections);
+        recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recycler.setAdapter(adapter);
+    }
+
+    private void setupFilterPanel(View view) {
+        AutoCompleteTextView inputBuilding = view.findViewById(R.id.input_filter_building);
+        AutoCompleteTextView inputLocation = view.findViewById(R.id.input_filter_location);
+        AutoCompleteTextView inputStatus = view.findViewById(R.id.input_filter_status);
+
+        // Status dropdown
+        List<String> statusOptions = new ArrayList<>();
+        statusOptions.add(getString(R.string.filter_all));
+        for (String s : HomeViewModel.STATUS_OPTIONS) {
+            statusOptions.add(s);
+        }
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_dropdown_item_1line, statusOptions);
+        inputStatus.setAdapter(statusAdapter);
+        inputStatus.setOnItemClickListener((parent, v, position, id) -> {
+            String selected = statusOptions.get(position);
+            viewModel.setStatusFilter(
+                    getString(R.string.filter_all).equals(selected) ? null : selected);
         });
 
-        // Logout result listener
-        viewModel.getInspections().observe(getViewLifecycleOwner(), this::onInspectionsChanged);
+        // Building dropdown - populated when data loads
+        viewModel.getBuildingIdsResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource.getStatus() == Resource.Status.SUCCESS && resource.getData() != null) {
+                List<String> buildingIds = new ArrayList<>(resource.getData());
+                buildingIds.add(0, getString(R.string.filter_all));
+                ArrayAdapter<String> buildingAdapter = new ArrayAdapter<>(requireContext(),
+                        android.R.layout.simple_dropdown_item_1line, buildingIds);
+                inputBuilding.setAdapter(buildingAdapter);
+                inputBuilding.setOnItemClickListener((parent, v, position, id) -> {
+                    String selected = buildingIds.get(position);
+                    viewModel.setBuildingFilter(
+                            getString(R.string.filter_all).equals(selected) ? null : selected);
+                });
+            }
+        });
+
+        // Location dropdown - populated when data loads
+        viewModel.getLocationIdsResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource.getStatus() == Resource.Status.SUCCESS && resource.getData() != null) {
+                List<String> locationIds = new ArrayList<>(resource.getData());
+                locationIds.add(0, getString(R.string.filter_all));
+                ArrayAdapter<String> locationAdapter = new ArrayAdapter<>(requireContext(),
+                        android.R.layout.simple_dropdown_item_1line, locationIds);
+                inputLocation.setAdapter(locationAdapter);
+                inputLocation.setOnItemClickListener((parent, v, position, id) -> {
+                    String selected = locationIds.get(position);
+                    viewModel.setLocationFilter(
+                            getString(R.string.filter_all).equals(selected) ? null : selected);
+                });
+            }
+        });
+
+        // Date filter button
+        view.findViewById(R.id.btn_filter_date).setOnClickListener(v -> showDateRangePicker());
+
+        // Apply and Clear buttons
+        view.findViewById(R.id.btn_filter_apply).setOnClickListener(v -> viewModel.applyFilters());
+        view.findViewById(R.id.btn_filter_clear).setOnClickListener(v -> {
+            viewModel.clearFilters();
+            inputBuilding.setText("", false);
+            inputLocation.setText("", false);
+            inputStatus.setText("", false);
+            ((MaterialButton) view.findViewById(R.id.btn_filter_date)).setText(R.string.filter_date_hint);
+        });
+    }
+
+    private void showDateRangePicker() {
+        MaterialDatePicker.Builder<androidx.core.util.Pair<Long, Long>> builder =
+                MaterialDatePicker.Builder.dateRangePicker();
+        MaterialDatePicker<androidx.core.util.Pair<Long, Long>> picker = builder.build();
+
+        picker.addOnPositiveButtonClickListener(
+                (MaterialPickerOnPositiveButtonClickListener<androidx.core.util.Pair<Long, Long>>) selection -> {
+                    if (selection != null) {
+                        Long fromMillis = selection.first;
+                        Long toMillis = selection.second;
+                        viewModel.setDateFilter(fromMillis, toMillis);
+                    }
+                });
+
+        picker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
+    }
+
+    private void observeData() {
+        viewModel.getFilteredInspections().observe(getViewLifecycleOwner(), inspections -> {
+            if (inspections != null) {
+                adapter.submitList(new ArrayList<>(inspections));
+            }
+        });
+
+        viewModel.getInspectionsResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource != null && resource.getStatus() == Resource.Status.ERROR) {
+                Toast.makeText(requireContext(),
+                        resource.getMessage() != null ? resource.getMessage() : getString(R.string.error_unknown),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setupLogoutAndProfile(View view) {
         getParentFragmentManager().setFragmentResultListener(
                 LogoutDialogFragment.REQUEST_KEY, this, (key, result) -> {
                     boolean syncFirst = result.getBoolean(LogoutDialogFragment.RESULT_SYNC_FIRST, false);
@@ -108,38 +194,10 @@ public class HomeFragment extends Fragment {
                     });
                 });
 
-        // Observar inspecciones
-        viewModel.getInspections().observe(getViewLifecycleOwner(), resource -> {
-            switch (resource.getStatus()) {
-                case LOADING:
-                    progressBar.setVisibility(View.VISIBLE);
-                    recyclerView.setVisibility(View.GONE);
-                    textEmpty.setVisibility(View.GONE);
-                    textError.setVisibility(View.GONE);
-                    break;
-
-                case SUCCESS:
-                    progressBar.setVisibility(View.GONE);
-                    textError.setVisibility(View.GONE);
-
-                    if (resource.getData() != null && !resource.getData().isEmpty()) {
-                        adapter.submitList(resource.getData());
-                        recyclerView.setVisibility(View.VISIBLE);
-                        textEmpty.setVisibility(View.GONE);
-                    } else {
-                        recyclerView.setVisibility(View.GONE);
-                        textEmpty.setVisibility(View.VISIBLE);
-                    }
-                    break;
-
-                case ERROR:
-                    progressBar.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.GONE);
-                    textEmpty.setVisibility(View.GONE);
-                    textError.setVisibility(View.VISIBLE);
-                    textError.setText(resource.getMessage());
-                    break;
-            }
+        view.findViewById(R.id.btn_logout).setOnClickListener(v -> {
+            boolean hasPendingData = false;
+            LogoutDialogFragment.newInstance(hasPendingData)
+                    .show(getParentFragmentManager(), "LogoutDialog");
         });
 
         view.findViewById(R.id.btn_profile).setOnClickListener(v ->

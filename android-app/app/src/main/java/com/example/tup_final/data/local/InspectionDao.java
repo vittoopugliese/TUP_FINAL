@@ -25,6 +25,12 @@ public interface InspectionDao {
     @Query("SELECT * FROM inspections")
     List<InspectionEntity> getAll();
 
+    @Query("SELECT DISTINCT buildingId FROM inspections WHERE buildingId IS NOT NULL AND buildingId != '' ORDER BY buildingId")
+    List<String> getDistinctBuildingIds();
+
+    @Query("SELECT DISTINCT locationId FROM inspections WHERE locationId IS NOT NULL AND locationId != '' ORDER BY locationId")
+    List<String> getDistinctLocationIds();
+
     @Query("SELECT * FROM inspections WHERE buildingId = :buildingId ORDER BY scheduledDate")
     List<InspectionEntity> getByBuildingId(String buildingId);
 
