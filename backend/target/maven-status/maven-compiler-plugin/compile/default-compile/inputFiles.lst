@@ -1,6 +1,7 @@
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\service\AuthService.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\InspectionsApplication.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\validation\PasswordConstraintValidator.java
+C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\dto\AvatarUploadResponse.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\repository\UserRepository.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\validation\ValidPassword.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\repository\InspectionRepository.java
@@ -29,6 +30,7 @@ C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\j
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\entity\Device.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\entity\PasswordResetToken.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\entity\Photo.java
+C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\config\FileUploadConfig.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\repository\ZoneRepository.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\dto\AuthResponse.java
 C:\Users\Alex\Desktop\proyecto_final\TUP_FINAL-main\TUP_FINAL\backend\src\main\java\com\inspections\repository\StepRepository.java
