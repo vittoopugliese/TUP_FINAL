@@ -12,6 +12,7 @@ import com.example.tup_final.data.remote.dto.UpdateProfileRequest;
 import com.example.tup_final.data.repository.UserRepository;
 import com.example.tup_final.util.Resource;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -21,7 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 /**
  * ViewModel para la pantalla de perfil.
  * Obtiene el userId de SharedPreferences y carga los datos del perfil.
- * Soporta edición con validación y actualización local + sync.
+ * Soporta edición con validación, actualización y subida de avatar.
  */
 @HiltViewModel
 public class ProfileViewModel extends ViewModel {
@@ -32,6 +33,7 @@ public class ProfileViewModel extends ViewModel {
     private final SharedPreferences prefs;
     private MutableLiveData<Resource<UserEntity>> profile;
     private final MediatorLiveData<Resource<UserEntity>> updateResult = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<UserEntity>> uploadResult = new MediatorLiveData<>();
 
     @Inject
     public ProfileViewModel(UserRepository userRepository, SharedPreferences prefs) {
@@ -55,6 +57,13 @@ public class ProfileViewModel extends ViewModel {
      */
     public LiveData<Resource<UserEntity>> getUpdateResult() {
         return updateResult;
+    }
+
+    /**
+     * Resultado de la subida de avatar.
+     */
+    public LiveData<Resource<UserEntity>> getUploadResult() {
+        return uploadResult;
     }
 
     /**
@@ -110,7 +119,7 @@ public class ProfileViewModel extends ViewModel {
                 firstName != null ? firstName.trim() : null,
                 lastName != null ? lastName.trim() : null,
                 phoneNumber != null && !phoneNumber.trim().isEmpty() ? phoneNumber.trim() : null,
-                null  // avatarImage - no editable en esta pantalla
+                null  // avatarImage - se maneja por separado con uploadAvatar
         );
 
         LiveData<Resource<UserEntity>> source = userRepository.updateProfile(userId, request);
@@ -118,6 +127,27 @@ public class ProfileViewModel extends ViewModel {
             updateResult.setValue(resource);
             if (resource.getStatus() != Resource.Status.LOADING) {
                 updateResult.removeSource(source);
+            }
+        });
+    }
+
+    /**
+     * Sube una imagen como avatar del usuario.
+     *
+     * @param imageFile Archivo de imagen comprimido (JPEG)
+     */
+    public void uploadAvatar(File imageFile) {
+        String userId = prefs.getString("cached_user_id", null);
+        if (userId == null || userId.isEmpty()) {
+            uploadResult.setValue(Resource.error("No se encontró el ID del usuario."));
+            return;
+        }
+
+        LiveData<Resource<UserEntity>> source = userRepository.uploadAvatar(userId, imageFile);
+        uploadResult.addSource(source, resource -> {
+            uploadResult.setValue(resource);
+            if (resource.getStatus() != Resource.Status.LOADING) {
+                uploadResult.removeSource(source);
             }
         });
     }

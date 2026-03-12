@@ -9,10 +9,12 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.tup_final.data.entity.UserEntity;
 import com.example.tup_final.data.local.UserDao;
 import com.example.tup_final.data.remote.UserApi;
+import com.example.tup_final.data.remote.dto.AvatarUploadResponse;
 import com.example.tup_final.data.remote.dto.UpdateProfileRequest;
 import com.example.tup_final.data.remote.dto.UserProfileResponse;
 import com.example.tup_final.util.Resource;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,6 +22,9 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Response;
 
 /**
@@ -122,6 +127,56 @@ public class UserRepository {
             } catch (IOException e) {
                 // Offline o error de red: datos ya guardados en Room
                 mainHandler.post(() -> result.setValue(Resource.success(updated)));
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Sube el avatar del usuario al backend.
+     * Envía la imagen como multipart, actualiza Room con la URL retornada.
+     *
+     * @param userId    ID del usuario
+     * @param imageFile Archivo de imagen comprimido
+     * @return LiveData con el estado del recurso
+     */
+    public LiveData<Resource<UserEntity>> uploadAvatar(String userId, File imageFile) {
+        MutableLiveData<Resource<UserEntity>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                // Crear MultipartBody.Part
+                RequestBody requestBody = RequestBody.create(
+                        imageFile, MediaType.parse("image/jpeg"));
+                MultipartBody.Part part = MultipartBody.Part.createFormData(
+                        "file", imageFile.getName(), requestBody);
+
+                // Llamar al backend
+                Response<AvatarUploadResponse> response =
+                        userApi.uploadAvatar(userId, part).execute();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    String avatarUrl = response.body().getAvatarUrl();
+
+                    // Actualizar Room
+                    UserEntity user = userDao.getById(userId);
+                    if (user != null) {
+                        user.avatarImage = avatarUrl;
+                        userDao.update(user);
+                        mainHandler.post(() -> result.setValue(Resource.success(user)));
+                    } else {
+                        mainHandler.post(() -> result.setValue(
+                                Resource.error("No se encontró el perfil local.")));
+                    }
+                } else {
+                    mainHandler.post(() -> result.setValue(
+                            Resource.error("Error al subir la imagen. Intentá de nuevo.")));
+                }
+            } catch (IOException e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error("Error de conexión. Verificá tu internet.")));
             }
         });
 

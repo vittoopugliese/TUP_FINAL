@@ -12,20 +12,39 @@
         android:layout_height="wrap_content"
         android:padding="24dp">
 
-        <!-- Avatar circular -->
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/img_avatar"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+        <!-- Contenedor del avatar con badge de cámara -->
+        <FrameLayout
+            android:id="@+id/layout_avatar_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_person_placeholder"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImage"
-            app:strokeWidth="2dp"
-            app:strokeColor="?attr/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Avatar circular -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/img_avatar"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_person_placeholder"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImage"
+                app:strokeWidth="2dp"
+                app:strokeColor="?attr/colorPrimary" />
+
+            <!-- Badge de cámara (esquina inferior derecha) -->
+            <ImageView
+                android:id="@+id/img_camera_badge"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/ic_camera_badge"
+                android:contentDescription="@string/profile_change_photo"
+                android:elevation="2dp" />
+        </FrameLayout>
 
         <!-- Nombre completo -->
         <TextView
@@ -39,7 +58,7 @@
             tools:text="Juan Pérez"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/img_avatar" />
+            app:layout_constraintTop_toBottomOf="@id/layout_avatar_container" />
 
         <!-- Rol -->
         <TextView

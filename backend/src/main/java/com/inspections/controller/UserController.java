@@ -1,5 +1,6 @@
 package com.inspections.controller;
 
+import com.inspections.dto.AvatarUploadResponse;
 import com.inspections.dto.UpdateProfileRequest;
 import com.inspections.dto.UserProfileResponse;
 import com.inspections.service.UserService;
@@ -8,12 +9,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * Endpoints de usuario (perfil).
  *
- * GET /api/users/{id} – Obtener perfil de usuario por ID
- * PUT /api/users/{id} – Actualizar perfil de usuario
+ * GET  /api/users/{id}        – Obtener perfil de usuario por ID
+ * PUT  /api/users/{id}        – Actualizar perfil de usuario
+ * POST /api/users/{id}/avatar – Subir avatar de usuario
  */
 @RestController
 @RequestMapping("/api/users")
@@ -42,5 +47,22 @@ public class UserController {
             @Valid @RequestBody UpdateProfileRequest request) {
         UserProfileResponse profile = userService.updateProfile(id, request);
         return ResponseEntity.ok(profile);
+    }
+
+    @PostMapping("/{id}/avatar")
+    @Operation(summary = "Subir avatar de usuario",
+               description = "Sube una imagen JPEG o PNG como avatar del usuario (máximo 5MB)")
+    public ResponseEntity<?> uploadAvatar(
+            @PathVariable String id,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            AvatarUploadResponse response = userService.uploadAvatar(id, file);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error al guardar el archivo: " + e.getMessage());
+        }
     }
 }
