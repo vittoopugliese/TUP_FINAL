@@ -9,9 +9,8 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.data.local.InspectionDao;
 import com.example.tup_final.data.remote.InspectionApi;
+import com.example.tup_final.data.remote.dto.InspectionListResponse;
 import com.example.tup_final.util.Resource;
-
-import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,8 +25,7 @@ import retrofit2.Response;
 
 /**
  * Repository para inspecciones.
- * Intenta obtener datos online (InspectionApi), guarda en Room,
- * y usa Room como fallback offline.
+ * Patrón offline-first: intenta online, cachea en Room, fallback a Room.
  */
 @Singleton
 public class InspectionRepository {
@@ -56,72 +54,60 @@ public class InspectionRepository {
 
         executor.execute(() -> {
             try {
-                Response<List<JsonObject>> response = inspectionApi.getInspections().execute();
-                if (!response.isSuccessful() || response.body() == null) {
-                    throw new IOException("Error al obtener inspecciones: " + response.code());
-                }
-
-                List<InspectionEntity> entities = mapJsonListToEntities(response.body());
-                inspectionDao.deleteAll();
-                if (!entities.isEmpty()) {
-                    inspectionDao.insertAll(entities);
-                }
-                mainHandler.post(() -> result.setValue(Resource.success(entities)));
-            } catch (IOException e) {
-                List<InspectionEntity> cached = inspectionDao.getAll();
-                if (!cached.isEmpty()) {
-                    mainHandler.post(() -> result.setValue(Resource.success(cached)));
+                Response<List<InspectionListResponse>> response = inspectionApi.getInspections().execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<InspectionEntity> entities = mapToEntities(response.body());
+                    inspectionDao.deleteAll();
+                    if (!entities.isEmpty()) {
+                        inspectionDao.insertAll(entities);
+                    }
+                    mainHandler.post(() -> result.setValue(Resource.success(entities)));
                 } else {
-                    mainHandler.post(() -> result.setValue(
-                            Resource.error("No se pudieron cargar las inspecciones. Verificá tu conexión.")));
+                    // Server error, try to load from cache
+                    loadFromCache(result);
                 }
+            } catch (IOException e) {
+                // Network error, try to load from cache
+                loadFromCache(result);
             }
         });
 
         return result;
     }
 
-    private List<InspectionEntity> mapJsonListToEntities(List<JsonObject> jsonList) {
-        List<InspectionEntity> result = new ArrayList<>();
-        for (JsonObject json : jsonList) {
-            InspectionEntity entity = mapJsonToEntity(json);
-            if (entity != null) {
-                result.add(entity);
-            }
+    private void loadFromCache(MutableLiveData<Resource<List<InspectionEntity>>> result) {
+        List<InspectionEntity> cached = inspectionDao.getAll();
+        if (cached != null && !cached.isEmpty()) {
+            mainHandler.post(() -> result.setValue(Resource.success(cached)));
+        } else {
+            mainHandler.post(() -> result.setValue(
+                    Resource.error("No se pudieron cargar las inspecciones. Verificá tu conexión.")));
         }
-        return result;
     }
 
-    private InspectionEntity mapJsonToEntity(JsonObject json) {
-        String id = getStringOrEmpty(json, "id");
-        if (id.isEmpty()) {
-            return null;
+    private List<InspectionEntity> mapToEntities(List<InspectionListResponse> dtos) {
+        List<InspectionEntity> entities = new ArrayList<>();
+        for (InspectionListResponse dto : dtos) {
+            InspectionEntity entity = new InspectionEntity();
+            entity.id = dto.getId();
+            entity.buildingId = dto.getBuildingId();
+            entity.type = dto.getType();
+            entity.status = dto.getStatus();
+            entity.scheduledDate = dto.getScheduledDate();
+            entity.approvalDate = dto.getApprovalDate();
+            entity.result = dto.getResult();
+            entity.notes = dto.getNotes();
+            entity.signer = dto.getSigner();
+            entity.signed = dto.isSigned();
+            entity.signDate = dto.getSignDate();
+            entity.startedAt = dto.getStartedAt();
+            entity.inspectionReportId = dto.getInspectionReportId();
+            entity.inspectionTemplateId = dto.getInspectionTemplateId();
+            entity.coverPageId = dto.getCoverPageId();
+            entity.createdAt = dto.getCreatedAt();
+            entity.updatedAt = dto.getUpdatedAt();
+            entities.add(entity);
         }
-        InspectionEntity entity = new InspectionEntity();
-        entity.id = id;
-        entity.buildingId = getStringOrEmpty(json, "buildingId");
-        entity.type = getStringOrEmpty(json, "type");
-        entity.status = getStringOrEmpty(json, "status");
-        entity.scheduledDate = getStringOrEmpty(json, "scheduledDate");
-        entity.approvalDate = getStringOrEmpty(json, "approvalDate");
-        entity.result = getStringOrEmpty(json, "result");
-        entity.notes = getStringOrEmpty(json, "notes");
-        entity.signer = getStringOrEmpty(json, "signer");
-        entity.signed = json.has("signed") && json.get("signed").getAsBoolean();
-        entity.signDate = getStringOrEmpty(json, "signDate");
-        entity.startedAt = getStringOrEmpty(json, "startedAt");
-        entity.inspectionReportId = getStringOrEmpty(json, "inspectionReportId");
-        entity.inspectionTemplateId = getStringOrEmpty(json, "inspectionTemplateId");
-        entity.coverPageId = getStringOrEmpty(json, "coverPageId");
-        entity.createdAt = getStringOrEmpty(json, "createdAt");
-        entity.updatedAt = getStringOrEmpty(json, "updatedAt");
-        return entity;
-    }
-
-    private static String getStringOrEmpty(JsonObject json, String key) {
-        if (!json.has(key) || json.get(key).isJsonNull()) {
-            return "";
-        }
-        return json.get(key).getAsString();
+        return entities;
     }
 }
