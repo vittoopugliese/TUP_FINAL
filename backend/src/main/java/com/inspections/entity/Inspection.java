@@ -10,6 +10,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "inspections", indexes = {
     @Index(name = "idx_inspection_building", columnList = "buildingId"),
+    @Index(name = "idx_inspection_location", columnList = "locationId"),
     @Index(name = "idx_inspection_status",   columnList = "status"),
     @Index(name = "idx_inspection_date",     columnList = "scheduledDate")
 })
@@ -21,6 +22,9 @@ public class Inspection {
 
     /** FK hacia el edificio (entidad externa / ID externo). */
     private String buildingId;
+
+    /** FK hacia la ubicación (Location). */
+    private String locationId;
 
     /** Tipo: Daily, Weekly, Monthly, Annually. */
     private String type;
@@ -59,6 +63,9 @@ public class Inspection {
 
     public String getBuildingId() { return buildingId; }
     public void setBuildingId(String buildingId) { this.buildingId = buildingId; }
+
+    public String getLocationId() { return locationId; }
+    public void setLocationId(String locationId) { this.locationId = locationId; }
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }

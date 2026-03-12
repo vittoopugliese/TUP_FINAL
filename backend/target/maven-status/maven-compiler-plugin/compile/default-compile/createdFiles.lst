@@ -15,6 +15,7 @@ com\inspections\repository\InspectionRepository.class
 com\inspections\dto\AuthRequest.class
 com\inspections\entity\Observation.class
 com\inspections\entity\Step.class
+com\inspections\dto\UpdateProfileRequest.class
 com\inspections\repository\PhotoRepository.class
 com\inspections\repository\LocationRepository.class
 com\inspections\repository\AuditLogRepository.class

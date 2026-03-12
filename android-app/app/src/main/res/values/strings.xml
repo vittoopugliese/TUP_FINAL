@@ -56,6 +56,18 @@
     <string name="error_phone_invalid">Formato de teléfono inválido</string>
     <string name="profile_sync_pending">Guardado. Se sincronizará cuando haya conexión.</string>
 
+    <!-- Inspections filter -->
+    <string name="filter_building">Edificio</string>
+    <string name="filter_location">Ubicación</string>
+    <string name="filter_date">Fecha</string>
+    <string name="filter_status">Estado</string>
+    <string name="filter_apply">Aplicar</string>
+    <string name="filter_clear">Limpiar</string>
+    <string name="filter_date_hint">Seleccionar rango de fechas</string>
+    <string name="filter_all">Todos</string>
+    <string name="inspections_empty">No hay inspecciones</string>
+    <string name="inspections_loading">Cargando inspecciones…</string>
+
     <!-- Profile Photo Upload -->
     <string name="profile_change_photo">Cambiar foto de perfil</string>
     <string name="profile_take_photo">📷 Tomar foto</string>
