@@ -52,6 +52,7 @@ public class HomeFragment extends Fragment {
     private InspectionAdapter adapter;
     private ProgressBar progressInspections;
     private TextView textEmptyOrError;
+    private TextView textInspectionsCount;
     private RecyclerView recyclerInspections;
 
     @Nullable
@@ -78,6 +79,7 @@ public class HomeFragment extends Fragment {
         recyclerInspections = view.findViewById(R.id.recycler_inspections);
         progressInspections = view.findViewById(R.id.progress_inspections);
         textEmptyOrError = view.findViewById(R.id.text_empty);
+        textInspectionsCount = view.findViewById(R.id.text_inspections_count);
         recyclerInspections.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerInspections.setAdapter(adapter);
     }
@@ -169,6 +171,7 @@ public class HomeFragment extends Fragment {
         viewModel.getFilteredInspections().observe(getViewLifecycleOwner(), inspections -> {
             if (inspections != null) {
                 adapter.submitList(new ArrayList<>(inspections));
+                textInspectionsCount.setText(getString(R.string.inspections_count, inspections.size()));
             }
         });
 
