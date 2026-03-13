@@ -76,6 +76,32 @@ public class InspectionRepository {
         });
 
         return result;
+    private List<InspectionEntity> mapToEntities(List<InspectionListResponse> dtos) {
+        List<InspectionEntity> entities = new ArrayList<>();
+        for (InspectionListResponse dto : dtos) {
+            InspectionEntity entity = new InspectionEntity();
+            entity.id = dto.getId() != null ? dto.getId() : "";
+            entity.buildingId = dto.getBuildingId();
+            entity.type = dto.getType();
+            entity.status = dto.getStatus();
+            entity.scheduledDate = dto.getScheduledDate();
+            // Campos opcionales no presentes en el DTO mínimo - se dejan null
+            entity.approvalDate = null;
+            entity.result = null;
+            entity.notes = null;
+            entity.signer = null;
+            entity.signed = false;
+            entity.signDate = null;
+            entity.startedAt = null;
+            entity.inspectionReportId = null;
+            entity.inspectionTemplateId = null;
+            entity.coverPageId = null;
+            entity.createdAt = null;
+            entity.updatedAt = null;
+            entity.locationId = null;
+            entities.add(entity);
+        }
+        return entities;
     }
 
     /**

@@ -36,8 +36,8 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<List<InspectionEntity>> allInspections = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<InspectionEntity>> filteredInspections = new MutableLiveData<>(new ArrayList<>());
     private final MediatorLiveData<Resource<List<InspectionEntity>>> inspectionsResult = new MediatorLiveData<>();
-    private final MutableLiveData<Resource<List<String>>> buildingIdsResult = new MutableLiveData<>();
-    private final MutableLiveData<Resource<List<String>>> locationIdsResult = new MutableLiveData<>();
+    private final MediatorLiveData<Resource<List<String>>> buildingIdsResult = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<List<String>>> locationIdsResult = new MediatorLiveData<>();
 
     private final MutableLiveData<String> buildingFilter = new MutableLiveData<>(null);
     private final MutableLiveData<String> locationFilter = new MutableLiveData<>(null);
@@ -57,7 +57,7 @@ public class HomeViewModel extends ViewModel {
      * Carga las inspecciones desde el repositorio.
      */
     public void loadInspections() {
-        LiveData<Resource<List<InspectionEntity>>> source = inspectionRepository.getAllInspections();
+        LiveData<Resource<List<InspectionEntity>>> source = inspectionRepository.getInspections();
         inspectionsResult.addSource(source, resource -> {
             inspectionsResult.setValue(resource);
             if (resource.getStatus() == Resource.Status.SUCCESS && resource.getData() != null) {
