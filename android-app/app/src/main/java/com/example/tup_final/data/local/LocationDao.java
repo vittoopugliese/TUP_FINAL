@@ -28,6 +28,15 @@ public interface LocationDao {
     @Query("SELECT * FROM locations WHERE buildingId = :buildingId ORDER BY name")
     List<LocationEntity> getByBuildingId(String buildingId);
 
+    @Query("SELECT COUNT(*) FROM tests t INNER JOIN devices d ON t.deviceId = d.id WHERE d.locationId = :locationId")
+    int getTestCountForLocation(String locationId);
+
+    @Query("SELECT COUNT(*) FROM tests t INNER JOIN devices d ON t.deviceId = d.id WHERE d.locationId = :locationId AND t.status = 'COMPLETED'")
+    int getCompletedTestCountForLocation(String locationId);
+
+    @Query("SELECT COUNT(*) FROM locations WHERE LOWER(name) = LOWER(:name)")
+    int countByName(String name);
+
     @Update
     void update(LocationEntity location);
 

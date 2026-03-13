@@ -44,6 +44,22 @@
     </fragment>
 
     <fragment
+        android:id="@+id/locationsFragment"
+        android:name="com.example.tup_final.ui.locations.LocationsFragment"
+        android:label="@string/locations_title"
+        tools:layout="@layout/fragment_locations">
+        <action
+            android:id="@+id/action_locations_to_create_location"
+            app:destination="@id/createLocationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createLocationFragment"
+        android:name="com.example.tup_final.ui.locations.CreateLocationFragment"
+        android:label="@string/create_location_title"
+        tools:layout="@layout/fragment_create_location" />
+
+    <fragment
         android:id="@+id/forgotPasswordFragment"
         android:name="com.example.tup_final.ui.forgotpassword.ForgotPasswordFragment"
         android:label="@string/forgot_password_title"
