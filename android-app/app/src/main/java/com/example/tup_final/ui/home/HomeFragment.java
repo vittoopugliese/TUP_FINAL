@@ -207,6 +207,10 @@ public class HomeFragment extends Fragment {
         view.findViewById(R.id.btn_profile).setOnClickListener(v ->
                 NavHostFragment.findNavController(HomeFragment.this)
                         .navigate(R.id.action_home_to_profile));
+
+        view.findViewById(R.id.btn_locations).setOnClickListener(v ->
+                NavHostFragment.findNavController(HomeFragment.this)
+                        .navigate(R.id.action_home_to_locations));
     }
 
     private void onInspectionsChanged(Resource<List<InspectionEntity>> resource) {
