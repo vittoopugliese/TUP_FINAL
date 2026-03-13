@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -196,6 +197,15 @@ public class HomeViewModel extends ViewModel {
             if (!matchesDateRange(inspection, fromMillis, toMillis)) continue;
             filtered.add(inspection);
         }
+
+        Collections.sort(filtered, (a, b) -> {
+            long millisA = parseToStartOfDayMillis(a.scheduledDate != null ? a.scheduledDate : "");
+            long millisB = parseToStartOfDayMillis(b.scheduledDate != null ? b.scheduledDate : "");
+            if (millisA == 0 && millisB == 0) return 0;
+            if (millisA == 0) return 1;
+            if (millisB == 0) return -1;
+            return Long.compare(millisA, millisB);
+        });
 
         filteredInspections.setValue(filtered);
     }

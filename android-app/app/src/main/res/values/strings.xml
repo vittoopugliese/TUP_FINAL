@@ -92,6 +92,7 @@
 
     <!-- Home / Inspections -->
     <string name="home_title">Inspecciones</string>
+    <string name="inspections_count">Inspecciones (%d)</string>
     <string name="inspections_empty">No hay inspecciones asignadas.</string>
     <string name="inspections_error">No se pudieron cargar las inspecciones.</string>
     <string name="inspection_type_unknown">Sin tipo</string>
