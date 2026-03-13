@@ -1,6 +1,8 @@
 -- Sample/test data for Inspections Android app
 -- Tables: users, locations, zones, devices, inspections, photos, tests, steps, observations, audit_logs
 -- Order respects foreign key dependencies
+--
+-- Backend: Este archivo está integrado en backend/src/main/resources/data.sql (adaptado para H2)
 
 -- Users (no FKs)
 INSERT INTO users (id, email, firstName, lastName, avatarImage, phoneNumber, role, lastLoginAt, createdAt) VALUES

@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +50,9 @@ public class HomeFragment extends Fragment {
 
     private HomeViewModel viewModel;
     private InspectionAdapter adapter;
+    private ProgressBar progressInspections;
+    private TextView textEmptyOrError;
+    private RecyclerView recyclerInspections;
 
     @Nullable
     @Override
@@ -71,9 +75,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupRecyclerView(View view) {
-        RecyclerView recycler = view.findViewById(R.id.recycler_inspections);
-        recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recycler.setAdapter(adapter);
+        recyclerInspections = view.findViewById(R.id.recycler_inspections);
+        progressInspections = view.findViewById(R.id.progress_inspections);
+        textEmptyOrError = view.findViewById(R.id.text_empty);
+        recyclerInspections.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerInspections.setAdapter(adapter);
     }
 
     private void setupFilterPanel(View view) {
@@ -167,6 +173,7 @@ public class HomeFragment extends Fragment {
         });
 
         viewModel.getInspectionsResult().observe(getViewLifecycleOwner(), resource -> {
+            onInspectionsChanged(resource);
             if (resource != null && resource.getStatus() == Resource.Status.ERROR) {
                 Toast.makeText(requireContext(),
                         resource.getMessage() != null ? resource.getMessage() : getString(R.string.error_unknown),
@@ -221,7 +228,6 @@ public class HomeFragment extends Fragment {
                 } else {
                     textEmptyOrError.setVisibility(View.GONE);
                     recyclerInspections.setVisibility(View.VISIBLE);
-                    adapter.setItems(list);
                 }
                 break;
             case ERROR:

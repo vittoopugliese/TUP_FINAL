@@ -43,7 +43,7 @@
     <string name="profile_photo_description">Foto de perfil</string>
     <string name="profile_no_phone">Sin teléfono registrado</string>
     <string name="profile_no_name">Sin nombre</string>
-    <string name="btn_profile">Mi Perfil</string>
+    <string name="str_btn_profile">Mi Perfil</string>
     <string name="btn_back">Volver</string>
     <string name="profile_error">Error al cargar el perfil</string>
     <string name="btn_edit">Editar</string>
@@ -65,20 +65,10 @@
     <string name="filter_clear">Limpiar</string>
     <string name="filter_date_hint">Seleccionar rango de fechas</string>
     <string name="filter_all">Todos</string>
-    <string name="inspections_empty">No hay inspecciones</string>
     <string name="inspections_loading">Cargando inspecciones…</string>
-
-    <!-- Profile Photo Upload -->
-    <string name="profile_change_photo">Cambiar foto de perfil</string>
-    <string name="profile_take_photo">📷 Tomar foto</string>
-    <string name="profile_choose_gallery">🖼️ Elegir de galería</string>
-    <string name="profile_upload_error">Error al subir la imagen. Intentá de nuevo.</string>
-    <string name="profile_upload_success">Foto de perfil actualizada.</string>
-    <string name="profile_camera_denied">Se necesita permiso de cámara para tomar fotos.</string>
 
     <!-- Inspections -->
     <string name="inspections_title">Inspecciones</string>
-    <string name="inspections_empty">No hay inspecciones disponibles.</string>
     <string name="inspection_no_building">Sin edificio</string>
     <string name="inspection_scheduled_date">Fecha programada</string>
     <string name="inspection_days_remaining">días restantes</string>

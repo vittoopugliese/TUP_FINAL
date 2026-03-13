@@ -67,8 +67,10 @@ Inspection (evento principal, vinculado a edificio/planta)
 ## Uso
 
 ### Backend (Spring Boot)
-- Importar `schema.sql` en la configuración inicial de la base de datos
-- JPA/Hibernate puede generar el schema desde entidades, pero `schema.sql` sirve como referencia
+- El backend usa `backend/src/main/resources/schema.sql` y `data.sql`
+- `data.sql` está adaptado de `data-ejemplo.sql` para H2 (snake_case, formato de fechas)
+- El usuario admin se crea en `DataInitializer` (admin@inspections.com / Admin1234!)
+- Al iniciar el backend, se cargan automáticamente: locations, zones, devices, inspections, photos, tests, steps, observations, audit_logs
 
 ### Android (Room)
 - Las entidades Room deben reflejar el schema de `schema.sql`

@@ -89,23 +89,25 @@ public class InspectionRepository {
         List<InspectionEntity> entities = new ArrayList<>();
         for (InspectionListResponse dto : dtos) {
             InspectionEntity entity = new InspectionEntity();
-            entity.id = dto.getId();
+            entity.id = dto.getId() != null ? dto.getId() : "";
             entity.buildingId = dto.getBuildingId();
             entity.type = dto.getType();
             entity.status = dto.getStatus();
             entity.scheduledDate = dto.getScheduledDate();
-            entity.approvalDate = dto.getApprovalDate();
-            entity.result = dto.getResult();
-            entity.notes = dto.getNotes();
-            entity.signer = dto.getSigner();
-            entity.signed = dto.isSigned();
-            entity.signDate = dto.getSignDate();
-            entity.startedAt = dto.getStartedAt();
-            entity.inspectionReportId = dto.getInspectionReportId();
-            entity.inspectionTemplateId = dto.getInspectionTemplateId();
-            entity.coverPageId = dto.getCoverPageId();
-            entity.createdAt = dto.getCreatedAt();
-            entity.updatedAt = dto.getUpdatedAt();
+            // Campos opcionales no presentes en el DTO mínimo - se dejan null
+            entity.approvalDate = null;
+            entity.result = null;
+            entity.notes = null;
+            entity.signer = null;
+            entity.signed = false;
+            entity.signDate = null;
+            entity.startedAt = null;
+            entity.inspectionReportId = null;
+            entity.inspectionTemplateId = null;
+            entity.coverPageId = null;
+            entity.createdAt = null;
+            entity.updatedAt = null;
+            entity.locationId = null;
             entities.add(entity);
         }
         return entities;
