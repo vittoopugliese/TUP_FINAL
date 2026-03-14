@@ -35,6 +35,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionAdapter.ViewHolder> {
 
+    public interface OnInspectionClickListener {
+        void onInspectionClick(InspectionEntity inspection);
+    }
+
+    private OnInspectionClickListener clickListener;
+
+    public void setOnInspectionClickListener(OnInspectionClickListener listener) {
+        this.clickListener = listener;
+    }
+
     // Colores por estado
     private static final int COLOR_PENDING = Color.parseColor("#9E9E9E");
     private static final int COLOR_IN_PROGRESS = Color.parseColor("#FFC107");
@@ -85,6 +95,11 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         InspectionEntity inspection = getItem(position);
         holder.bind(inspection);
+        holder.itemView.setOnClickListener(v -> {
+            if (clickListener != null) {
+                clickListener.onInspectionClick(inspection);
+            }
+        });
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

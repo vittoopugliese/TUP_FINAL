@@ -99,6 +99,25 @@
     <string name="inspection_date_unknown">Sin fecha</string>
     <string name="inspection_building_unknown">Sin edificio</string>
 
+    <!-- Inspection Locations -->
+    <string name="inspection_locations_title">Ubicaciones de la inspección</string>
+    <string name="inspection_locations_empty">No hay ubicaciones en este edificio.</string>
+
+    <!-- Locations -->
+    <string name="locations_title">Ubicaciones</string>
+    <string name="locations_empty">No hay ubicaciones.</string>
+    <string name="locations_error">No se pudieron cargar las ubicaciones.</string>
+    <string name="location_tests_count">Tests: %d</string>
+    <string name="btn_locations">Ubicaciones</string>
+    <string name="btn_new_location">Nueva Ubicación</string>
+    <string name="create_location_title">Nueva Ubicación</string>
+    <string name="hint_location_name">Nombre</string>
+    <string name="hint_location_description">Descripción</string>
+    <string name="btn_save_location">Guardar</string>
+    <string name="error_name_duplicate">Ya existe una ubicación con ese nombre.</string>
+    <string name="location_complete">Completa</string>
+    <string name="location_incomplete">Incompleta</string>
+
     <!-- Profile Photo Upload -->
     <string name="profile_change_photo">Cambiar foto de perfil</string>
     <string name="profile_take_photo">📷 Tomar foto</string>
