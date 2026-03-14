@@ -41,9 +41,6 @@
         <action
             android:id="@+id/action_home_to_inspectionDetail"
             app:destination="@id/inspectionDetailFragment" />
-        <action
-            android:id="@+id/action_home_to_locations"
-            app:destination="@id/locationsFragment" />
     </fragment>
 
     <fragment
@@ -65,29 +62,19 @@
     </fragment>
 
     <fragment
-        android:id="@+id/locationsFragment"
-        android:name="com.example.tup_final.ui.locations.LocationsFragment"
-        android:label="@string/locations_title"
-        tools:layout="@layout/fragment_locations">
+        android:id="@+id/createLocationFragment"
+        android:name="com.example.tup_final.ui.locations.CreateLocationFragment"
+        android:label="@string/create_location_title"
+        tools:layout="@layout/fragment_create_location">
+        <argument
+            android:name="buildingId"
+            app:argType="string"
+            android:defaultValue="" />
         <argument
             android:name="inspectionId"
             app:argType="string"
             android:defaultValue="" />
-        <argument
-            android:name="buildingId"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
-        <action
-            android:id="@+id/action_locations_to_create_location"
-            app:destination="@id/createLocationFragment" />
     </fragment>
-
-    <fragment
-        android:id="@+id/createLocationFragment"
-        android:name="com.example.tup_final.ui.locations.CreateLocationFragment"
-        android:label="@string/create_location_title"
-        tools:layout="@layout/fragment_create_location" />
 
     <fragment
         android:id="@+id/forgotPasswordFragment"

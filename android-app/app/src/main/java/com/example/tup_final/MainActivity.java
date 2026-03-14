@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             int destId = destination.getId();
             boolean showBottomNav = destId == R.id.homeFragment
-                    || destId == R.id.locationsFragment
                     || destId == R.id.profileFragment;
             bottomNav.setVisibility(showBottomNav ? android.view.View.VISIBLE : android.view.View.GONE);
         });

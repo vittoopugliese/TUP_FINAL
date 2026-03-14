@@ -37,6 +37,9 @@ public interface LocationDao {
     @Query("SELECT COUNT(*) FROM locations WHERE LOWER(name) = LOWER(:name)")
     int countByName(String name);
 
+    @Query("SELECT COUNT(*) FROM locations WHERE LOWER(name) = LOWER(:name) AND buildingId = :buildingId")
+    int countByNameAndBuilding(String name, String buildingId);
+
     @Update
     void update(LocationEntity location);
 

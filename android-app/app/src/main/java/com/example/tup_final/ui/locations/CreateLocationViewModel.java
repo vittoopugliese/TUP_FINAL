@@ -46,8 +46,9 @@ public class CreateLocationViewModel extends ViewModel {
 
     /**
      * Crea una nueva ubicación. Valida nombre no vacío antes de llamar al repository.
+     * buildingId puede ser null si se crea desde contexto global.
      */
-    public void createLocation(String name, String details) {
+    public void createLocation(String name, String details, String buildingId) {
         String trimmedName = name != null ? name.trim() : "";
 
         if (trimmedName.isEmpty()) {
@@ -58,7 +59,7 @@ public class CreateLocationViewModel extends ViewModel {
 
         createResult.setValue(Resource.loading());
 
-        LiveData<Resource<LocationEntity>> source = locationRepository.createLocation(trimmedName, details);
+        LiveData<Resource<LocationEntity>> source = locationRepository.createLocation(trimmedName, details, buildingId);
         createResult.addSource(source, resource -> {
             createResult.setValue(resource);
             if (resource.getStatus() != Resource.Status.LOADING) {

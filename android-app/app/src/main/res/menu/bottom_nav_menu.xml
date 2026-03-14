@@ -5,10 +5,6 @@
         android:icon="@drawable/ic_nav_inspections"
         android:title="@string/nav_inspections" />
     <item
-        android:id="@+id/locationsFragment"
-        android:icon="@drawable/ic_nav_locations"
-        android:title="@string/nav_locations" />
-    <item
         android:id="@+id/profileFragment"
         android:icon="@drawable/ic_nav_profile"
         android:title="@string/nav_profile" />

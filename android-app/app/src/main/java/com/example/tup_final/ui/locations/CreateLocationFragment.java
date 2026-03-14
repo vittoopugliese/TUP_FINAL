@@ -47,10 +47,13 @@ public class CreateLocationFragment extends Fragment {
         inputName = view.findViewById(R.id.input_name);
         inputDescription = view.findViewById(R.id.input_description);
 
+        String buildingId = getArguments() != null ? getArguments().getString("buildingId", "") : "";
+
         view.findViewById(R.id.btn_save).setOnClickListener(v -> {
             viewModel.createLocation(
                     inputName.getText() != null ? inputName.getText().toString() : "",
-                    inputDescription.getText() != null ? inputDescription.getText().toString() : ""
+                    inputDescription.getText() != null ? inputDescription.getText().toString() : "",
+                    buildingId != null && !buildingId.isEmpty() ? buildingId : null
             );
         });
 

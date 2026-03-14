@@ -12,12 +12,19 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.tup_final.R;
+import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.databinding.FragmentInspectionDetailBinding;
+import com.example.tup_final.util.Resource;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import dagger.hilt.android.AndroidEntryPoint;
+
+import static com.example.tup_final.util.Resource.Status.SUCCESS;
 
 @AndroidEntryPoint
 public class InspectionDetailFragment extends Fragment {
@@ -57,6 +64,7 @@ public class InspectionDetailFragment extends Fragment {
 
         viewModel.loadInspection(inspectionId);
         observeInspection();
+        observeAssignments();
         observeStartResult();
 
         binding.btnStartInspection.setOnClickListener(v ->
@@ -105,6 +113,40 @@ public class InspectionDetailFragment extends Fragment {
         });
     }
 
+    private void observeAssignments() {
+        viewModel.getAssignments().observe(getViewLifecycleOwner(), resource -> {
+            if (resource != null && resource.getStatus() == SUCCESS && resource.getData() != null) {
+                Resource<InspectionEntity> inspRes = viewModel.getInspection().getValue();
+                if (inspRes != null && inspRes.getData() != null) {
+                    List<InspectionAssignmentEntity> inspectors = filterInspectors(resource.getData());
+                    updateStartButton(inspRes.getData(), inspectors);
+                }
+            }
+        });
+    }
+
+    private List<InspectionAssignmentEntity> filterInspectors(List<InspectionAssignmentEntity> assignments) {
+        List<InspectionAssignmentEntity> result = new ArrayList<>();
+        if (assignments == null) return result;
+        for (InspectionAssignmentEntity a : assignments) {
+            if ("INSPECTOR".equals(a.role)) result.add(a);
+        }
+        return result;
+    }
+
+    private void updateStartButton(InspectionEntity inspection, List<InspectionAssignmentEntity> inspectors) {
+        if (inspection == null) return;
+        boolean isDone = inspection.status != null && inspection.status.startsWith("DONE");
+        if (isDone) {
+            binding.btnStartInspection.setVisibility(View.GONE);
+            return;
+        }
+        binding.btnStartInspection.setVisibility(View.VISIBLE);
+        boolean showStart = viewModel.shouldShowStartLabel(inspection, inspectors);
+        binding.btnStartInspection.setText(showStart ? R.string.btn_start_inspection : R.string.btn_continue_inspection);
+        binding.btnStartInspection.setEnabled(viewModel.isStartButtonEnabled(inspection, inspectors));
+    }
+
     private void observeStartResult() {
         viewModel.getStartResult().observe(getViewLifecycleOwner(), resource -> {
             switch (resource.getStatus()) {
@@ -135,18 +177,8 @@ public class InspectionDetailFragment extends Fragment {
         String typeLabel = inspection.type != null ? inspection.type : "—";
         binding.textInspectionType.setText(typeLabel);
 
-        boolean isInProgress = "IN_PROGRESS".equals(inspection.status);
-        boolean isDone = inspection.status != null && inspection.status.startsWith("DONE");
-
-        if (isDone) {
-            binding.btnStartInspection.setVisibility(View.GONE);
-        } else if (isInProgress) {
-            binding.btnStartInspection.setText(R.string.btn_continue_inspection);
-            binding.btnStartInspection.setVisibility(View.VISIBLE);
-        } else {
-            binding.btnStartInspection.setText(R.string.btn_start_inspection);
-            binding.btnStartInspection.setVisibility(View.VISIBLE);
-        }
+        List<InspectionAssignmentEntity> inspectors = viewModel.getInspectorAssignments();
+        updateStartButton(inspection, inspectors);
     }
 
     private void setStatusChipColor(String status) {
