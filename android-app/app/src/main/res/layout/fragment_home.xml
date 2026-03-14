@@ -17,17 +17,30 @@
         app:layout_constraintVertical_chainStyle="packed" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_profile"
+        android:id="@+id/btn_inspections"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:text="@string/btn_inspections"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_agenda"
+        app:iconSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_home" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:text="@string/btn_profile"
         android:textAllCaps="false"
         app:icon="@drawable/ic_person_placeholder"
         app:iconSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_home" />
+        app:layout_constraintTop_toBottomOf="@id/btn_inspections" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_logout"

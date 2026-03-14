@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,9 +14,12 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.tup_final.R;
+import com.example.tup_final.data.entity.InspectionEntity;
+import com.example.tup_final.data.local.InspectionDao;
 import com.example.tup_final.data.repository.AuthRepository;
 import com.example.tup_final.sync.SyncScheduler;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -30,6 +34,9 @@ public class HomeFragment extends Fragment {
 
     @Inject
     AuthRepository authRepository;
+
+    @Inject
+    InspectionDao inspectionDao;
 
     @Nullable
     @Override
@@ -65,9 +72,25 @@ public class HomeFragment extends Fragment {
                     .show(getParentFragmentManager(), "LogoutDialog");
         });
 
-        // Navegar al perfil
         view.findViewById(R.id.btn_profile).setOnClickListener(v ->
                 NavHostFragment.findNavController(HomeFragment.this)
                         .navigate(R.id.action_home_to_profile));
+
+        view.findViewById(R.id.btn_inspections).setOnClickListener(v ->
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    List<InspectionEntity> inspections = inspectionDao.getAll();
+                    requireActivity().runOnUiThread(() -> {
+                        if (inspections != null && !inspections.isEmpty()) {
+                            Bundle args = new Bundle();
+                            args.putString("inspectionId", inspections.get(0).id);
+                            NavHostFragment.findNavController(HomeFragment.this)
+                                    .navigate(R.id.action_home_to_inspectionDetail, args);
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    R.string.inspection_no_inspections,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }));
     }
 }

@@ -55,4 +55,32 @@
     <string name="error_lastname_required">El apellido es obligatorio</string>
     <string name="error_phone_invalid">Formato de teléfono inválido</string>
     <string name="profile_sync_pending">Guardado. Se sincronizará cuando haya conexión.</string>
+
+    <!-- Inspection Detail -->
+    <string name="inspection_detail_title">Detalle de Inspección</string>
+    <string name="tab_general_info">General Info</string>
+    <string name="tab_devices">Devices</string>
+    <string name="btn_start_inspection">Iniciar Inspección</string>
+    <string name="btn_continue_inspection">Continuar Inspección</string>
+    <string name="btn_inspections">Inspecciones</string>
+    <string name="inspection_error_not_found">No se encontró la inspección.</string>
+    <string name="inspection_validation_title">Validación</string>
+    <string name="inspection_no_inspections">No hay inspecciones disponibles.</string>
+
+    <!-- General Info -->
+    <string name="info_building">Edificio</string>
+    <string name="info_type">Tipo de Inspección</string>
+    <string name="info_scheduled_date">Fecha Programada</string>
+    <string name="info_started_at">Fecha de Inicio</string>
+    <string name="info_notes">Notas</string>
+    <string name="info_signer">Firmante</string>
+
+    <!-- Devices -->
+    <string name="devices_empty">No hay dispositivos asociados.</string>
+    <string name="device_serial_format">S/N: %d</string>
+    <string name="device_no_serial">Sin número de serie</string>
+
+    <!-- Locations -->
+    <string name="locations_title">Ubicaciones</string>
+    <string name="locations_empty">No hay ubicaciones disponibles.</string>
 </resources>
