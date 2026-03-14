@@ -1,7 +1,7 @@
 package com.example.tup_final.ui.home;
 
-import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.tup_final.R;
 import com.example.tup_final.data.entity.InspectionEntity;
 import com.google.android.material.card.MaterialCardView;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -126,6 +125,8 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
         }
 
         void bind(InspectionEntity inspection) {
+            if (inspection == null) return;
+
             int statusColor = getStatusColor(inspection.status);
 
             card.setStrokeColor(statusColor);
@@ -136,8 +137,10 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
             textBuilding.setText(buildingName);
 
             chipStatus.setText(getStatusLabel(inspection.status));
-            GradientDrawable badgeBg = (GradientDrawable) chipStatus.getBackground().mutate();
-            badgeBg.setColor(statusColor);
+            Drawable bg = chipStatus.getBackground();
+            if (bg instanceof GradientDrawable) {
+                ((GradientDrawable) bg.mutate()).setColor(statusColor);
+            }
 
             String formattedDate = formatDate(inspection.scheduledDate);
             textDate.setText(formattedDate);

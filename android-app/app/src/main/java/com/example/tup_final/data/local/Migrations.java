@@ -23,9 +23,9 @@ public final class Migrations {
         public void migrate(@NonNull SupportSQLiteDatabase db) {
             db.execSQL("CREATE TABLE IF NOT EXISTS inspection_assignments (" +
                     "id TEXT PRIMARY KEY NOT NULL, " +
-                    "inspectionId TEXT NOT NULL, " +
-                    "userEmail TEXT NOT NULL, " +
-                    "role TEXT NOT NULL, " +
+                    "inspectionId TEXT, " +
+                    "userEmail TEXT, " +
+                    "role TEXT, " +
                     "createdAt TEXT)");
             db.execSQL("CREATE INDEX IF NOT EXISTS index_inspection_assignments_inspectionId ON inspection_assignments (inspectionId)");
             db.execSQL("CREATE INDEX IF NOT EXISTS index_inspection_assignments_userEmail ON inspection_assignments (userEmail)");

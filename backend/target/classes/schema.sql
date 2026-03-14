@@ -32,10 +32,11 @@ CREATE TABLE IF NOT EXISTS locations (
 CREATE INDEX IF NOT EXISTS idx_location_building ON locations(building_id);
 CREATE INDEX IF NOT EXISTS idx_location_name ON locations(name);
 
--- Inspections (buildingId is logical ref)
+-- Inspections (buildingId and locationId are logical refs)
 CREATE TABLE IF NOT EXISTS inspections (
     id VARCHAR(36) PRIMARY KEY NOT NULL,
     building_id VARCHAR(36),
+    location_id VARCHAR(36),
     type VARCHAR(50),
     status VARCHAR(50),
     scheduled_date TIMESTAMP,
@@ -53,6 +54,7 @@ CREATE TABLE IF NOT EXISTS inspections (
     updated_at TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_inspection_building ON inspections(building_id);
+CREATE INDEX IF NOT EXISTS idx_inspection_location ON inspections(location_id);
 CREATE INDEX IF NOT EXISTS idx_inspection_status ON inspections(status);
 CREATE INDEX IF NOT EXISTS idx_inspection_date ON inspections(scheduled_date);
 

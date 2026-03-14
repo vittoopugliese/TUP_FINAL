@@ -17,8 +17,6 @@ import com.example.tup_final.data.remote.dto.AssignmentRequest;
 import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.remote.dto.InspectionListResponse;
 import com.example.tup_final.util.Resource;
-
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -80,7 +78,7 @@ public class InspectionRepository {
                 } else {
                     loadFromCache(result);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 loadFromCache(result);
             }
         });
@@ -242,7 +240,7 @@ public class InspectionRepository {
                     List<InspectionAssignmentEntity> cached = assignmentDao.getByInspectionId(inspectionId);
                     mainHandler.post(() -> result.setValue(Resource.success(cached != null ? cached : new ArrayList<>())));
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 List<InspectionAssignmentEntity> cached = assignmentDao.getByInspectionId(inspectionId);
                 mainHandler.post(() -> result.setValue(Resource.success(cached != null ? cached : new ArrayList<>())));
             }
@@ -270,7 +268,7 @@ public class InspectionRepository {
                     String errorBody = response.errorBody() != null ? response.errorBody().string() : "Error al agregar";
                     mainHandler.post(() -> result.setValue(Resource.error(errorBody)));
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 mainHandler.post(() -> result.setValue(
                         Resource.error(e.getMessage() != null ? e.getMessage() : "Error de conexión")));
             }
@@ -296,7 +294,7 @@ public class InspectionRepository {
                     String errorBody = response.errorBody() != null ? response.errorBody().string() : "Error al remover";
                     mainHandler.post(() -> result.setValue(Resource.error(errorBody)));
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 mainHandler.post(() -> result.setValue(
                         Resource.error(e.getMessage() != null ? e.getMessage() : "Error de conexión")));
             }
