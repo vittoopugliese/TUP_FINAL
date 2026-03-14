@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tup_final.R;
 import com.example.tup_final.data.entity.InspectionEntity;
+import com.example.tup_final.data.local.InspectionDao;
 import com.example.tup_final.data.repository.AuthRepository;
 import com.example.tup_final.sync.SyncScheduler;
 import com.example.tup_final.util.Resource;
@@ -27,8 +28,12 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 
 import static com.example.tup_final.util.Resource.Status.ERROR;
@@ -48,10 +53,15 @@ public class HomeFragment extends Fragment {
     @Inject
     AuthRepository authRepository;
 
+    @Inject
+    InspectionDao inspectionDao;
+
     private HomeViewModel viewModel;
     private InspectionAdapter adapter;
+    private MaterialButton btnFilterDate;
     private ProgressBar progressInspections;
     private TextView textEmptyOrError;
+    private TextView textInspectionsCount;
     private RecyclerView recyclerInspections;
 
     @Nullable
@@ -67,6 +77,13 @@ public class HomeFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         adapter = new InspectionAdapter();
+        adapter.setOnInspectionClickListener(inspection -> {
+            android.os.Bundle args = new android.os.Bundle();
+            args.putString("inspectionId", inspection.id);
+            args.putString("buildingId", inspection.buildingId != null ? inspection.buildingId : "");
+            NavHostFragment.findNavController(HomeFragment.this)
+                    .navigate(R.id.action_home_to_inspection_locations, args);
+        });
 
         setupRecyclerView(view);
         setupFilterPanel(view);
@@ -78,6 +95,7 @@ public class HomeFragment extends Fragment {
         recyclerInspections = view.findViewById(R.id.recycler_inspections);
         progressInspections = view.findViewById(R.id.progress_inspections);
         textEmptyOrError = view.findViewById(R.id.text_empty);
+        textInspectionsCount = view.findViewById(R.id.text_inspections_count);
         recyclerInspections.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerInspections.setAdapter(adapter);
     }
@@ -135,7 +153,8 @@ public class HomeFragment extends Fragment {
         });
 
         // Date filter button
-        view.findViewById(R.id.btn_filter_date).setOnClickListener(v -> showDateRangePicker());
+        btnFilterDate = view.findViewById(R.id.btn_filter_date);
+        btnFilterDate.setOnClickListener(v -> showDateRangePicker());
 
         // Apply and Clear buttons
         view.findViewById(R.id.btn_filter_apply).setOnClickListener(v -> viewModel.applyFilters());
@@ -144,7 +163,7 @@ public class HomeFragment extends Fragment {
             inputBuilding.setText("", false);
             inputLocation.setText("", false);
             inputStatus.setText("", false);
-            ((MaterialButton) view.findViewById(R.id.btn_filter_date)).setText(R.string.filter_date_hint);
+            btnFilterDate.setText(R.string.filter_date_hint);
         });
     }
 
@@ -159,6 +178,11 @@ public class HomeFragment extends Fragment {
                         Long fromMillis = selection.first;
                         Long toMillis = selection.second;
                         viewModel.setDateFilter(fromMillis, toMillis);
+                        SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+                        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        String fromFormatted = format.format(new Date(fromMillis));
+                        String toFormatted = format.format(new Date(toMillis));
+                        btnFilterDate.setText(fromFormatted + " - " + toFormatted);
                     }
                 });
 
@@ -169,6 +193,7 @@ public class HomeFragment extends Fragment {
         viewModel.getFilteredInspections().observe(getViewLifecycleOwner(), inspections -> {
             if (inspections != null) {
                 adapter.submitList(new ArrayList<>(inspections));
+                textInspectionsCount.setText(getString(R.string.inspections_count, inspections.size()));
             }
         });
 
@@ -207,6 +232,27 @@ public class HomeFragment extends Fragment {
         view.findViewById(R.id.btn_profile).setOnClickListener(v ->
                 NavHostFragment.findNavController(HomeFragment.this)
                         .navigate(R.id.action_home_to_profile));
+
+        view.findViewById(R.id.btn_locations).setOnClickListener(v ->
+                NavHostFragment.findNavController(HomeFragment.this)
+                        .navigate(R.id.action_home_to_locations));
+
+        view.findViewById(R.id.btn_inspections).setOnClickListener(v ->
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    List<InspectionEntity> inspections = inspectionDao.getAll();
+                    requireActivity().runOnUiThread(() -> {
+                        if (inspections != null && !inspections.isEmpty()) {
+                            Bundle args = new Bundle();
+                            args.putString("inspectionId", inspections.get(0).id);
+                            NavHostFragment.findNavController(HomeFragment.this)
+                                    .navigate(R.id.action_home_to_inspectionDetail, args);
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    R.string.inspection_no_inspections,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }));
     }
 
     private void onInspectionsChanged(Resource<List<InspectionEntity>> resource) {

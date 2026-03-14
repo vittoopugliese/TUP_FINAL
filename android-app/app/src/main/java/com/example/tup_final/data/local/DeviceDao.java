@@ -31,6 +31,9 @@ public interface DeviceDao {
     @Query("SELECT * FROM devices WHERE locationId = :locationId ORDER BY name")
     List<DeviceEntity> getByLocationId(String locationId);
 
+    @Query("SELECT * FROM devices WHERE buildingId = :buildingId ORDER BY name")
+    List<DeviceEntity> getByBuildingId(String buildingId);
+
     @Update
     void update(DeviceEntity device);
 

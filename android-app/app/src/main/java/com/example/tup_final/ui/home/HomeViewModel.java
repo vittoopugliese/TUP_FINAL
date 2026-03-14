@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -96,73 +97,43 @@ public class HomeViewModel extends ViewModel {
         });
     }
 
-    /**
-     * Resultado observable de la carga de inspecciones.
-     */
     public LiveData<Resource<List<InspectionEntity>>> getInspectionsResult() {
         return inspectionsResult;
     }
 
-    /**
-     * Lista filtrada de inspecciones para mostrar en el RecyclerView.
-     */
     public LiveData<List<InspectionEntity>> getFilteredInspections() {
         return filteredInspections;
     }
 
-    /**
-     * Resultado de la carga de building IDs para el dropdown.
-     */
     public LiveData<Resource<List<String>>> getBuildingIdsResult() {
         return buildingIdsResult;
     }
 
-    /**
-     * Resultado de la carga de location IDs para el dropdown.
-     */
     public LiveData<Resource<List<String>>> getLocationIdsResult() {
         return locationIdsResult;
     }
 
-    /**
-     * Establece el filtro de edificio y aplica los filtros.
-     */
     public void setBuildingFilter(String buildingId) {
         buildingFilter.setValue(buildingId != null && buildingId.trim().isEmpty() ? null : buildingId);
         applyFilters();
     }
 
-    /**
-     * Establece el filtro de ubicación y aplica los filtros.
-     */
     public void setLocationFilter(String locationId) {
         locationFilter.setValue(locationId != null && locationId.trim().isEmpty() ? null : locationId);
         applyFilters();
     }
 
-    /**
-     * Establece el filtro de estado y aplica los filtros.
-     */
     public void setStatusFilter(String status) {
         statusFilter.setValue(status != null && status.trim().isEmpty() ? null : status);
         applyFilters();
     }
 
-    /**
-     * Establece el filtro de rango de fechas y aplica los filtros.
-     *
-     * @param fromMillis fecha desde (inicio del día) o null
-     * @param toMillis   fecha hasta (fin del día) o null
-     */
     public void setDateFilter(Long fromMillis, Long toMillis) {
         dateFromFilter.setValue(fromMillis);
         dateToFilter.setValue(toMillis);
         applyFilters();
     }
 
-    /**
-     * Limpia todos los filtros.
-     */
     public void clearFilters() {
         buildingFilter.setValue(null);
         locationFilter.setValue(null);
@@ -172,9 +143,6 @@ public class HomeViewModel extends ViewModel {
         applyFilters();
     }
 
-    /**
-     * Aplica los filtros actuales a la lista completa y actualiza filteredInspections.
-     */
     public void applyFilters() {
         List<InspectionEntity> all = allInspections.getValue();
         if (all == null) {
@@ -196,6 +164,15 @@ public class HomeViewModel extends ViewModel {
             if (!matchesDateRange(inspection, fromMillis, toMillis)) continue;
             filtered.add(inspection);
         }
+
+        Collections.sort(filtered, (a, b) -> {
+            long millisA = parseToStartOfDayMillis(a.scheduledDate != null ? a.scheduledDate : "");
+            long millisB = parseToStartOfDayMillis(b.scheduledDate != null ? b.scheduledDate : "");
+            if (millisA == 0 && millisB == 0) return 0;
+            if (millisA == 0) return 1;
+            if (millisB == 0) return -1;
+            return Long.compare(millisA, millisB);
+        });
 
         filteredInspections.setValue(filtered);
     }
@@ -230,37 +207,22 @@ public class HomeViewModel extends ViewModel {
         }
     }
 
-    /**
-     * Retorna el valor actual del filtro de edificio (para restaurar UI).
-     */
     public LiveData<String> getBuildingFilter() {
         return buildingFilter;
     }
 
-    /**
-     * Retorna el valor actual del filtro de ubicación (para restaurar UI).
-     */
     public LiveData<String> getLocationFilter() {
         return locationFilter;
     }
 
-    /**
-     * Retorna el valor actual del filtro de estado (para restaurar UI).
-     */
     public LiveData<String> getStatusFilter() {
         return statusFilter;
     }
 
-    /**
-     * Retorna el valor actual del filtro de fecha desde (para restaurar UI).
-     */
     public LiveData<Long> getDateFromFilter() {
         return dateFromFilter;
     }
 
-    /**
-     * Retorna el valor actual del filtro de fecha hasta (para restaurar UI).
-     */
     public LiveData<Long> getDateToFilter() {
         return dateToFilter;
     }

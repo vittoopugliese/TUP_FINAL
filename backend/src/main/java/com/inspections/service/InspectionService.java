@@ -35,6 +35,7 @@ public class InspectionService {
         return new InspectionListResponse(
                 inspection.getId(),
                 inspection.getBuildingId(),
+                inspection.getLocationId(),
                 inspection.getStatus(),
                 inspection.getScheduledDate(),
                 inspection.getType()

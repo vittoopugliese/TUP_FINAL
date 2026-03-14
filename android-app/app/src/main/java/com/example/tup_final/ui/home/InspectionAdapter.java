@@ -28,12 +28,22 @@ import java.util.concurrent.TimeUnit;
  * Muestra: edificio, fecha, estado (badge con color), días restantes.
  *
  * Colores por estado:
- * - PENDING → Gris (#9E9E9E)
- * - IN_PROGRESS → Amarillo (#FFC107)
- * - DONE_COMPLETED → Verde (#4CAF50)
- * - DONE_FAILED → Rojo (#F44336)
+ * - PENDING -> Gris (#9E9E9E)
+ * - IN_PROGRESS -> Amarillo (#FFC107)
+ * - DONE_COMPLETED -> Verde (#4CAF50)
+ * - DONE_FAILED -> Rojo (#F44336)
  */
 public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionAdapter.ViewHolder> {
+
+    public interface OnInspectionClickListener {
+        void onInspectionClick(InspectionEntity inspection);
+    }
+
+    private OnInspectionClickListener clickListener;
+
+    public void setOnInspectionClickListener(OnInspectionClickListener listener) {
+        this.clickListener = listener;
+    }
 
     // Colores por estado
     private static final int COLOR_PENDING = Color.parseColor("#9E9E9E");
@@ -85,6 +95,11 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         InspectionEntity inspection = getItem(position);
         holder.bind(inspection);
+        holder.itemView.setOnClickListener(v -> {
+            if (clickListener != null) {
+                clickListener.onInspectionClick(inspection);
+            }
+        });
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -109,35 +124,26 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
         }
 
         void bind(InspectionEntity inspection) {
-            // Color según estado
             int statusColor = getStatusColor(inspection.status);
 
-            // Borde de la card
             card.setStrokeColor(statusColor);
-
-            // Indicador vertical
             statusIndicator.setBackgroundColor(statusColor);
 
-            // Edificio (usar buildingId como nombre si no hay tabla de edificios)
             String buildingName = inspection.buildingId != null
                     ? inspection.buildingId : itemView.getContext().getString(R.string.inspection_no_building);
             textBuilding.setText(buildingName);
 
-            // Badge de estado
             chipStatus.setText(getStatusLabel(inspection.status));
             GradientDrawable badgeBg = (GradientDrawable) chipStatus.getBackground().mutate();
             badgeBg.setColor(statusColor);
 
-            // Fecha
             String formattedDate = formatDate(inspection.scheduledDate);
             textDate.setText(formattedDate);
 
-            // Días restantes
             String daysText = calculateDaysRemaining(inspection.scheduledDate, inspection.status);
             textDaysRemaining.setText(daysText);
             textDaysRemaining.setTextColor(statusColor);
 
-            // Tipo
             String typeLabel = getTypeLabel(inspection.type);
             textType.setText(typeLabel);
         }
@@ -189,21 +195,18 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
         }
 
         private String formatDate(String isoDate) {
-            if (isoDate == null || isoDate.isEmpty()) return "—";
+            if (isoDate == null || isoDate.isEmpty()) return "\u2014";
             try {
-                // Intentar parsear ISO con zona horaria
                 String cleanDate = isoDate;
                 if (cleanDate.contains("Z")) {
                     cleanDate = cleanDate.replace("Z", "+0000");
                 }
-                // Intentar con el formato ISO estándar
                 SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
                 Date date = parser.parse(cleanDate.substring(0, Math.min(cleanDate.length(), 19)));
                 if (date != null) {
                     return DISPLAY_FORMAT.format(date);
                 }
             } catch (ParseException e) {
-                // Intentar formato simple
                 try {
                     SimpleDateFormat simpleParser = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                     Date date = simpleParser.parse(isoDate.substring(0, Math.min(isoDate.length(), 10)));
@@ -216,7 +219,6 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
         }
 
         private String calculateDaysRemaining(String isoDate, String status) {
-            // Si la inspección ya finalizó, no mostrar días restantes
             if ("DONE_COMPLETED".equals(status) || "DONE_FAILED".equals(status)) {
                 return "DONE_COMPLETED".equals(status)
                         ? itemView.getContext().getString(R.string.inspection_completed)

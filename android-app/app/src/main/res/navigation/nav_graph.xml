@@ -38,7 +38,44 @@
         <action
             android:id="@+id/action_home_to_profile"
             app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_home_to_inspectionDetail"
+            app:destination="@id/inspectionDetailFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/inspectionLocationsFragment"
+        android:name="com.example.tup_final.ui.inspectionlocations.InspectionLocationsFragment"
+        android:label="@string/inspection_locations_title"
+        tools:layout="@layout/fragment_inspection_locations">
+        <argument
+            android:name="inspectionId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="buildingId"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_inspection_locations_to_create_location"
+            app:destination="@id/createLocationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/locationsFragment"
+        android:name="com.example.tup_final.ui.locations.LocationsFragment"
+        android:label="@string/locations_title"
+        tools:layout="@layout/fragment_locations">
+        <action
+            android:id="@+id/action_locations_to_create_location"
+            app:destination="@id/createLocationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createLocationFragment"
+        android:name="com.example.tup_final.ui.locations.CreateLocationFragment"
+        android:label="@string/create_location_title"
+        tools:layout="@layout/fragment_create_location" />
 
     <fragment
         android:id="@+id/forgotPasswordFragment"
@@ -51,5 +88,33 @@
         android:name="com.example.tup_final.ui.profile.ProfileFragment"
         android:label="@string/profile_title"
         tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/inspectionDetailFragment"
+        android:name="com.example.tup_final.ui.inspection.InspectionDetailFragment"
+        android:label="@string/inspection_detail_title"
+        tools:layout="@layout/fragment_inspection_detail">
+        <argument
+            android:name="inspectionId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_inspectionDetail_to_locations"
+            app:destination="@id/locationsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/locationsFragment"
+        android:name="com.example.tup_final.ui.locations.LocationsFragment"
+        android:label="@string/locations_title"
+        tools:layout="@layout/fragment_locations">
+        <argument
+            android:name="inspectionId"
+            app:argType="string" />
+        <argument
+            android:name="buildingId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
 </navigation>
 

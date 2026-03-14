@@ -92,12 +92,32 @@
 
     <!-- Home / Inspections -->
     <string name="home_title">Inspecciones</string>
+    <string name="inspections_count">Inspecciones (%d)</string>
     <string name="inspections_empty">No hay inspecciones asignadas.</string>
     <string name="inspections_error">No se pudieron cargar las inspecciones.</string>
     <string name="inspection_type_unknown">Sin tipo</string>
     <string name="inspection_status_unknown">Sin estado</string>
     <string name="inspection_date_unknown">Sin fecha</string>
     <string name="inspection_building_unknown">Sin edificio</string>
+
+    <!-- Inspection Locations -->
+    <string name="inspection_locations_title">Ubicaciones de la inspección</string>
+    <string name="inspection_locations_empty">No hay ubicaciones en este edificio.</string>
+
+    <!-- Locations -->
+    <string name="locations_title">Ubicaciones</string>
+    <string name="locations_empty">No hay ubicaciones.</string>
+    <string name="locations_error">No se pudieron cargar las ubicaciones.</string>
+    <string name="location_tests_count">Tests: %d</string>
+    <string name="btn_locations">Ubicaciones</string>
+    <string name="btn_new_location">Nueva Ubicación</string>
+    <string name="create_location_title">Nueva Ubicación</string>
+    <string name="hint_location_name">Nombre</string>
+    <string name="hint_location_description">Descripción</string>
+    <string name="btn_save_location">Guardar</string>
+    <string name="error_name_duplicate">Ya existe una ubicación con ese nombre.</string>
+    <string name="location_complete">Completa</string>
+    <string name="location_incomplete">Incompleta</string>
 
     <!-- Profile Photo Upload -->
     <string name="profile_change_photo">Cambiar foto de perfil</string>
@@ -106,5 +126,28 @@
     <string name="profile_upload_error">Error al subir la imagen. Intentá de nuevo.</string>
     <string name="profile_upload_success">Foto de perfil actualizada.</string>
     <string name="profile_camera_denied">Se necesita permiso de cámara para tomar fotos.</string>
-</resources>
 
+    <!-- Inspection Detail -->
+    <string name="inspection_detail_title">Detalle de Inspección</string>
+    <string name="tab_general_info">General Info</string>
+    <string name="tab_devices">Devices</string>
+    <string name="btn_start_inspection">Iniciar Inspección</string>
+    <string name="btn_continue_inspection">Continuar Inspección</string>
+    <string name="btn_inspections">Inspecciones</string>
+    <string name="inspection_error_not_found">No se encontró la inspección.</string>
+    <string name="inspection_validation_title">Validación</string>
+    <string name="inspection_no_inspections">No hay inspecciones disponibles.</string>
+
+    <!-- General Info -->
+    <string name="info_building">Edificio</string>
+    <string name="info_type">Tipo de Inspección</string>
+    <string name="info_scheduled_date">Fecha Programada</string>
+    <string name="info_started_at">Fecha de Inicio</string>
+    <string name="info_notes">Notas</string>
+    <string name="info_signer">Firmante</string>
+
+    <!-- Devices -->
+    <string name="devices_empty">No hay dispositivos asociados.</string>
+    <string name="device_serial_format">S/N: %d</string>
+    <string name="device_no_serial">Sin número de serie</string>
+</resources>

@@ -8,6 +8,7 @@ public class InspectionListResponse {
 
     private String id;
     private String buildingId;
+    private String locationId;
     private String status;
     private String scheduledDate;
     private String type;
@@ -19,6 +20,9 @@ public class InspectionListResponse {
 
     public String getBuildingId() { return buildingId; }
     public void setBuildingId(String buildingId) { this.buildingId = buildingId; }
+
+    public String getLocationId() { return locationId; }
+    public void setLocationId(String locationId) { this.locationId = locationId; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

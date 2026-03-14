@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.room.Room;
 
 import com.example.tup_final.data.local.AppDatabase;
+import com.example.tup_final.data.local.DeviceDao;
 import com.example.tup_final.data.local.InspectionDao;
 import com.example.tup_final.data.local.LocationDao;
 import com.example.tup_final.data.local.Migrations;
@@ -38,6 +39,11 @@ public final class DatabaseModule {
     @Provides
     public static InspectionDao provideInspectionDao(AppDatabase db) {
         return db.inspectionDao();
+    }
+
+    @Provides
+    public static DeviceDao provideDeviceDao(AppDatabase db) {
+        return db.deviceDao();
     }
 
     @Provides
