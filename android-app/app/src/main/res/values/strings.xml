@@ -112,6 +112,7 @@
     <string name="inspection_tests_title">Zonas y Tests</string>
     <string name="inspection_tests_empty">No hay zonas ni dispositivos en esta ubicación.</string>
     <string name="steps_title">Pasos del Test</string>
+    <string name="steps_placeholder">Cargando pasos del test %s…</string>
 
     <!-- Locations -->
     <string name="locations_title">Ubicaciones</string>
@@ -171,4 +172,8 @@
     <string name="devices_empty">No hay dispositivos asociados.</string>
     <string name="device_serial_format">S/N: %d</string>
     <string name="device_no_serial">Sin número de serie</string>
+    <string name="expand_collapse">Expandir o colapsar</string>
+    <string name="navigate_to_steps">Ir a pasos del test</string>
+    <string name="zone_devices_count">%d dispositivos</string>
+    <string name="device_tests_completed">Completed %1$d of %2$d tests.</string>
 </resources>

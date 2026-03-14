@@ -9,6 +9,8 @@ import com.example.tup_final.data.local.DeviceDao;
 import com.example.tup_final.data.local.InspectionAssignmentDao;
 import com.example.tup_final.data.local.InspectionDao;
 import com.example.tup_final.data.local.LocationDao;
+import com.example.tup_final.data.local.TestDao;
+import com.example.tup_final.data.local.ZoneDao;
 import com.example.tup_final.data.local.Migrations;
 import com.example.tup_final.data.local.UserDao;
 
@@ -56,5 +58,15 @@ public final class DatabaseModule {
     @Provides
     public static LocationDao provideLocationDao(AppDatabase db) {
         return db.locationDao();
+    }
+
+    @Provides
+    public static ZoneDao provideZoneDao(AppDatabase db) {
+        return db.zoneDao();
+    }
+
+    @Provides
+    public static TestDao provideTestDao(AppDatabase db) {
+        return db.testDao();
     }
 }

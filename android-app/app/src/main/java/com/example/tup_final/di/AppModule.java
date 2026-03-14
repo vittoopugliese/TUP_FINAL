@@ -7,6 +7,7 @@ import com.example.tup_final.data.remote.ApiService;
 import com.example.tup_final.data.remote.AuthApi;
 import com.example.tup_final.data.remote.InspectionApi;
 import com.example.tup_final.data.remote.LocationApi;
+import com.example.tup_final.data.remote.ZonesApi;
 import com.example.tup_final.data.remote.UserApi;
 import dagger.Module;
 import dagger.Provides;
@@ -85,6 +86,12 @@ public final class AppModule {
     @Singleton
     public LocationApi provideLocationApi(Retrofit retrofit) {
         return retrofit.create(LocationApi.class);
+    }
+
+    @Provides
+    @Singleton
+    public ZonesApi provideZonesApi(Retrofit retrofit) {
+        return retrofit.create(ZonesApi.class);
     }
 
     @Provides
