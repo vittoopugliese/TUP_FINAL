@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tup_final.R;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.example.tup_final.data.entity.LocationWithStats;
 import com.example.tup_final.ui.locations.LocationAdapter;
 import com.example.tup_final.util.Resource;
@@ -70,8 +71,22 @@ public class InspectionLocationsFragment extends Fragment {
         recyclerLocations.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerLocations.setAdapter(adapter);
 
+        adapter.setOnLocationClickListener(item -> {
+            Bundle args = new Bundle();
+            args.putString("inspectionId", inspectionId);
+            args.putString("locationId", item.location.id);
+            args.putString("locationName", item.location.name != null ? item.location.name : "");
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_inspection_locations_to_inspection_tests, args);
+        });
+
         observeData(buildingId);
         setupButtons(view, buildingId, inspectionId);
+
+        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v ->
+                NavHostFragment.findNavController(this).popBackStack()
+        );
     }
 
     private void observeData(String buildingId) {
@@ -118,8 +133,5 @@ public class InspectionLocationsFragment extends Fragment {
             args.putString("inspectionId", inspectionId);
             NavHostFragment.findNavController(this).navigate(R.id.action_inspection_locations_to_create_location, args);
         });
-
-        view.findViewById(R.id.btn_back).setOnClickListener(v ->
-                NavHostFragment.findNavController(this).navigateUp());
     }
 }

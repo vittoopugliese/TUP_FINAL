@@ -1,4 +1,5 @@
 com\inspections\entity\Device.class
+com\inspections\controller\LocationController.class
 com\inspections\InspectionsApplication.class
 com\inspections\controller\AuthController.class
 com\inspections\entity\InspectionTest.class
@@ -28,6 +29,7 @@ com\inspections\dto\AuthResponse.class
 com\inspections\entity\Photo.class
 com\inspections\controller\InspectionAssignmentController.class
 com\inspections\entity\Step.class
+com\inspections\dto\LocationListResponse.class
 com\inspections\repository\PhotoRepository.class
 com\inspections\repository\LocationRepository.class
 com\inspections\repository\AuditLogRepository.class

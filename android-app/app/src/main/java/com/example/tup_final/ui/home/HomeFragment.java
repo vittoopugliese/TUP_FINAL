@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
@@ -50,6 +51,9 @@ public class HomeFragment extends Fragment {
     private TextView textEmptyOrError;
     private TextView textInspectionsCount;
     private RecyclerView recyclerInspections;
+    private View filterContent;
+    private ImageView iconFilterChevron;
+    private boolean filtersExpanded = false;
 
     @Nullable
     @Override
@@ -73,7 +77,27 @@ public class HomeFragment extends Fragment {
 
         setupRecyclerView(view);
         setupFilterPanel(view);
+        setupFilterCollapse(view);
         observeData();
+    }
+
+    private void setupFilterCollapse(View view) {
+        filterContent = view.findViewById(R.id.filter_content);
+        iconFilterChevron = view.findViewById(R.id.icon_filter_chevron);
+        View filterHeader = view.findViewById(R.id.filter_header);
+
+        filtersExpanded = false;
+        filterContent.setVisibility(View.GONE);
+        iconFilterChevron.setImageResource(R.drawable.ic_chevron_down);
+        iconFilterChevron.setContentDescription(getString(R.string.filter_expand_hint));
+
+        filterHeader.setOnClickListener(v -> {
+            filtersExpanded = !filtersExpanded;
+            filterContent.setVisibility(filtersExpanded ? View.VISIBLE : View.GONE);
+            iconFilterChevron.setImageResource(filtersExpanded ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down);
+            iconFilterChevron.setContentDescription(filtersExpanded
+                    ? getString(R.string.filter_collapse_hint) : getString(R.string.filter_expand_hint));
+        });
     }
 
     private void setupRecyclerView(View view) {

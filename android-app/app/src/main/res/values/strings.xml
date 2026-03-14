@@ -60,6 +60,9 @@
     <string name="profile_sync_pending">Guardado. Se sincronizará cuando haya conexión.</string>
 
     <!-- Inspections filter -->
+    <string name="filter_title">Filtros</string>
+    <string name="filter_expand_hint">Mostrar filtros</string>
+    <string name="filter_collapse_hint">Ocultar filtros</string>
     <string name="filter_building">Edificio</string>
     <string name="filter_location">Ubicación</string>
     <string name="filter_date">Fecha</string>
@@ -106,6 +109,9 @@
     <!-- Inspection Locations -->
     <string name="inspection_locations_title">Ubicaciones de la inspección</string>
     <string name="inspection_locations_empty">No hay ubicaciones en este edificio.</string>
+    <string name="inspection_tests_title">Zonas y Tests</string>
+    <string name="inspection_tests_empty">No hay zonas ni dispositivos en esta ubicación.</string>
+    <string name="steps_title">Pasos del Test</string>
 
     <!-- Locations -->
     <string name="locations_title">Ubicaciones</string>

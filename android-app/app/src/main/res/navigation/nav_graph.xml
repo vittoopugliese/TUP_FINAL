@@ -59,6 +59,50 @@
         <action
             android:id="@+id/action_inspection_locations_to_create_location"
             app:destination="@id/createLocationFragment" />
+        <action
+            android:id="@+id/action_inspection_locations_to_inspection_tests"
+            app:destination="@id/inspectionTestsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/inspectionTestsFragment"
+        android:name="com.example.tup_final.ui.inspectiontests.InspectionTestsFragment"
+        android:label="@string/inspection_tests_title"
+        tools:layout="@layout/fragment_inspection_tests">
+        <argument
+            android:name="inspectionId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="locationId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="locationName"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_inspection_tests_to_steps"
+            app:destination="@id/stepsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/stepsFragment"
+        android:name="com.example.tup_final.ui.steps.StepsFragment"
+        android:label="@string/steps_title"
+        tools:layout="@layout/fragment_steps">
+        <argument
+            android:name="inspectionId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="testId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="deviceId"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
     <fragment
