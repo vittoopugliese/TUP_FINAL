@@ -42,9 +42,6 @@
             android:id="@+id/action_home_to_inspectionDetail"
             app:destination="@id/inspectionDetailFragment" />
         <action
-            android:id="@+id/action_home_to_inspection_locations"
-            app:destination="@id/inspectionLocationsFragment" />
-        <action
             android:id="@+id/action_home_to_locations"
             app:destination="@id/locationsFragment" />
     </fragment>
@@ -102,7 +99,13 @@
         android:id="@+id/profileFragment"
         android:name="com.example.tup_final.ui.profile.ProfileFragment"
         android:label="@string/profile_title"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profile_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/inspectionDetailFragment"
@@ -114,7 +117,7 @@
             app:argType="string" />
         <action
             android:id="@+id/action_inspectionDetail_to_locations"
-            app:destination="@id/locationsFragment" />
+            app:destination="@id/inspectionLocationsFragment" />
     </fragment>
 </navigation>
 

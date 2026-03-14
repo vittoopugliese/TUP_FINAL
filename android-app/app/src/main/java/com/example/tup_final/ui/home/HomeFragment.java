@@ -20,9 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tup_final.R;
 import com.example.tup_final.data.entity.InspectionEntity;
-import com.example.tup_final.data.local.InspectionDao;
-import com.example.tup_final.data.repository.AuthRepository;
-import com.example.tup_final.sync.SyncScheduler;
 import com.example.tup_final.util.Resource;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -34,13 +31,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.Executors;
 
 import static com.example.tup_final.util.Resource.Status.ERROR;
 import static com.example.tup_final.util.Resource.Status.LOADING;
 import static com.example.tup_final.util.Resource.Status.SUCCESS;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -49,12 +43,6 @@ import dagger.hilt.android.AndroidEntryPoint;
  */
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
-
-    @Inject
-    AuthRepository authRepository;
-
-    @Inject
-    InspectionDao inspectionDao;
 
     private HomeViewModel viewModel;
     private InspectionAdapter adapter;
@@ -78,17 +66,15 @@ public class HomeFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         adapter = new InspectionAdapter();
         adapter.setOnInspectionClickListener(inspection -> {
-            android.os.Bundle args = new android.os.Bundle();
+            Bundle args = new Bundle();
             args.putString("inspectionId", inspection.id);
-            args.putString("buildingId", inspection.buildingId != null ? inspection.buildingId : "");
             NavHostFragment.findNavController(HomeFragment.this)
-                    .navigate(R.id.action_home_to_inspection_locations, args);
+                    .navigate(R.id.action_home_to_inspectionDetail, args);
         });
 
         setupRecyclerView(view);
         setupFilterPanel(view);
         observeData();
-        setupLogoutAndProfile(view);
     }
 
     private void setupRecyclerView(View view) {
@@ -205,54 +191,6 @@ public class HomeFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void setupLogoutAndProfile(View view) {
-        getParentFragmentManager().setFragmentResultListener(
-                LogoutDialogFragment.REQUEST_KEY, this, (key, result) -> {
-                    boolean syncFirst = result.getBoolean(LogoutDialogFragment.RESULT_SYNC_FIRST, false);
-                    if (syncFirst) {
-                        SyncScheduler.enqueueOneTime(requireContext());
-                    }
-                    Executors.newSingleThreadExecutor().execute(() -> {
-                        authRepository.logout();
-                        requireActivity().runOnUiThread(() ->
-                                NavHostFragment.findNavController(HomeFragment.this)
-                                        .navigate(R.id.action_home_to_login)
-                        );
-                    });
-                });
-
-        view.findViewById(R.id.btn_logout).setOnClickListener(v -> {
-            boolean hasPendingData = false;
-            LogoutDialogFragment.newInstance(hasPendingData)
-                    .show(getParentFragmentManager(), "LogoutDialog");
-        });
-
-        view.findViewById(R.id.btn_profile).setOnClickListener(v ->
-                NavHostFragment.findNavController(HomeFragment.this)
-                        .navigate(R.id.action_home_to_profile));
-
-        view.findViewById(R.id.btn_locations).setOnClickListener(v ->
-                NavHostFragment.findNavController(HomeFragment.this)
-                        .navigate(R.id.action_home_to_locations));
-
-        view.findViewById(R.id.btn_inspections).setOnClickListener(v ->
-                Executors.newSingleThreadExecutor().execute(() -> {
-                    List<InspectionEntity> inspections = inspectionDao.getAll();
-                    requireActivity().runOnUiThread(() -> {
-                        if (inspections != null && !inspections.isEmpty()) {
-                            Bundle args = new Bundle();
-                            args.putString("inspectionId", inspections.get(0).id);
-                            NavHostFragment.findNavController(HomeFragment.this)
-                                    .navigate(R.id.action_home_to_inspectionDetail, args);
-                        } else {
-                            Toast.makeText(requireContext(),
-                                    R.string.inspection_no_inspections,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }));
     }
 
     private void onInspectionsChanged(Resource<List<InspectionEntity>> resource) {

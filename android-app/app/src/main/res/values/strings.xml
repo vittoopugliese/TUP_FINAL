@@ -44,6 +44,9 @@
     <string name="profile_no_phone">Sin teléfono registrado</string>
     <string name="profile_no_name">Sin nombre</string>
     <string name="str_btn_profile">Mi Perfil</string>
+    <string name="nav_inspections">Inspecciones</string>
+    <string name="nav_locations">Ubicaciones</string>
+    <string name="nav_profile">Mi Perfil</string>
     <string name="btn_back">Volver</string>
     <string name="profile_error">Error al cargar el perfil</string>
     <string name="btn_edit">Editar</string>
@@ -137,6 +140,18 @@
     <string name="inspection_error_not_found">No se encontró la inspección.</string>
     <string name="inspection_validation_title">Validación</string>
     <string name="inspection_no_inspections">No hay inspecciones disponibles.</string>
+
+    <!-- Assignment (Inspector/Operators) -->
+    <string name="assignment_inspector_title">Inspector</string>
+    <string name="assignment_operators_title">Operadores</string>
+    <string name="assignment_email_hint">Email del usuario</string>
+    <string name="assignment_add">Agregar</string>
+    <string name="assignment_remove_title">Remover asignación</string>
+    <string name="assignment_remove_message">¿Estás seguro de remover a %s de esta inspección?</string>
+    <string name="assignment_max_inspector">Solo se permite 1 Inspector por inspección</string>
+    <string name="assignment_cannot_remove_inspector">No se puede remover al único Inspector</string>
+    <string name="assignment_invalid_email">Ingrese un email válido</string>
+    <string name="assignment_duplicate">Este email ya está asignado</string>
 
     <!-- General Info -->
     <string name="info_building">Edificio</string>

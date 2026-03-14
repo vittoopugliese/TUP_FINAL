@@ -7,10 +7,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.tup_final.data.entity.DeviceEntity;
+import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.data.local.DeviceDao;
+import com.example.tup_final.data.local.InspectionAssignmentDao;
 import com.example.tup_final.data.local.InspectionDao;
 import com.example.tup_final.data.remote.InspectionApi;
+import com.example.tup_final.data.remote.dto.AssignmentRequest;
+import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.remote.dto.InspectionListResponse;
 import com.example.tup_final.util.Resource;
 
@@ -38,14 +42,17 @@ public class InspectionRepository {
 
     private final InspectionApi inspectionApi;
     private final InspectionDao inspectionDao;
+    private final InspectionAssignmentDao assignmentDao;
     private final DeviceDao deviceDao;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
-    public InspectionRepository(InspectionApi inspectionApi, InspectionDao inspectionDao, DeviceDao deviceDao) {
+    public InspectionRepository(InspectionApi inspectionApi, InspectionDao inspectionDao,
+                                InspectionAssignmentDao assignmentDao, DeviceDao deviceDao) {
         this.inspectionApi = inspectionApi;
         this.inspectionDao = inspectionDao;
+        this.assignmentDao = assignmentDao;
         this.deviceDao = deviceDao;
     }
 
@@ -211,6 +218,115 @@ public class InspectionRepository {
         });
 
         return result;
+    }
+
+    /**
+     * Obtiene las asignaciones de una inspeccion.
+     * Offline-first: intenta API, cachea en Room, fallback a Room.
+     */
+    public LiveData<Resource<List<InspectionAssignmentEntity>>> getAssignments(String inspectionId) {
+        MutableLiveData<Resource<List<InspectionAssignmentEntity>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<List<AssignmentResponse>> response = inspectionApi.getAssignments(inspectionId).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<InspectionAssignmentEntity> entities = mapAssignmentsToEntities(inspectionId, response.body());
+                    assignmentDao.deleteByInspectionId(inspectionId);
+                    if (!entities.isEmpty()) {
+                        assignmentDao.insertAll(entities);
+                    }
+                    mainHandler.post(() -> result.setValue(Resource.success(entities)));
+                } else {
+                    List<InspectionAssignmentEntity> cached = assignmentDao.getByInspectionId(inspectionId);
+                    mainHandler.post(() -> result.setValue(Resource.success(cached != null ? cached : new ArrayList<>())));
+                }
+            } catch (IOException e) {
+                List<InspectionAssignmentEntity> cached = assignmentDao.getByInspectionId(inspectionId);
+                mainHandler.post(() -> result.setValue(Resource.success(cached != null ? cached : new ArrayList<>())));
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Agrega una asignacion. POST al backend y cache local.
+     */
+    public LiveData<Resource<AssignmentResponse>> addAssignment(String inspectionId, String userEmail, String role) {
+        MutableLiveData<Resource<AssignmentResponse>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                AssignmentRequest request = new AssignmentRequest(userEmail, role);
+                Response<AssignmentResponse> response = inspectionApi.addAssignment(inspectionId, request).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    InspectionAssignmentEntity entity = mapAssignmentToEntity(response.body());
+                    assignmentDao.insert(entity);
+                    mainHandler.post(() -> result.setValue(Resource.success(response.body())));
+                } else {
+                    String errorBody = response.errorBody() != null ? response.errorBody().string() : "Error al agregar";
+                    mainHandler.post(() -> result.setValue(Resource.error(errorBody)));
+                }
+            } catch (IOException e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error(e.getMessage() != null ? e.getMessage() : "Error de conexión")));
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Remueve una asignacion. DELETE al backend y remove local.
+     */
+    public LiveData<Resource<Void>> removeAssignment(String inspectionId, String userEmail) {
+        MutableLiveData<Resource<Void>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<Void> response = inspectionApi.removeAssignment(inspectionId, userEmail).execute();
+                if (response.isSuccessful()) {
+                    assignmentDao.deleteByInspectionIdAndEmail(inspectionId, userEmail);
+                    mainHandler.post(() -> result.setValue(Resource.success(null)));
+                } else {
+                    String errorBody = response.errorBody() != null ? response.errorBody().string() : "Error al remover";
+                    mainHandler.post(() -> result.setValue(Resource.error(errorBody)));
+                }
+            } catch (IOException e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error(e.getMessage() != null ? e.getMessage() : "Error de conexión")));
+            }
+        });
+
+        return result;
+    }
+
+    private List<InspectionAssignmentEntity> mapAssignmentsToEntities(String inspectionId, List<AssignmentResponse> dtos) {
+        List<InspectionAssignmentEntity> entities = new ArrayList<>();
+        for (AssignmentResponse dto : dtos) {
+            InspectionAssignmentEntity entity = new InspectionAssignmentEntity();
+            entity.id = dto.getId() != null ? dto.getId() : "";
+            entity.inspectionId = inspectionId;
+            entity.userEmail = dto.getUserEmail();
+            entity.role = dto.getRole();
+            entity.createdAt = dto.getCreatedAt();
+            entities.add(entity);
+        }
+        return entities;
+    }
+
+    private InspectionAssignmentEntity mapAssignmentToEntity(AssignmentResponse dto) {
+        InspectionAssignmentEntity entity = new InspectionAssignmentEntity();
+        entity.id = dto.getId() != null ? dto.getId() : "";
+        entity.inspectionId = dto.getInspectionId();
+        entity.userEmail = dto.getUserEmail();
+        entity.role = dto.getRole();
+        entity.createdAt = dto.getCreatedAt();
+        return entity;
     }
 
     /**

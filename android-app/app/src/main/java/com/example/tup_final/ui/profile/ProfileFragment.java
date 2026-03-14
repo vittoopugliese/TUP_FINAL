@@ -22,9 +22,12 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
+import com.example.tup_final.data.repository.AuthRepository;
+import com.example.tup_final.ui.home.LogoutDialogFragment;
+import com.example.tup_final.sync.SyncScheduler;
 import com.example.tup_final.R;
 import com.example.tup_final.data.entity.UserEntity;
 import com.example.tup_final.databinding.FragmentProfileBinding;
@@ -35,6 +38,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -45,6 +51,9 @@ import dagger.hilt.android.AndroidEntryPoint;
  */
 @AndroidEntryPoint
 public class ProfileFragment extends Fragment {
+
+    @Inject
+    AuthRepository authRepository;
 
     private FragmentProfileBinding binding;
     private ProfileViewModel viewModel;
@@ -102,9 +111,7 @@ public class ProfileFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
-        // Botón volver
-        binding.btnBack.setOnClickListener(v ->
-                Navigation.findNavController(view).navigateUp());
+        setupLogout();
 
         // Botón Editar: cambiar a modo edición
         binding.btnEdit.setOnClickListener(v -> switchToEditMode());
@@ -225,6 +232,31 @@ public class ProfileFragment extends Fragment {
                             Toast.LENGTH_LONG).show();
                     break;
             }
+        });
+    }
+
+    // ── Logout ─────────────────────────────────────────────────────────────
+
+    private void setupLogout() {
+        getParentFragmentManager().setFragmentResultListener(
+                LogoutDialogFragment.REQUEST_KEY, this, (key, result) -> {
+                    boolean syncFirst = result.getBoolean(LogoutDialogFragment.RESULT_SYNC_FIRST, false);
+                    if (syncFirst) {
+                        SyncScheduler.enqueueOneTime(requireContext());
+                    }
+                    Executors.newSingleThreadExecutor().execute(() -> {
+                        authRepository.logout();
+                        requireActivity().runOnUiThread(() ->
+                                NavHostFragment.findNavController(ProfileFragment.this)
+                                        .navigate(R.id.action_profile_to_login)
+                        );
+                    });
+                });
+
+        binding.btnLogout.setOnClickListener(v -> {
+            boolean hasPendingData = false;
+            LogoutDialogFragment.newInstance(hasPendingData)
+                    .show(getParentFragmentManager(), "LogoutDialog");
         });
     }
 

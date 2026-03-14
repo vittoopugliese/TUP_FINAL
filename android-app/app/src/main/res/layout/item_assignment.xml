@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="8dp"
+    android:paddingEnd="4dp">
+
+    <ImageView
+        android:id="@+id/icon_person"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_nav_profile"
+        android:contentDescription="@null"
+        app:tint="?attr/colorPrimary" />
+
+    <TextView
+        android:id="@+id/text_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:textSize="14sp"
+        android:textColor="?android:attr/textColorPrimary"
+        tools:text="user@example.com" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_remove"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:contentDescription="@string/assignment_remove_title"
+        android:text="✕"
+        android:textSize="18sp"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp" />
+
+</LinearLayout>

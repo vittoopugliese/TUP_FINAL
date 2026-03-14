@@ -175,3 +175,14 @@ CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_entity_type ON audit_logs(entity_type);
 CREATE INDEX IF NOT EXISTS idx_audit_entity_id ON audit_logs(entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
+
+-- Inspection assignments (FK: inspection_id -> inspections)
+CREATE TABLE IF NOT EXISTS inspection_assignments (
+    id VARCHAR(36) PRIMARY KEY NOT NULL,
+    inspection_id VARCHAR(36) NOT NULL,
+    user_email VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_assign_inspection ON inspection_assignments(inspection_id);
+CREATE INDEX IF NOT EXISTS idx_assign_email ON inspection_assignments(user_email);

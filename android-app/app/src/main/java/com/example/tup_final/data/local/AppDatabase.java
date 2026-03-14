@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase;
 
 import com.example.tup_final.data.entity.AuditLogEntity;
 import com.example.tup_final.data.entity.DeviceEntity;
+import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.data.entity.LocationEntity;
 import com.example.tup_final.data.entity.ObservationEntity;
@@ -24,6 +25,7 @@ import com.example.tup_final.data.entity.ZoneEntity;
     entities = {
         UserEntity.class,
         InspectionEntity.class,
+        InspectionAssignmentEntity.class,
         LocationEntity.class,
         ZoneEntity.class,
         DeviceEntity.class,
@@ -33,13 +35,14 @@ import com.example.tup_final.data.entity.ZoneEntity;
         PhotoEntity.class,
         AuditLogEntity.class
     },
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UserDao userDao();
     public abstract InspectionDao inspectionDao();
+    public abstract InspectionAssignmentDao inspectionAssignmentDao();
     public abstract LocationDao locationDao();
     public abstract ZoneDao zoneDao();
     public abstract DeviceDao deviceDao();

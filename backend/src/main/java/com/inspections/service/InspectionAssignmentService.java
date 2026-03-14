@@ -1,0 +1,97 @@
+package com.inspections.service;
+
+import com.inspections.entity.InspectionAssignment;
+import com.inspections.repository.InspectionAssignmentRepository;
+import com.inspections.repository.InspectionRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Servicio para asignaciones de inspectores y operadores a inspecciones.
+ * Reglas: max 1 INSPECTOR por inspeccion, operadores ilimitados.
+ * No se puede remover al unico inspector.
+ */
+@Service
+public class InspectionAssignmentService {
+
+    private static final String ROLE_INSPECTOR = "INSPECTOR";
+    private static final String ROLE_OPERATOR = "OPERATOR";
+
+    private final InspectionAssignmentRepository assignmentRepository;
+    private final InspectionRepository inspectionRepository;
+
+    public InspectionAssignmentService(InspectionAssignmentRepository assignmentRepository,
+                                       InspectionRepository inspectionRepository) {
+        this.assignmentRepository = assignmentRepository;
+        this.inspectionRepository = inspectionRepository;
+    }
+
+    public List<InspectionAssignment> getAssignments(String inspectionId) {
+        return assignmentRepository.findByInspectionId(inspectionId);
+    }
+
+    @Transactional
+    public InspectionAssignment addAssignment(String inspectionId, String userEmail, String role) {
+        if (inspectionId == null || userEmail == null || role == null) {
+            throw new IllegalArgumentException("inspectionId, userEmail and role are required");
+        }
+
+        if (!inspectionRepository.existsById(inspectionId)) {
+            throw new IllegalArgumentException("Inspection not found: " + inspectionId);
+        }
+
+        String normalizedEmail = userEmail.trim().toLowerCase();
+        String normalizedRole = role.toUpperCase();
+
+        if (!ROLE_INSPECTOR.equals(normalizedRole) && !ROLE_OPERATOR.equals(normalizedRole)) {
+            throw new IllegalArgumentException("Role must be INSPECTOR or OPERATOR");
+        }
+
+        if (assignmentRepository.existsByInspectionIdAndUserEmail(inspectionId, normalizedEmail)) {
+            throw new IllegalArgumentException("This email is already assigned to this inspection");
+        }
+
+        if (ROLE_INSPECTOR.equals(normalizedRole)) {
+            long inspectorCount = assignmentRepository.countByInspectionIdAndRole(inspectionId, ROLE_INSPECTOR);
+            if (inspectorCount >= 1) {
+                throw new IllegalArgumentException("Only 1 Inspector is allowed per inspection");
+            }
+        }
+
+        InspectionAssignment assignment = new InspectionAssignment();
+        assignment.setId(UUID.randomUUID().toString());
+        assignment.setInspectionId(inspectionId);
+        assignment.setUserEmail(normalizedEmail);
+        assignment.setRole(normalizedRole);
+        assignment.setCreatedAt(Instant.now());
+
+        return assignmentRepository.save(assignment);
+    }
+
+    @Transactional
+    public void removeAssignment(String inspectionId, String userEmail) {
+        if (inspectionId == null || userEmail == null) {
+            throw new IllegalArgumentException("inspectionId and userEmail are required");
+        }
+
+        String normalizedEmail = userEmail.trim().toLowerCase();
+
+        InspectionAssignment toRemove = assignmentRepository.findByInspectionIdAndUserEmail(inspectionId, normalizedEmail)
+                .orElse(null);
+        if (toRemove == null) {
+            return;
+        }
+        if (ROLE_INSPECTOR.equals(toRemove.getRole())) {
+            long inspectorCount = assignmentRepository.countByInspectionIdAndRole(inspectionId, ROLE_INSPECTOR);
+            if (inspectorCount <= 1) {
+                throw new IllegalArgumentException("Cannot remove the only Inspector from the inspection");
+            }
+        }
+
+        assignmentRepository.delete(toRemove);
+    }
+}

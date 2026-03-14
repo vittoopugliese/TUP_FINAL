@@ -175,7 +175,7 @@ public class InspectionDetailFragment extends Fragment {
     private void navigateToLocations(InspectionEntity inspection) {
         Bundle args = new Bundle();
         args.putString("inspectionId", inspection.id);
-        args.putString("buildingId", inspection.buildingId);
+        args.putString("buildingId", inspection.buildingId != null ? inspection.buildingId : "");
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_inspectionDetail_to_locations, args);
     }

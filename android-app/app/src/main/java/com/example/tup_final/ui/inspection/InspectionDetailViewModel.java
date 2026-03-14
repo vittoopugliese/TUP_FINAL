@@ -8,12 +8,15 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.tup_final.data.entity.DeviceEntity;
+import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.data.entity.UserEntity;
+import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.local.UserDao;
 import com.example.tup_final.data.repository.InspectionRepository;
 import com.example.tup_final.util.Resource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,9 +33,16 @@ public class InspectionDetailViewModel extends ViewModel {
     private final SharedPreferences prefs;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
+    private static final String ROLE_INSPECTOR = "INSPECTOR";
+    private static final String ROLE_OPERATOR = "OPERATOR";
+
     private MutableLiveData<Resource<InspectionEntity>> inspection;
     private MutableLiveData<Resource<List<DeviceEntity>>> devices;
     private final MediatorLiveData<Resource<InspectionEntity>> startResult = new MediatorLiveData<>();
+
+    private final MediatorLiveData<Resource<List<InspectionAssignmentEntity>>> assignments = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<AssignmentResponse>> addAssignmentResult = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<Void>> removeAssignmentResult = new MediatorLiveData<>();
 
     private String currentInspectionId;
 
@@ -49,6 +59,19 @@ public class InspectionDetailViewModel extends ViewModel {
         this.currentInspectionId = inspectionId;
         inspection = (MutableLiveData<Resource<InspectionEntity>>)
                 inspectionRepository.getInspectionById(inspectionId);
+        loadAssignments(inspectionId);
+    }
+
+    public void loadAssignments(String inspectionId) {
+        assignments.setValue(Resource.loading());
+        LiveData<Resource<List<InspectionAssignmentEntity>>> source =
+                inspectionRepository.getAssignments(inspectionId);
+        assignments.addSource(source, resource -> {
+            assignments.setValue(resource);
+            if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
+                assignments.removeSource(source);
+            }
+        });
     }
 
     public LiveData<Resource<InspectionEntity>> getInspection() {
@@ -121,5 +144,83 @@ public class InspectionDetailViewModel extends ViewModel {
 
     public String getCurrentInspectionId() {
         return currentInspectionId;
+    }
+
+    public LiveData<Resource<List<InspectionAssignmentEntity>>> getAssignments() {
+        return assignments;
+    }
+
+    public LiveData<Resource<AssignmentResponse>> getAddAssignmentResult() {
+        return addAssignmentResult;
+    }
+
+    public LiveData<Resource<Void>> getRemoveAssignmentResult() {
+        return removeAssignmentResult;
+    }
+
+    public void addAssignment(String inspectionId, String userEmail, String role) {
+        if (inspectionId == null || userEmail == null || role == null) return;
+
+        String normalizedRole = role.toUpperCase();
+        if (ROLE_INSPECTOR.equals(normalizedRole)) {
+            Resource<List<InspectionAssignmentEntity>> current = assignments.getValue();
+            if (current != null && current.getData() != null) {
+                long inspectorCount = current.getData().stream()
+                        .filter(a -> ROLE_INSPECTOR.equals(a.role))
+                        .count();
+                if (inspectorCount >= 1) {
+                    addAssignmentResult.setValue(Resource.error("Solo se permite 1 Inspector por inspeccion"));
+                    return;
+                }
+            }
+        }
+
+        addAssignmentResult.setValue(Resource.loading());
+        LiveData<Resource<AssignmentResponse>> source = inspectionRepository.addAssignment(inspectionId, userEmail, normalizedRole);
+        addAssignmentResult.addSource(source, resource -> {
+            if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
+                addAssignmentResult.removeSource(source);
+                addAssignmentResult.setValue(resource);
+                if (resource.getStatus() == Resource.Status.SUCCESS) {
+                    loadAssignments(inspectionId);
+                }
+            }
+        });
+    }
+
+    public void removeAssignment(String inspectionId, String userEmail) {
+        if (inspectionId == null || userEmail == null) return;
+
+        removeAssignmentResult.setValue(Resource.loading());
+        LiveData<Resource<Void>> source = inspectionRepository.removeAssignment(inspectionId, userEmail);
+        removeAssignmentResult.addSource(source, resource -> {
+            if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
+                removeAssignmentResult.removeSource(source);
+                removeAssignmentResult.setValue(resource);
+                if (resource.getStatus() == Resource.Status.SUCCESS) {
+                    loadAssignments(inspectionId);
+                }
+            }
+        });
+    }
+
+    public List<InspectionAssignmentEntity> getInspectorAssignments() {
+        Resource<List<InspectionAssignmentEntity>> r = assignments.getValue();
+        if (r == null || r.getData() == null) return new ArrayList<>();
+        List<InspectionAssignmentEntity> result = new ArrayList<>();
+        for (InspectionAssignmentEntity a : r.getData()) {
+            if (ROLE_INSPECTOR.equals(a.role)) result.add(a);
+        }
+        return result;
+    }
+
+    public List<InspectionAssignmentEntity> getOperatorAssignments() {
+        Resource<List<InspectionAssignmentEntity>> r = assignments.getValue();
+        if (r == null || r.getData() == null) return new ArrayList<>();
+        List<InspectionAssignmentEntity> result = new ArrayList<>();
+        for (InspectionAssignmentEntity a : r.getData()) {
+            if (ROLE_OPERATOR.equals(a.role)) result.add(a);
+        }
+        return result;
     }
 }
