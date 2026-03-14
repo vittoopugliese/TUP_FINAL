@@ -65,13 +65,15 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
                 @Override
                 public boolean areItemsTheSame(@NonNull InspectionEntity oldItem,
                                                 @NonNull InspectionEntity newItem) {
-                    return oldItem.id.equals(newItem.id);
+                    String oldId = oldItem != null && oldItem.id != null ? oldItem.id : "";
+                    String newId = newItem != null && newItem.id != null ? newItem.id : "";
+                    return oldId.equals(newId);
                 }
 
                 @Override
                 public boolean areContentsTheSame(@NonNull InspectionEntity oldItem,
                                                    @NonNull InspectionEntity newItem) {
-                    return oldItem.id.equals(newItem.id)
+                    return areItemsTheSame(oldItem, newItem)
                             && stringEquals(oldItem.status, newItem.status)
                             && stringEquals(oldItem.buildingId, newItem.buildingId)
                             && stringEquals(oldItem.scheduledDate, newItem.scheduledDate);

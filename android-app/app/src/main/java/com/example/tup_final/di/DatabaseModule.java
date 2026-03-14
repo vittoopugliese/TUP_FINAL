@@ -29,6 +29,7 @@ public final class DatabaseModule {
     public static AppDatabase provideAppDatabase(@ApplicationContext Context context) {
         return Room.databaseBuilder(context, AppDatabase.class, "app_database")
                 .addMigrations(Migrations.ALL)
+                .fallbackToDestructiveMigration()
                 .build();
     }
 

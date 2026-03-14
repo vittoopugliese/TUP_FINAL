@@ -36,10 +36,11 @@ CREATE TABLE locations (
 CREATE INDEX index_locations_buildingId ON locations(buildingId);
 CREATE INDEX index_locations_name ON locations(name);
 
--- Inspections (buildingId is logical ref)
+-- Inspections (buildingId and locationId are logical refs)
 CREATE TABLE inspections (
     id TEXT PRIMARY KEY NOT NULL,
     buildingId TEXT,
+    locationId TEXT,
     type TEXT,
     status TEXT,
     scheduledDate TEXT,
@@ -57,6 +58,7 @@ CREATE TABLE inspections (
     updatedAt TEXT
 );
 CREATE INDEX index_inspections_buildingId ON inspections(buildingId);
+CREATE INDEX index_inspections_locationId ON inspections(locationId);
 CREATE INDEX index_inspections_status ON inspections(status);
 CREATE INDEX index_inspections_scheduledDate ON inspections(scheduledDate);
 
@@ -184,3 +186,14 @@ CREATE INDEX index_audit_logs_userId ON audit_logs(userId);
 CREATE INDEX index_audit_logs_entityType ON audit_logs(entityType);
 CREATE INDEX index_audit_logs_entityId ON audit_logs(entityId);
 CREATE INDEX index_audit_logs_createdAt ON audit_logs(createdAt);
+
+-- Inspection assignments (FK: inspectionId -> inspections)
+CREATE TABLE inspection_assignments (
+    id TEXT PRIMARY KEY NOT NULL,
+    inspectionId TEXT NOT NULL,
+    userEmail TEXT NOT NULL,
+    role TEXT NOT NULL,
+    createdAt TEXT
+);
+CREATE INDEX index_inspection_assignments_inspectionId ON inspection_assignments(inspectionId);
+CREATE INDEX index_inspection_assignments_userEmail ON inspection_assignments(userEmail);

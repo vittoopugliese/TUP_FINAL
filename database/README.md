@@ -2,12 +2,12 @@
 
 Scripts SQL para la base de datos del sistema de inspección. Sirven como referencia para el backend (Spring Boot/JPA) y para la app Android (Room).
 
-## Archivos a Crear
+## Archivos
 
 | Archivo | Descripción |
 |---------|-------------|
-| `schema.sql` | DDL para crear todas las tablas |
-| `data-ejemplo.sql` | Datos de prueba para desarrollo |
+| `schema.sql` | DDL para crear todas las tablas (incluye locationId en inspections, inspection_assignments) |
+| `data-ejemplo.sql` | Datos de prueba ricos para desarrollo (8 locations, 9 devices, 7 inspections, assignments) |
 
 ## Modelo de Datos (según planning)
 
