@@ -41,6 +41,27 @@
         <action
             android:id="@+id/action_home_to_locations"
             app:destination="@id/locationsFragment" />
+        <action
+            android:id="@+id/action_home_to_inspection_locations"
+            app:destination="@id/inspectionLocationsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/inspectionLocationsFragment"
+        android:name="com.example.tup_final.ui.inspectionlocations.InspectionLocationsFragment"
+        android:label="@string/inspection_locations_title"
+        tools:layout="@layout/fragment_inspection_locations">
+        <argument
+            android:name="inspectionId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="buildingId"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_inspection_locations_to_create_location"
+            app:destination="@id/createLocationFragment" />
     </fragment>
 
     <fragment

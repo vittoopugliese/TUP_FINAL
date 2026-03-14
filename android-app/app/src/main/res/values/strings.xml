@@ -99,6 +99,10 @@
     <string name="inspection_date_unknown">Sin fecha</string>
     <string name="inspection_building_unknown">Sin edificio</string>
 
+    <!-- Inspection Locations -->
+    <string name="inspection_locations_title">Ubicaciones de la inspección</string>
+    <string name="inspection_locations_empty">No hay ubicaciones en este edificio.</string>
+
     <!-- Locations -->
     <string name="locations_title">Ubicaciones</string>
     <string name="locations_empty">No hay ubicaciones.</string>

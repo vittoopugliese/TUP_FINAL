@@ -20,6 +20,16 @@ import com.example.tup_final.data.entity.LocationWithStats;
  */
 public class LocationAdapter extends ListAdapter<LocationWithStats, LocationAdapter.ViewHolder> {
 
+    public interface OnLocationClickListener {
+        void onLocationClick(LocationWithStats item);
+    }
+
+    private OnLocationClickListener clickListener;
+
+    public void setOnLocationClickListener(OnLocationClickListener listener) {
+        this.clickListener = listener;
+    }
+
     private static final int COLOR_COMPLETE = 0xFF4CAF50;
     private static final int COLOR_INCOMPLETE = 0xFFFFC107;
 
@@ -61,7 +71,13 @@ public class LocationAdapter extends ListAdapter<LocationWithStats, LocationAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position));
+        LocationWithStats item = getItem(position);
+        holder.bind(item);
+        holder.itemView.setOnClickListener(v -> {
+            if (clickListener != null) {
+                clickListener.onLocationClick(item);
+            }
+        });
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

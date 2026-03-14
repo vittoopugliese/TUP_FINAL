@@ -27,8 +27,12 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 
 import static com.example.tup_final.util.Resource.Status.ERROR;
@@ -50,6 +54,7 @@ public class HomeFragment extends Fragment {
 
     private HomeViewModel viewModel;
     private InspectionAdapter adapter;
+    private MaterialButton btnFilterDate;
     private ProgressBar progressInspections;
     private TextView textEmptyOrError;
     private RecyclerView recyclerInspections;
@@ -67,6 +72,13 @@ public class HomeFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         adapter = new InspectionAdapter();
+        adapter.setOnInspectionClickListener(inspection -> {
+            android.os.Bundle args = new android.os.Bundle();
+            args.putString("inspectionId", inspection.id);
+            args.putString("buildingId", inspection.buildingId != null ? inspection.buildingId : "");
+            NavHostFragment.findNavController(HomeFragment.this)
+                    .navigate(R.id.action_home_to_inspection_locations, args);
+        });
 
         setupRecyclerView(view);
         setupFilterPanel(view);
@@ -135,7 +147,8 @@ public class HomeFragment extends Fragment {
         });
 
         // Date filter button
-        view.findViewById(R.id.btn_filter_date).setOnClickListener(v -> showDateRangePicker());
+        btnFilterDate = view.findViewById(R.id.btn_filter_date);
+        btnFilterDate.setOnClickListener(v -> showDateRangePicker());
 
         // Apply and Clear buttons
         view.findViewById(R.id.btn_filter_apply).setOnClickListener(v -> viewModel.applyFilters());
@@ -144,7 +157,7 @@ public class HomeFragment extends Fragment {
             inputBuilding.setText("", false);
             inputLocation.setText("", false);
             inputStatus.setText("", false);
-            ((MaterialButton) view.findViewById(R.id.btn_filter_date)).setText(R.string.filter_date_hint);
+            btnFilterDate.setText(R.string.filter_date_hint);
         });
     }
 
@@ -159,6 +172,11 @@ public class HomeFragment extends Fragment {
                         Long fromMillis = selection.first;
                         Long toMillis = selection.second;
                         viewModel.setDateFilter(fromMillis, toMillis);
+                        SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+                        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        String fromFormatted = format.format(new Date(fromMillis));
+                        String toFormatted = format.format(new Date(toMillis));
+                        btnFilterDate.setText(fromFormatted + " - " + toFormatted);
                     }
                 });
 
