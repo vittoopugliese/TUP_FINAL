@@ -98,7 +98,7 @@ public class InspectionRepository {
             entity.coverPageId = null;
             entity.createdAt = null;
             entity.updatedAt = null;
-            entity.locationId = null;
+            entity.locationId = dto.getLocationId();
             entities.add(entity);
         }
         return entities;

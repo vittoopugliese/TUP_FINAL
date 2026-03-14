@@ -37,6 +37,35 @@ public class LocationRepository {
     }
 
     /**
+     * Obtiene las ubicaciones de un edificio con estadísticas de tests.
+     * Si buildingId es null o vacío, retorna todas las ubicaciones.
+     */
+    public LiveData<Resource<List<LocationWithStats>>> getLocationsByBuildingId(String buildingId) {
+        MutableLiveData<Resource<List<LocationWithStats>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                List<LocationEntity> locations = buildingId != null && !buildingId.isEmpty()
+                        ? locationDao.getByBuildingId(buildingId)
+                        : locationDao.getAll();
+                List<LocationWithStats> withStats = new ArrayList<>();
+                for (LocationEntity loc : locations) {
+                    int testCount = locationDao.getTestCountForLocation(loc.id);
+                    int completedCount = locationDao.getCompletedTestCountForLocation(loc.id);
+                    withStats.add(new LocationWithStats(loc, testCount, completedCount));
+                }
+                mainHandler.post(() -> result.setValue(Resource.success(withStats)));
+            } catch (Exception e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error(e.getMessage() != null ? e.getMessage() : "Error al cargar ubicaciones")));
+            }
+        });
+
+        return result;
+    }
+
+    /**
      * Obtiene todas las ubicaciones con estadísticas de tests.
      */
     public LiveData<Resource<List<LocationWithStats>>> getAllLocations() {
