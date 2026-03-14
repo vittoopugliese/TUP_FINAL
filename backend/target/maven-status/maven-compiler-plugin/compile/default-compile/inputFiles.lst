@@ -18,8 +18,10 @@ C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\c
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\controller\InspectionAssignmentController.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\ZoneRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\Observation.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\TestResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\Device.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\InspectionRepository.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\DeviceWithTestsResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\controller\LocationController.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\LocationRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\controller\AuthController.java
@@ -42,6 +44,7 @@ C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\d
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\AvatarUploadResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\service\InspectionService.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\PhotoRepository.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\ZoneWithDevicesResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\AuthResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\InspectionAssignmentRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\service\EmailService.java
@@ -52,4 +55,5 @@ C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\s
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\InspectionListResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\DeviceRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\service\UserService.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\service\ZoneService.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\InspectionsApplication.java

@@ -4,6 +4,7 @@ com\inspections\InspectionsApplication.class
 com\inspections\controller\AuthController.class
 com\inspections\entity\InspectionTest.class
 com\inspections\entity\Zone.class
+com\inspections\service\ZoneService.class
 com\inspections\repository\InspectionRepository.class
 com\inspections\dto\AuthRequest.class
 com\inspections\repository\InspectionAssignmentRepository.class
@@ -14,7 +15,9 @@ com\inspections\entity\Inspection.class
 com\inspections\entity\InspectionAssignment.class
 com\inspections\entity\AuditLog.class
 com\inspections\config\SecurityConfig.class
+com\inspections\dto\ZoneWithDevicesResponse.class
 com\inspections\entity\User.class
+com\inspections\dto\TestResponse.class
 com\inspections\security\JwtAuthFilter.class
 com\inspections\dto\AssignmentRequest.class
 com\inspections\repository\DeviceRepository.class
@@ -22,6 +25,7 @@ com\inspections\repository\StepRepository.class
 com\inspections\config\OpenApiConfig.class
 com\inspections\entity\Location.class
 com\inspections\repository\UserRepository.class
+com\inspections\dto\DeviceWithTestsResponse.class
 com\inspections\dto\ForgotPasswordRequest.class
 com\inspections\security\JwtUtil.class
 com\inspections\repository\TestRepository.class

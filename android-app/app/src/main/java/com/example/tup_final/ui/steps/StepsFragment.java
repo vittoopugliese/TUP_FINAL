@@ -1,6 +1,8 @@
 package com.example.tup_final.ui.steps;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * Fragment que muestra los pasos (steps) de un test.
- * Esqueleto para integrar la lógica de steps según documentación PDS.
+ * Hotfix: evita loading infinito; muestra estado vacío o error según corresponda.
  */
 @AndroidEntryPoint
 public class StepsFragment extends Fragment {
@@ -28,6 +30,9 @@ public class StepsFragment extends Fragment {
     private static final String ARG_INSPECTION_ID = "inspectionId";
     private static final String ARG_TEST_ID = "testId";
     private static final String ARG_DEVICE_ID = "deviceId";
+    private static final long LOADING_DELAY_MS = 400L;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Nullable
     @Override
@@ -40,20 +45,39 @@ public class StepsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String inspectionId = getArguments() != null ? getArguments().getString(ARG_INSPECTION_ID, "") : "";
         String testId = getArguments() != null ? getArguments().getString(ARG_TEST_ID, "") : "";
-        String deviceId = getArguments() != null ? getArguments().getString(ARG_DEVICE_ID, "") : "";
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
 
         ProgressBar progress = view.findViewById(R.id.progress_steps);
-        progress.setVisibility(View.VISIBLE);
+        TextView textContent = view.findViewById(R.id.text_steps_content);
+        TextView textError = view.findViewById(R.id.text_steps_error);
 
-        TextView placeholder = view.findViewById(R.id.text_steps_placeholder);
-        if (placeholder != null) {
-            placeholder.setVisibility(View.VISIBLE);
-            placeholder.setText(getString(R.string.steps_placeholder, testId));
+        if (testId == null || testId.trim().isEmpty()) {
+            progress.setVisibility(View.GONE);
+            textContent.setVisibility(View.GONE);
+            textError.setVisibility(View.VISIBLE);
+            textError.setText(R.string.steps_invalid_test);
+            return;
         }
+
+        progress.setVisibility(View.VISIBLE);
+        textContent.setVisibility(View.GONE);
+        textError.setVisibility(View.GONE);
+
+        handler.postDelayed(() -> {
+            if (!isAdded()) return;
+            progress.setVisibility(View.GONE);
+            textContent.setVisibility(View.VISIBLE);
+            textError.setVisibility(View.GONE);
+            textContent.setText(R.string.steps_not_available);
+        }, LOADING_DELAY_MS);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        handler.removeCallbacksAndMessages(null);
     }
 }

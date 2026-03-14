@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -84,9 +85,12 @@ public class InspectionLocationsFragment extends Fragment {
         setupButtons(view, buildingId, inspectionId);
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener(v ->
-                NavHostFragment.findNavController(this).popBackStack()
-        );
+        toolbar.setNavigationOnClickListener(v -> {
+            NavController nav = NavHostFragment.findNavController(this);
+            if (!nav.popBackStack(R.id.inspectionDetailFragment, false)) {
+                nav.popBackStack();
+            }
+        });
     }
 
     private void observeData(String buildingId) {

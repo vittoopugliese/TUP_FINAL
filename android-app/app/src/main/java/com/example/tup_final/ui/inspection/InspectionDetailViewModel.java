@@ -39,6 +39,8 @@ public class InspectionDetailViewModel extends ViewModel {
     private final MediatorLiveData<Resource<Void>> removeAssignmentResult = new MediatorLiveData<>();
 
     private String currentInspectionId;
+    /** Evita re-navegar a Locations cuando el usuario vuelve con back. */
+    private boolean startResultNavigationHandled = false;
 
     @Inject
     public InspectionDetailViewModel(InspectionRepository inspectionRepository) {
@@ -82,6 +84,19 @@ public class InspectionDetailViewModel extends ViewModel {
     }
 
     /**
+     * Consume el SUCCESS de startResult para navegación. Retorna true solo la primera vez
+     * (evita re-navegar al volver con back desde Locations).
+     */
+    public boolean consumeStartResultForNavigation(Resource<InspectionEntity> resource) {
+        if (resource == null || resource.getStatus() != Resource.Status.SUCCESS
+                || resource.getData() == null || startResultNavigationHandled) {
+            return false;
+        }
+        startResultNavigationHandled = true;
+        return true;
+    }
+
+    /**
      * Start: validates at least 1 inspector assigned and inspection is PENDING,
      * then transitions to IN_PROGRESS.
      * Continue: when already IN_PROGRESS, navigates to locations without changing status.
@@ -92,6 +107,7 @@ public class InspectionDetailViewModel extends ViewModel {
             return;
         }
 
+        startResultNavigationHandled = false;
         startResult.setValue(Resource.loading());
 
         executor.execute(() -> {
@@ -106,8 +122,9 @@ public class InspectionDetailViewModel extends ViewModel {
 
             boolean isInProgress = "IN_PROGRESS".equals(inv.status);
             boolean isPending = "PENDING".equals(inv.status) || "SCHEDULED".equals(inv.status);
+            boolean isDone = inv.status != null && inv.status.startsWith("DONE");
 
-            if (isInProgress) {
+            if (isInProgress || isDone) {
                 startResult.postValue(Resource.success(inv));
                 return;
             }
@@ -125,6 +142,9 @@ public class InspectionDetailViewModel extends ViewModel {
 
                 new android.os.Handler(android.os.Looper.getMainLooper()).post(() ->
                         startResult.addSource(source, resource -> {
+                            if (resource == null) {
+                                return;
+                            }
                             startResult.setValue(resource);
                             if (resource.getStatus() != Resource.Status.LOADING) {
                                 startResult.removeSource(source);
@@ -140,13 +160,13 @@ public class InspectionDetailViewModel extends ViewModel {
 
     /**
      * Returns true if the Start/Continue button should be enabled.
-     * Enabled when: (PENDING + at least 1 inspector) OR (IN_PROGRESS).
+     * Enabled when: (PENDING + at least 1 inspector) OR (IN_PROGRESS) OR (DONE_*).
      */
     public boolean isStartButtonEnabled(InspectionEntity inspection,
                                        List<InspectionAssignmentEntity> inspectorAssignments) {
         if (inspection == null) return false;
         boolean isDone = inspection.status != null && inspection.status.startsWith("DONE");
-        if (isDone) return false;
+        if (isDone) return true;
         boolean isInProgress = "IN_PROGRESS".equals(inspection.status);
         if (isInProgress) return true;
         boolean isPending = "PENDING".equals(inspection.status) || "SCHEDULED".equals(inspection.status);
@@ -156,7 +176,7 @@ public class InspectionDetailViewModel extends ViewModel {
 
     /**
      * Returns true if the button label should be "Start" (vs "Continue").
-     * Start only when PENDING and has at least 1 inspector.
+     * Start only when PENDING and has at least 1 inspector. Continue for IN_PROGRESS and DONE_*.
      */
     public boolean shouldShowStartLabel(InspectionEntity inspection,
                                        List<InspectionAssignmentEntity> inspectorAssignments) {

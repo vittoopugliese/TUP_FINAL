@@ -113,6 +113,8 @@
     <string name="inspection_tests_empty">No hay zonas ni dispositivos en esta ubicación.</string>
     <string name="steps_title">Pasos del Test</string>
     <string name="steps_placeholder">Cargando pasos del test %s…</string>
+    <string name="steps_not_available">Los pasos de este test no están disponibles todavía.</string>
+    <string name="steps_invalid_test">Test inválido. No se pueden cargar los pasos.</string>
 
     <!-- Locations -->
     <string name="locations_title">Ubicaciones</string>

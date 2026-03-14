@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.tup_final.R;
@@ -88,6 +89,7 @@ public class InspectionDetailFragment extends Fragment {
 
     private void observeInspection() {
         viewModel.getInspection().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null || binding == null) return;
             switch (resource.getStatus()) {
                 case LOADING:
                     binding.progressDetail.setVisibility(View.VISIBLE);
@@ -136,11 +138,6 @@ public class InspectionDetailFragment extends Fragment {
 
     private void updateStartButton(InspectionEntity inspection, List<InspectionAssignmentEntity> inspectors) {
         if (inspection == null) return;
-        boolean isDone = inspection.status != null && inspection.status.startsWith("DONE");
-        if (isDone) {
-            binding.btnStartInspection.setVisibility(View.GONE);
-            return;
-        }
         binding.btnStartInspection.setVisibility(View.VISIBLE);
         boolean showStart = viewModel.shouldShowStartLabel(inspection, inspectors);
         binding.btnStartInspection.setText(showStart ? R.string.btn_start_inspection : R.string.btn_continue_inspection);
@@ -149,6 +146,7 @@ public class InspectionDetailFragment extends Fragment {
 
     private void observeStartResult() {
         viewModel.getStartResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
             switch (resource.getStatus()) {
                 case LOADING:
                     binding.btnStartInspection.setEnabled(false);
@@ -158,7 +156,9 @@ public class InspectionDetailFragment extends Fragment {
                     binding.btnStartInspection.setEnabled(true);
                     if (resource.getData() != null) {
                         bindHeader(resource.getData());
-                        navigateToLocations(resource.getData());
+                        if (viewModel.consumeStartResultForNavigation(resource)) {
+                            navigateToLocations(resource.getData());
+                        }
                     }
                     break;
 
@@ -205,15 +205,20 @@ public class InspectionDetailFragment extends Fragment {
     }
 
     private void navigateToLocations(InspectionEntity inspection) {
-        Bundle args = new Bundle();
-        args.putString("inspectionId", inspection.id);
-        args.putString("buildingId", inspection.buildingId != null ? inspection.buildingId : "");
-        Navigation.findNavController(requireView())
-                .navigate(R.id.action_inspectionDetail_to_locations, args);
+        View root = getView();
+        if (!isAdded() || root == null) return;
+        NavController nav = Navigation.findNavController(root);
+        if (nav.getCurrentDestination() != null
+                && nav.getCurrentDestination().getId() == R.id.inspectionDetailFragment) {
+            Bundle args = new Bundle();
+            args.putString("inspectionId", inspection.id);
+            args.putString("buildingId", inspection.buildingId != null ? inspection.buildingId : "");
+            nav.navigate(R.id.action_inspectionDetail_to_locations, args);
+        }
     }
 
     private void showValidationError(String message) {
-        if (message == null) return;
+        if (message == null || !isAdded()) return;
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.inspection_validation_title)
                 .setMessage(message)
