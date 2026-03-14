@@ -9,6 +9,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+
+import com.google.android.material.appbar.MaterialToolbar;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -107,7 +109,8 @@ public class LocationsFragment extends Fragment {
         view.findViewById(R.id.btn_new_location).setOnClickListener(v ->
                 NavHostFragment.findNavController(this).navigate(R.id.action_locations_to_create_location));
 
-        view.findViewById(R.id.btn_back).setOnClickListener(v ->
+        MaterialToolbar toolbar = view.findViewById(R.id.toolbar_locations);
+        toolbar.setNavigationOnClickListener(v ->
                 NavHostFragment.findNavController(this).navigateUp());
     }
 }

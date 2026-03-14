@@ -14,6 +14,7 @@ retrofit = "2.9.0"
 okhttp = "4.12.0"
 lifecycle = "2.7.0"
 navigation = "2.7.7"
+viewpager2 = "1.1.0"
 glide = "4.16.0"
 work = "2.9.0"
 
@@ -49,6 +50,9 @@ lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", 
 # Navigation
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigation" }
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigation" }
+
+# ViewPager2
+viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
 
 # Glide
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }

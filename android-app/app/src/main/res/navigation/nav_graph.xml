@@ -41,6 +41,12 @@
         <action
             android:id="@+id/action_home_to_inspectionDetail"
             app:destination="@id/inspectionDetailFragment" />
+        <action
+            android:id="@+id/action_home_to_inspection_locations"
+            app:destination="@id/inspectionLocationsFragment" />
+        <action
+            android:id="@+id/action_home_to_locations"
+            app:destination="@id/locationsFragment" />
     </fragment>
 
     <fragment
@@ -66,6 +72,15 @@
         android:name="com.example.tup_final.ui.locations.LocationsFragment"
         android:label="@string/locations_title"
         tools:layout="@layout/fragment_locations">
+        <argument
+            android:name="inspectionId"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="buildingId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <action
             android:id="@+id/action_locations_to_create_location"
             app:destination="@id/createLocationFragment" />
@@ -100,21 +115,6 @@
         <action
             android:id="@+id/action_inspectionDetail_to_locations"
             app:destination="@id/locationsFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/locationsFragment"
-        android:name="com.example.tup_final.ui.locations.LocationsFragment"
-        android:label="@string/locations_title"
-        tools:layout="@layout/fragment_locations">
-        <argument
-            android:name="inspectionId"
-            app:argType="string" />
-        <argument
-            android:name="buildingId"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
     </fragment>
 </navigation>
 
