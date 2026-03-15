@@ -54,6 +54,10 @@ public class HomeFragment extends Fragment {
     private View filterContent;
     private ImageView iconFilterChevron;
     private boolean filtersExpanded = false;
+    private AutoCompleteTextView inputBuilding;
+    private AutoCompleteTextView inputLocation;
+    private AutoCompleteTextView inputStatus;
+    private TextView textActiveFilters;
 
     @Nullable
     @Override
@@ -80,6 +84,7 @@ public class HomeFragment extends Fragment {
         setupFilterCollapse(view);
         setupFab(view);
         observeData();
+        observeActiveFilters();
         setupFragmentResultListener();
     }
 
@@ -105,18 +110,25 @@ public class HomeFragment extends Fragment {
         iconFilterChevron = view.findViewById(R.id.icon_filter_chevron);
         View filterHeader = view.findViewById(R.id.filter_header);
 
+        collapseFilters();
+
+        filterHeader.setOnClickListener(v -> {
+            if (filtersExpanded) {
+                collapseFilters();
+            } else {
+                filtersExpanded = true;
+                filterContent.setVisibility(View.VISIBLE);
+                iconFilterChevron.setImageResource(R.drawable.ic_chevron_up);
+                iconFilterChevron.setContentDescription(getString(R.string.filter_collapse_hint));
+            }
+        });
+    }
+
+    private void collapseFilters() {
         filtersExpanded = false;
         filterContent.setVisibility(View.GONE);
         iconFilterChevron.setImageResource(R.drawable.ic_chevron_down);
         iconFilterChevron.setContentDescription(getString(R.string.filter_expand_hint));
-
-        filterHeader.setOnClickListener(v -> {
-            filtersExpanded = !filtersExpanded;
-            filterContent.setVisibility(filtersExpanded ? View.VISIBLE : View.GONE);
-            iconFilterChevron.setImageResource(filtersExpanded ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down);
-            iconFilterChevron.setContentDescription(filtersExpanded
-                    ? getString(R.string.filter_collapse_hint) : getString(R.string.filter_expand_hint));
-        });
     }
 
     private void setupRecyclerView(View view) {
@@ -124,14 +136,15 @@ public class HomeFragment extends Fragment {
         progressInspections = view.findViewById(R.id.progress_inspections);
         textEmptyOrError = view.findViewById(R.id.text_empty);
         textInspectionsCount = view.findViewById(R.id.text_inspections_count);
+        textActiveFilters = view.findViewById(R.id.text_active_filters);
         recyclerInspections.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerInspections.setAdapter(adapter);
     }
 
     private void setupFilterPanel(View view) {
-        AutoCompleteTextView inputBuilding = view.findViewById(R.id.input_filter_building);
-        AutoCompleteTextView inputLocation = view.findViewById(R.id.input_filter_location);
-        AutoCompleteTextView inputStatus = view.findViewById(R.id.input_filter_status);
+        inputBuilding = view.findViewById(R.id.input_filter_building);
+        inputLocation = view.findViewById(R.id.input_filter_location);
+        inputStatus = view.findViewById(R.id.input_filter_status);
 
         // Status dropdown
         List<String> statusOptions = new ArrayList<>();
@@ -146,6 +159,7 @@ public class HomeFragment extends Fragment {
             String selected = statusOptions.get(position);
             viewModel.setStatusFilter(
                     getString(R.string.filter_all).equals(selected) ? null : selected);
+            collapseFilters();
         });
 
         // Building dropdown - populated when data loads
@@ -160,6 +174,7 @@ public class HomeFragment extends Fragment {
                     String selected = buildingIds.get(position);
                     viewModel.setBuildingFilter(
                             getString(R.string.filter_all).equals(selected) ? null : selected);
+                    collapseFilters();
                 });
             }
         });
@@ -176,6 +191,7 @@ public class HomeFragment extends Fragment {
                     String selected = locationIds.get(position);
                     viewModel.setLocationFilter(
                             getString(R.string.filter_all).equals(selected) ? null : selected);
+                    collapseFilters();
                 });
             }
         });
@@ -233,6 +249,41 @@ public class HomeFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void observeActiveFilters() {
+        androidx.lifecycle.Observer<Object> updateSummary = o -> updateActiveFiltersSummary();
+        viewModel.getStatusFilter().observe(getViewLifecycleOwner(), updateSummary);
+        viewModel.getBuildingFilter().observe(getViewLifecycleOwner(), updateSummary);
+        viewModel.getLocationFilter().observe(getViewLifecycleOwner(), updateSummary);
+        viewModel.getDateFromFilter().observe(getViewLifecycleOwner(), updateSummary);
+        viewModel.getDateToFilter().observe(getViewLifecycleOwner(), updateSummary);
+    }
+
+    private void updateActiveFiltersSummary() {
+        String status = viewModel.getStatusFilter().getValue();
+        String building = viewModel.getBuildingFilter().getValue();
+        String location = viewModel.getLocationFilter().getValue();
+        Long dateFrom = viewModel.getDateFromFilter().getValue();
+        Long dateTo = viewModel.getDateToFilter().getValue();
+
+        List<String> parts = new ArrayList<>();
+        if (status != null) parts.add(getString(R.string.filter_active_status, status));
+        if (building != null) parts.add(getString(R.string.filter_active_building, building));
+        if (location != null) parts.add(getString(R.string.filter_active_location, location));
+        if (dateFrom != null && dateTo != null) {
+            SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String range = format.format(new Date(dateFrom)) + " - " + format.format(new Date(dateTo));
+            parts.add(getString(R.string.filter_active_date, range));
+        }
+
+        if (parts.isEmpty()) {
+            textActiveFilters.setVisibility(View.GONE);
+        } else {
+            textActiveFilters.setText(android.text.TextUtils.join(" | ", parts));
+            textActiveFilters.setVisibility(View.VISIBLE);
+        }
     }
 
     private void onInspectionsChanged(Resource<List<InspectionEntity>> resource) {

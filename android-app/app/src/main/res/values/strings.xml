@@ -71,6 +71,10 @@
     <string name="filter_clear">Limpiar</string>
     <string name="filter_date_hint">Seleccionar rango de fechas</string>
     <string name="filter_all">Todos</string>
+    <string name="filter_active_status">Estado: %s</string>
+    <string name="filter_active_building">Edificio: %s</string>
+    <string name="filter_active_location">Ubicación: %s</string>
+    <string name="filter_active_date">Fecha: %s</string>
     <string name="inspections_loading">Cargando inspecciones…</string>
 
     <!-- Inspections -->

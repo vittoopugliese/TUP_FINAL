@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/filter_building">
 
-                <AutoCompleteTextView
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/input_filter_building"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -87,7 +87,7 @@
                 android:layout_marginTop="8dp"
                 android:hint="@string/filter_location">
 
-                <AutoCompleteTextView
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/input_filter_location"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -110,7 +110,7 @@
                 android:layout_marginTop="8dp"
                 android:hint="@string/filter_status">
 
-                <AutoCompleteTextView
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/input_filter_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -144,6 +144,20 @@
     </com.google.android.material.card.MaterialCardView>
 
     <TextView
+        android:id="@+id/text_active_filters"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_filter_panel"
+        tools:text="Estado: PENDING | Edificio: B1"
+        tools:visibility="visible" />
+
+    <TextView
         android:id="@+id/text_inspections_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -153,7 +167,7 @@
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_filter_panel"
+        app:layout_constraintTop_toBottomOf="@id/text_active_filters"
         tools:text="Inspecciones (3)" />
 
     <androidx.recyclerview.widget.RecyclerView
