@@ -1,11 +1,16 @@
 package com.inspections.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 /**
  * DTO para agregar una asignacion a una inspeccion.
  */
 public class AssignmentRequest {
 
+    @NotBlank(message = "userEmail is required")
     private String userEmail;
+
+    @NotBlank(message = "role is required")
     private String role;
 
     public AssignmentRequest() {}

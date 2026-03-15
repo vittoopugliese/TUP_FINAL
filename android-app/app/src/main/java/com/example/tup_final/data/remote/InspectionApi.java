@@ -2,6 +2,8 @@ package com.example.tup_final.data.remote;
 
 import com.example.tup_final.data.remote.dto.AssignmentRequest;
 import com.example.tup_final.data.remote.dto.AssignmentResponse;
+import com.example.tup_final.data.remote.dto.CreateInspectionRequest;
+import com.example.tup_final.data.remote.dto.CreateInspectionResponse;
 import com.example.tup_final.data.remote.dto.InspectionListResponse;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import retrofit2.http.Path;
  *
  * Rutas:
  * - GET /api/inspections – Lista de inspecciones
+ * - POST /api/inspections – Crear inspección building-wide
  * - GET /api/inspections/{id}/assignments – Asignaciones de una inspeccion
  * - POST /api/inspections/{id}/assignments – Agregar asignacion
  * - DELETE /api/inspections/{id}/assignments/{email} – Remover asignacion
@@ -26,6 +29,9 @@ public interface InspectionApi {
 
     @GET("inspections")
     Call<List<InspectionListResponse>> getInspections();
+
+    @POST("inspections")
+    Call<CreateInspectionResponse> createInspection(@Body CreateInspectionRequest request);
 
     @GET("inspections/{id}/assignments")
     Call<List<AssignmentResponse>> getAssignments(@Path("id") String inspectionId);

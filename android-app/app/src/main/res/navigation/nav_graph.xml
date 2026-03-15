@@ -41,7 +41,16 @@
         <action
             android:id="@+id/action_home_to_inspectionDetail"
             app:destination="@id/inspectionDetailFragment" />
+        <action
+            android:id="@+id/action_home_to_createInspection"
+            app:destination="@id/createInspectionFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/createInspectionFragment"
+        android:name="com.example.tup_final.ui.createinspection.CreateInspectionFragment"
+        android:label="@string/create_inspection_title"
+        tools:layout="@layout/fragment_create_inspection" />
 
     <fragment
         android:id="@+id/inspectionLocationsFragment"

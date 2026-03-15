@@ -197,4 +197,18 @@
     <string name="move_device_confirm">Mover</string>
     <string name="move_device_success">Dispositivo movido correctamente</string>
     <string name="device_tests_completed">Completed %1$d of %2$d tests.</string>
+
+    <!-- Create Inspection -->
+    <string name="create_inspection_title">Nueva Inspección</string>
+    <string name="create_inspection_building_hint">Seleccionar edificio</string>
+    <string name="create_inspection_type_hint">Tipo</string>
+    <string name="create_inspection_date_hint">Fecha programada</string>
+    <string name="create_inspection_template_hint">Plantilla</string>
+    <string name="create_inspection_notes_hint">Notas (opcional)</string>
+    <string name="create_inspection_inspector_hint">Email del inspector</string>
+    <string name="create_inspection_summary">Este edificio heredará %1$d ubicaciones, %2$d zonas, %3$d dispositivos y %4$d tests.</string>
+    <string name="create_inspection_summary_loading">Cargando resumen…</string>
+    <string name="create_inspection_success">Inspección creada correctamente</string>
+    <string name="btn_create_inspection">Crear Inspección</string>
+    <string name="fab_create_inspection">Nueva inspección</string>
 </resources>

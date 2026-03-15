@@ -78,7 +78,20 @@ public class HomeFragment extends Fragment {
         setupRecyclerView(view);
         setupFilterPanel(view);
         setupFilterCollapse(view);
+        setupFab(view);
         observeData();
+        setupFragmentResultListener();
+    }
+
+    private void setupFab(View view) {
+        view.findViewById(R.id.fab_create_inspection).setOnClickListener(v ->
+                NavHostFragment.findNavController(HomeFragment.this)
+                        .navigate(R.id.action_home_to_createInspection));
+    }
+
+    private void setupFragmentResultListener() {
+        getParentFragmentManager().setFragmentResultListener("create_inspection_success",
+                getViewLifecycleOwner(), (requestKey, result) -> viewModel.loadInspections());
     }
 
     private void setupFilterCollapse(View view) {

@@ -4,6 +4,25 @@
 -- El usuario admin se crea en DataInitializer (admin@inspections.com)
 -- ============================================================
 
+-- Buildings (catálogo de edificios para inspecciones building-wide)
+INSERT INTO buildings (id, name, details, created_at, updated_at) VALUES
+('bld-001', 'Hospital Central', 'Hospital general con sala de emergencias y quirófanos', '2025-01-10 08:00:00', '2025-01-10 08:00:00'),
+('bld-002', 'Depósito Logístico Norte', 'Almacén y nave de distribución', '2025-01-15 09:00:00', '2025-01-15 09:00:00'),
+('bld-003', 'Clínica Sur', 'Clínica con bloque quirúrgico e internación', '2025-01-20 10:00:00', '2025-01-20 10:00:00'),
+('bld-004', 'Colegio San Martín', 'Institución educativa primaria y secundaria', '2025-01-25 08:00:00', '2025-01-25 08:00:00'),
+('bld-005', 'Torre Oficinas Centro', 'Edificio corporativo 15 pisos', '2025-02-01 09:00:00', '2025-02-01 09:00:00'),
+('bld-006', 'Shopping Plaza Norte', 'Centro comercial con 120 locales', '2025-02-05 10:00:00', '2025-02-05 10:00:00'),
+('bld-007', 'Laboratorio Farmacéutico', 'Planta de producción y control de calidad', '2025-02-10 08:00:00', '2025-02-10 08:00:00'),
+('bld-008', 'Planta Industrial Este', 'Fábrica y almacén de materias primas', '2025-02-15 09:00:00', '2025-02-15 09:00:00'),
+('bld-009', 'Hotel Gran Vista', 'Hotel 4 estrellas 200 habitaciones', '2025-02-20 10:00:00', '2025-02-20 10:00:00'),
+('bld-010', 'Universidad Tecnológica', 'Campus con laboratorios y talleres', '2025-02-25 08:00:00', '2025-02-25 08:00:00');
+
+-- Inspection templates (catálogo para tipos de inspección)
+INSERT INTO inspection_templates (id, code, name, description, enabled, sort_order) VALUES
+('tpl-001', 'DAILY_STANDARD', 'Plantilla diaria estándar', 'Inspección diaria de equipos críticos', TRUE, 1),
+('tpl-002', 'WEEKLY_STANDARD', 'Plantilla semanal estándar', 'Inspección semanal completa', TRUE, 2),
+('tpl-003', 'ANNUAL_FULL', 'Plantilla anual completa', 'Inspección anual exhaustiva', TRUE, 3);
+
 -- Locations (building_id es ref lógica)
 INSERT INTO locations (id, building_id, name, details, created_at, updated_at) VALUES
 ('loc-001', 'bld-001', 'Sala de emergencias', 'Sala principal de emergencias - Planta Baja', '2025-01-10 08:00:00', '2025-01-10 08:00:00'),
@@ -13,7 +32,23 @@ INSERT INTO locations (id, building_id, name, details, created_at, updated_at) V
 ('loc-005', 'bld-002', 'Nave principal', 'Nave de almacenamiento - zona A', '2025-01-15 09:00:00', '2025-01-15 09:00:00'),
 ('loc-006', 'bld-002', 'Sala de máquinas', 'Equipos HVAC y bombas', '2025-01-15 09:00:00', '2025-01-15 09:00:00'),
 ('loc-007', 'bld-003', 'Quirófanos', 'Bloque quirúrgico - 3 salas', '2025-01-20 10:00:00', '2025-01-20 10:00:00'),
-('loc-008', 'bld-003', 'Área de internación', 'Habitaciones 101-120', '2025-01-20 10:00:00', '2025-01-20 10:00:00');
+('loc-008', 'bld-003', 'Área de internación', 'Habitaciones 101-120', '2025-01-20 10:00:00', '2025-01-20 10:00:00'),
+('loc-009', 'bld-004', 'Aulas bloque A', 'Aulas 1-12 planta baja', '2025-01-25 08:00:00', '2025-01-25 08:00:00'),
+('loc-010', 'bld-004', 'Laboratorio informática', 'Sala de computación', '2025-01-25 08:00:00', '2025-01-25 08:00:00'),
+('loc-011', 'bld-004', 'Gimnasio', 'Instalaciones deportivas', '2025-01-25 08:00:00', '2025-01-25 08:00:00'),
+('loc-012', 'bld-005', 'Piso 1 recepción', 'Hall y recepción', '2025-02-01 09:00:00', '2025-02-01 09:00:00'),
+('loc-013', 'bld-005', 'Piso 5 oficinas', 'Área administrativa', '2025-02-01 09:00:00', '2025-02-01 09:00:00'),
+('loc-014', 'bld-005', 'Sótano estacionamiento', 'Estacionamiento y sala de bombas', '2025-02-01 09:00:00', '2025-02-01 09:00:00'),
+('loc-015', 'bld-006', 'Pasillo principal', 'Corredor central comercial', '2025-02-05 10:00:00', '2025-02-05 10:00:00'),
+('loc-016', 'bld-006', 'Sala de máquinas', 'HVAC y equipos', '2025-02-05 10:00:00', '2025-02-05 10:00:00'),
+('loc-017', 'bld-007', 'Sala limpia', 'Área de producción estéril', '2025-02-10 08:00:00', '2025-02-10 08:00:00'),
+('loc-018', 'bld-007', 'Almacén de reactivos', 'Depósito controlado', '2025-02-10 08:00:00', '2025-02-10 08:00:00'),
+('loc-019', 'bld-008', 'Nave de producción', 'Línea de montaje', '2025-02-15 09:00:00', '2025-02-15 09:00:00'),
+('loc-020', 'bld-008', 'Sala de compresores', 'Equipos neumáticos', '2025-02-15 09:00:00', '2025-02-15 09:00:00'),
+('loc-021', 'bld-009', 'Recepción hotel', 'Lobby y check-in', '2025-02-20 10:00:00', '2025-02-20 10:00:00'),
+('loc-022', 'bld-009', 'Piso 3 habitaciones', 'Habitaciones 301-320', '2025-02-20 10:00:00', '2025-02-20 10:00:00'),
+('loc-023', 'bld-010', 'Laboratorio electrónica', 'Taller y laboratorio', '2025-02-25 08:00:00', '2025-02-25 08:00:00'),
+('loc-024', 'bld-010', 'Biblioteca', 'Sala de lectura y depósito', '2025-02-25 08:00:00', '2025-02-25 08:00:00');
 
 -- Device types (global catalog: extintores, detectores, rociadores, etc.)
 INSERT INTO device_types (id, code, name, category, enabled, sort_order) VALUES
@@ -70,7 +105,24 @@ INSERT INTO zones (id, location_id, name, details) VALUES
 ('zone-006', 'loc-005', 'Rociadores', 'Sistema de rociadores automáticos'),
 ('zone-007', 'loc-006', 'Bombas', 'Bombas de incendio y jockey'),
 ('zone-008', 'loc-007', 'Quirófano 1', 'Sala principal con equipos médicos'),
-('zone-009', 'loc-008', 'Pasillo central', 'Detectores y extintores');
+('zone-009', 'loc-008', 'Pasillo central', 'Detectores y extintores'),
+('zone-010', 'loc-009', 'Aula 1-4', 'Zona norte aulas'),
+('zone-011', 'loc-009', 'Aula 5-8', 'Zona sur aulas'),
+('zone-012', 'loc-010', 'Sala servidores', 'Rack y equipos'),
+('zone-013', 'loc-011', 'Cancha', 'Área deportiva'),
+('zone-014', 'loc-012', 'Hall principal', 'Recepción y detectores'),
+('zone-015', 'loc-013', 'Oficinas abiertas', 'Cubículos'),
+('zone-016', 'loc-014', 'Bombas', 'Sala de bombas incendio'),
+('zone-017', 'loc-015', 'Pasillo nivel 1', 'Corredor comercial'),
+('zone-018', 'loc-016', 'HVAC', 'Equipos climatización'),
+('zone-019', 'loc-017', 'Línea 1', 'Producción estéril'),
+('zone-020', 'loc-018', 'Estanterías A', 'Almacenamiento'),
+('zone-021', 'loc-019', 'Línea montaje', 'Estación de trabajo'),
+('zone-022', 'loc-020', 'Compresores', 'Sala de equipos'),
+('zone-023', 'loc-021', 'Lobby', 'Recepción y extintores'),
+('zone-024', 'loc-022', 'Pasillo 3', 'Corredor habitaciones'),
+('zone-025', 'loc-023', 'Taller', 'Bancos de trabajo'),
+('zone-026', 'loc-024', 'Sala lectura', 'Área de estudio');
 
 -- Devices (FK: zone_id -> zones, location_id -> locations)
 INSERT INTO devices (id, zone_id, location_id, building_id, manufacturer_id, model_id, device_type_id, device_category, name, description, device_serial_number, installation_date, expiration_date, enabled, attribute_ids, created_at, updated_at) VALUES
@@ -90,7 +142,31 @@ INSERT INTO devices (id, zone_id, location_id, building_id, manufacturer_id, mod
 ('dev-014', 'zone-005', 'loc-004', 'bld-001', 'mfr-001', 'mod-001', 'dt-001', 'FACP_DEVICE', 'Panel secundario oficinas', 'Panel de alarma zona oficinas', 1003, '2024-05-01', '2026-05-01', TRUE, NULL, '2025-01-10 08:00:00', '2025-01-10 08:00:00'),
 ('dev-015', 'zone-006', 'loc-005', 'bld-002', 'mfr-005', 'mod-006', 'dt-006', 'SPRINKLER_DEVICE', 'Rociador cabeza 2', 'Rociador tipo montante nave A', 6002, '2024-04-15', '2029-04-15', TRUE, NULL, '2025-01-15 09:00:00', '2025-01-15 09:00:00'),
 ('dev-016', 'zone-008', 'loc-007', 'bld-003', 'mfr-003', 'mod-009', 'dt-008', 'FA_FIELD_DEVICE', 'Monitor anestesia Q1', 'Monitor gases anestésicos quirófano 1', 7003, '2024-09-01', '2028-09-01', TRUE, NULL, '2025-01-20 10:00:00', '2025-01-20 10:00:00'),
-('dev-017', 'zone-009', 'loc-008', 'bld-003', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor pasillo internación', 'Extintor ABC 4kg pasillo central', 5003, '2024-10-01', '2025-10-01', TRUE, NULL, '2025-01-20 10:00:00', '2025-01-20 10:00:00');
+('dev-017', 'zone-009', 'loc-008', 'bld-003', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor pasillo internación', 'Extintor ABC 4kg pasillo central', 5003, '2024-10-01', '2025-10-01', TRUE, NULL, '2025-01-20 10:00:00', '2025-01-20 10:00:00'),
+('dev-018', 'zone-010', 'loc-009', 'bld-004', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor aula 1', 'Extintor ABC 6kg', 5004, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-01-25 08:00:00', '2025-01-25 08:00:00'),
+('dev-019', 'zone-010', 'loc-009', 'bld-004', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector aula 2', 'Detector fotoeléctrico', 4004, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-01-25 08:00:00', '2025-01-25 08:00:00'),
+('dev-020', 'zone-011', 'loc-009', 'bld-004', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor aula 6', 'Extintor ABC 6kg', 5005, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-01-25 08:00:00', '2025-01-25 08:00:00'),
+('dev-021', 'zone-012', 'loc-010', 'bld-004', 'mfr-001', 'mod-001', 'dt-001', 'FACP_DEVICE', 'Panel informática', 'Panel de alarma sala', 1004, '2024-08-01', '2026-08-01', TRUE, NULL, '2025-01-25 08:00:00', '2025-01-25 08:00:00'),
+('dev-022', 'zone-014', 'loc-012', 'bld-005', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector recepción', 'Detector hall principal', 4005, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-01 09:00:00', '2025-02-01 09:00:00'),
+('dev-023', 'zone-014', 'loc-012', 'bld-005', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor recepción', 'Extintor ABC 6kg', 5006, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-02-01 09:00:00', '2025-02-01 09:00:00'),
+('dev-024', 'zone-015', 'loc-013', 'bld-005', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector oficinas', 'Detector zona abierta', 4006, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-01 09:00:00', '2025-02-01 09:00:00'),
+('dev-025', 'zone-016', 'loc-014', 'bld-005', 'mfr-002', 'mod-002', 'dt-002', 'JOCKEY_PUMP', 'Jockey Pump torre', 'Bomba mantenimiento presión', 2003, '2024-07-01', '2025-07-01', TRUE, NULL, '2025-02-01 09:00:00', '2025-02-01 09:00:00'),
+('dev-026', 'zone-017', 'loc-015', 'bld-006', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector pasillo shopping', 'Detector corredor', 4007, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-05 10:00:00', '2025-02-05 10:00:00'),
+('dev-027', 'zone-017', 'loc-015', 'bld-006', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor pasillo', 'Extintor ABC 6kg', 5007, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-02-05 10:00:00', '2025-02-05 10:00:00'),
+('dev-028', 'zone-018', 'loc-016', 'bld-006', 'mfr-002', 'mod-002', 'dt-002', 'JOCKEY_PUMP', 'Jockey Pump shopping', 'Bomba HVAC', 2004, '2024-07-01', '2025-07-01', TRUE, NULL, '2025-02-05 10:00:00', '2025-02-05 10:00:00'),
+('dev-029', 'zone-019', 'loc-017', 'bld-007', 'mfr-001', 'mod-001', 'dt-001', 'FACP_DEVICE', 'Panel sala limpia', 'Panel área estéril', 1005, '2024-08-01', '2026-08-01', TRUE, NULL, '2025-02-10 08:00:00', '2025-02-10 08:00:00'),
+('dev-030', 'zone-019', 'loc-017', 'bld-007', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor sala limpia', 'Extintor CO2', 5008, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-02-10 08:00:00', '2025-02-10 08:00:00'),
+('dev-031', 'zone-020', 'loc-018', 'bld-007', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector almacén', 'Detector reactivos', 4008, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-10 08:00:00', '2025-02-10 08:00:00'),
+('dev-032', 'zone-021', 'loc-019', 'bld-008', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor línea 1', 'Extintor ABC 9kg', 5009, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-02-15 09:00:00', '2025-02-15 09:00:00'),
+('dev-033', 'zone-021', 'loc-019', 'bld-008', 'mfr-005', 'mod-006', 'dt-006', 'SPRINKLER_DEVICE', 'Rociador cabeza línea', 'Rociador pendiente', 6003, '2024-04-15', '2029-04-15', TRUE, NULL, '2025-02-15 09:00:00', '2025-02-15 09:00:00'),
+('dev-034', 'zone-022', 'loc-020', 'bld-008', 'mfr-001', 'mod-001', 'dt-010', 'PUMP_CONTROLLER', 'Controlador compresores', 'Controlador sala neumática', 10001, '2024-05-01', '2026-05-01', TRUE, NULL, '2025-02-15 09:00:00', '2025-02-15 09:00:00'),
+('dev-035', 'zone-023', 'loc-021', 'bld-009', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor lobby', 'Extintor ABC 6kg', 5010, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-02-20 10:00:00', '2025-02-20 10:00:00'),
+('dev-036', 'zone-023', 'loc-021', 'bld-009', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector lobby', 'Detector recepción', 4009, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-20 10:00:00', '2025-02-20 10:00:00'),
+('dev-037', 'zone-024', 'loc-022', 'bld-009', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector pasillo 3', 'Detector habitaciones', 4010, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-20 10:00:00', '2025-02-20 10:00:00'),
+('dev-038', 'zone-024', 'loc-022', 'bld-009', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor pasillo 3', 'Extintor ABC 4kg', 5011, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-02-20 10:00:00', '2025-02-20 10:00:00'),
+('dev-039', 'zone-025', 'loc-023', 'bld-010', 'mfr-001', 'mod-001', 'dt-001', 'FACP_DEVICE', 'Panel laboratorio', 'Panel taller electrónica', 1006, '2024-08-01', '2026-08-01', TRUE, NULL, '2025-02-25 08:00:00', '2025-02-25 08:00:00'),
+('dev-040', 'zone-025', 'loc-023', 'bld-010', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor taller', 'Extintor ABC 6kg', 5012, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-02-25 08:00:00', '2025-02-25 08:00:00'),
+('dev-041', 'zone-026', 'loc-024', 'bld-010', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector biblioteca', 'Detector sala lectura', 4011, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-25 08:00:00', '2025-02-25 08:00:00');
 
 -- Inspections (building_id y location_id son refs lógicas)
 INSERT INTO inspections (id, building_id, location_id, type, status, scheduled_date, approval_date, result, notes, signer, signed, sign_date, started_at, inspection_report_id, inspection_template_id, cover_page_id, created_at, updated_at) VALUES

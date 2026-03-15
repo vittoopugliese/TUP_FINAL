@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 
 import com.example.tup_final.data.remote.ApiService;
 import com.example.tup_final.data.remote.AuthApi;
+import com.example.tup_final.data.remote.BuildingApi;
 import com.example.tup_final.data.remote.InspectionApi;
+import com.example.tup_final.data.remote.InspectionTemplateApi;
 import com.example.tup_final.data.remote.LocationApi;
 import com.example.tup_final.data.remote.DeviceTypesApi;
 import com.example.tup_final.data.remote.ZonesApi;
@@ -81,6 +83,18 @@ public final class AppModule {
     @Singleton
     public InspectionApi provideInspectionApi(Retrofit retrofit) {
         return retrofit.create(InspectionApi.class);
+    }
+
+    @Provides
+    @Singleton
+    public BuildingApi provideBuildingApi(Retrofit retrofit) {
+        return retrofit.create(BuildingApi.class);
+    }
+
+    @Provides
+    @Singleton
+    public InspectionTemplateApi provideInspectionTemplateApi(Retrofit retrofit) {
+        return retrofit.create(InspectionTemplateApi.class);
     }
 
     @Provides
