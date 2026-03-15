@@ -4,6 +4,16 @@
 -- Adapted for H2 in-memory database with backend-specific fields
 -- ============================================================
 
+-- Buildings (catalog for building-wide inspections)
+CREATE TABLE IF NOT EXISTS buildings (
+    id VARCHAR(36) PRIMARY KEY NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    details TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_building_name ON buildings(name);
+
 -- Users (backend adds passwordHash and enabled for authentication)
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) PRIMARY KEY NOT NULL,
@@ -32,7 +42,18 @@ CREATE TABLE IF NOT EXISTS locations (
 CREATE INDEX IF NOT EXISTS idx_location_building ON locations(building_id);
 CREATE INDEX IF NOT EXISTS idx_location_name ON locations(name);
 
--- Inspections (buildingId and locationId are logical refs)
+-- Inspection templates (catalog for inspection types)
+CREATE TABLE IF NOT EXISTS inspection_templates (
+    id VARCHAR(36) PRIMARY KEY NOT NULL,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INT NOT NULL DEFAULT 0
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_inspection_template_code ON inspection_templates(code);
+
+-- Inspections (buildingId and locationId are logical refs; locationId null for building-wide)
 CREATE TABLE IF NOT EXISTS inspections (
     id VARCHAR(36) PRIMARY KEY NOT NULL,
     building_id VARCHAR(36),

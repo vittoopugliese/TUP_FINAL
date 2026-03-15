@@ -83,6 +83,12 @@ public class HomeFragment extends Fragment {
         setupFragmentResultListener();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        viewModel.loadInspections();
+    }
+
     private void setupFab(View view) {
         view.findViewById(R.id.fab_create_inspection).setOnClickListener(v ->
                 NavHostFragment.findNavController(HomeFragment.this)
@@ -90,7 +96,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupFragmentResultListener() {
-        getParentFragmentManager().setFragmentResultListener("create_inspection_success",
+        requireActivity().getSupportFragmentManager().setFragmentResultListener("create_inspection_success",
                 getViewLifecycleOwner(), (requestKey, result) -> viewModel.loadInspections());
     }
 

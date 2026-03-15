@@ -13,7 +13,9 @@ import com.example.tup_final.data.local.DeviceDao;
 import com.example.tup_final.data.local.TestDao;
 import com.example.tup_final.data.local.ZoneDao;
 import com.example.tup_final.data.remote.DeviceTypesApi;
+import com.example.tup_final.data.remote.LocationApi;
 import com.example.tup_final.data.remote.ZonesApi;
+import com.example.tup_final.data.remote.dto.LocationListResponse;
 import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
 import com.example.tup_final.data.remote.dto.DeviceWithTestsResponse;
 import com.example.tup_final.data.remote.dto.DeviceTypeResponse;
@@ -44,6 +46,7 @@ import retrofit2.Response;
 public class InspectionTestsRepository {
 
     private final ZonesApi zonesApi;
+    private final LocationApi locationApi;
     private final DeviceTypesApi deviceTypesApi;
     private final ZoneDao zoneDao;
     private final DeviceDao deviceDao;
@@ -52,13 +55,84 @@ public class InspectionTestsRepository {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
-    public InspectionTestsRepository(ZonesApi zonesApi, DeviceTypesApi deviceTypesApi,
-                                   ZoneDao zoneDao, DeviceDao deviceDao, TestDao testDao) {
+    public InspectionTestsRepository(ZonesApi zonesApi, LocationApi locationApi,
+                                    DeviceTypesApi deviceTypesApi,
+                                    ZoneDao zoneDao, DeviceDao deviceDao, TestDao testDao) {
         this.zonesApi = zonesApi;
+        this.locationApi = locationApi;
         this.deviceTypesApi = deviceTypesApi;
         this.zoneDao = zoneDao;
         this.deviceDao = deviceDao;
         this.testDao = testDao;
+    }
+
+    /**
+     * Obtiene todos los devices de la inspección como lista plana.
+     * Si locationId está definido, usa esa location. Si no (building-wide), obtiene
+     * todas las locations del building y agrega devices de cada una.
+     */
+    public LiveData<Resource<List<DeviceEntity>>> getDevicesForInspection(
+            String inspectionId, String locationId, String buildingId) {
+        MutableLiveData<Resource<List<DeviceEntity>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                List<String> locationIds = new ArrayList<>();
+                if (locationId != null && !locationId.isEmpty()) {
+                    locationIds.add(locationId);
+                } else if (buildingId != null && !buildingId.isEmpty()) {
+                    Response<List<LocationListResponse>> locResponse =
+                            locationApi.getLocations(buildingId).execute();
+                    if (locResponse.isSuccessful() && locResponse.body() != null) {
+                        for (LocationListResponse loc : locResponse.body()) {
+                            if (loc.getId() != null) {
+                                locationIds.add(loc.getId());
+                            }
+                        }
+                    }
+                }
+
+                List<DeviceEntity> allDevices = new ArrayList<>();
+                for (String locId : locationIds) {
+                    Response<List<ZoneWithDevicesResponse>> response =
+                            zonesApi.getZonesWithDevicesAndTests(locId, inspectionId).execute();
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<DeviceEntity> flat = flattenZonesToDevices(response.body(), buildingId);
+                        allDevices.addAll(flat);
+                    }
+                }
+
+                mainHandler.post(() -> result.setValue(Resource.success(allDevices)));
+            } catch (Exception e) {
+                mainHandler.post(() -> result.setValue(Resource.error(
+                        e.getMessage() != null ? e.getMessage() : "Error al cargar dispositivos")));
+            }
+        });
+
+        return result;
+    }
+
+    private List<DeviceEntity> flattenZonesToDevices(List<ZoneWithDevicesResponse> zones,
+                                                     String buildingId) {
+        List<DeviceEntity> result = new ArrayList<>();
+        for (ZoneWithDevicesResponse z : zones) {
+            if (z.getDevices() != null) {
+                for (DeviceWithTestsResponse d : z.getDevices()) {
+                    DeviceEntity de = new DeviceEntity();
+                    de.id = d.getId();
+                    de.zoneId = d.getZoneId();
+                    de.locationId = d.getLocationId();
+                    de.buildingId = buildingId;
+                    de.name = d.getName();
+                    de.deviceCategory = d.getDeviceCategory();
+                    de.deviceSerialNumber = d.getDeviceSerialNumber();
+                    de.enabled = d.isEnabled();
+                    result.add(de);
+                }
+            }
+        }
+        return result;
     }
 
     /**

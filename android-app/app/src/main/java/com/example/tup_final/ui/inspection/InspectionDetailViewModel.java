@@ -10,6 +10,7 @@ import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.repository.InspectionRepository;
+import com.example.tup_final.data.repository.InspectionTestsRepository;
 import com.example.tup_final.util.Resource;
 
 import java.util.ArrayList;
@@ -25,13 +26,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class InspectionDetailViewModel extends ViewModel {
 
     private final InspectionRepository inspectionRepository;
+    private final InspectionTestsRepository inspectionTestsRepository;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private static final String ROLE_INSPECTOR = "INSPECTOR";
     private static final String ROLE_OPERATOR = "OPERATOR";
 
     private MutableLiveData<Resource<InspectionEntity>> inspection;
-    private MutableLiveData<Resource<List<DeviceEntity>>> devices;
+    private final MediatorLiveData<Resource<List<DeviceEntity>>> devices = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<InspectionEntity>> startResult = new MediatorLiveData<>();
 
     private final MediatorLiveData<Resource<List<InspectionAssignmentEntity>>> assignments = new MediatorLiveData<>();
@@ -43,8 +45,10 @@ public class InspectionDetailViewModel extends ViewModel {
     private boolean startResultNavigationHandled = false;
 
     @Inject
-    public InspectionDetailViewModel(InspectionRepository inspectionRepository) {
+    public InspectionDetailViewModel(InspectionRepository inspectionRepository,
+                                    InspectionTestsRepository inspectionTestsRepository) {
         this.inspectionRepository = inspectionRepository;
+        this.inspectionTestsRepository = inspectionTestsRepository;
     }
 
     public void loadInspection(String inspectionId) {
@@ -70,9 +74,21 @@ public class InspectionDetailViewModel extends ViewModel {
         return inspection;
     }
 
-    public void loadDevices(String buildingId) {
-        devices = (MutableLiveData<Resource<List<DeviceEntity>>>)
-                inspectionRepository.getDevicesByBuildingId(buildingId);
+    /**
+     * Carga devices de la inspección usando locationId + inspectionId.
+     * Si locationId es null (building-wide), usa buildingId para obtener
+     * todas las locations y agrega devices de cada una.
+     */
+    public void loadDevices(String inspectionId, String locationId, String buildingId) {
+        LiveData<Resource<List<DeviceEntity>>> source =
+                inspectionTestsRepository.getDevicesForInspection(
+                        inspectionId, locationId, buildingId);
+        devices.addSource(source, resource -> {
+            devices.setValue(resource);
+            if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
+                devices.removeSource(source);
+            }
+        });
     }
 
     public LiveData<Resource<List<DeviceEntity>>> getDevices() {

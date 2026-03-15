@@ -11,13 +11,23 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.tup_final.R;
+import com.example.tup_final.data.entity.DeviceEntity;
+import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.databinding.FragmentDevicesBinding;
 import com.example.tup_final.util.Resource;
+
+import java.util.List;
+
+import static com.example.tup_final.util.Resource.Status.ERROR;
+import static com.example.tup_final.util.Resource.Status.LOADING;
+import static com.example.tup_final.util.Resource.Status.SUCCESS;
 
 public class DevicesFragment extends Fragment {
 
     private FragmentDevicesBinding binding;
     private DeviceAdapter adapter;
+    private boolean devicesLoadTriggered = false;
 
     @Nullable
     @Override
@@ -39,45 +49,54 @@ public class DevicesFragment extends Fragment {
         InspectionDetailViewModel viewModel =
                 new ViewModelProvider(requireParentFragment()).get(InspectionDetailViewModel.class);
 
+        viewModel.getDevices().observe(getViewLifecycleOwner(), this::onDevicesChanged);
+
         viewModel.getInspection().observe(getViewLifecycleOwner(), resource -> {
-            if (resource.getStatus() == Resource.Status.SUCCESS
+            if (resource != null
+                    && resource.getStatus() == Resource.Status.SUCCESS
                     && resource.getData() != null
-                    && resource.getData().buildingId != null) {
-                viewModel.loadDevices(resource.getData().buildingId);
-                observeDevices(viewModel);
+                    && !devicesLoadTriggered) {
+                InspectionEntity inv = resource.getData();
+                String inspectionId = viewModel.getCurrentInspectionId();
+                if (inspectionId != null && (inv.locationId != null || inv.buildingId != null)) {
+                    devicesLoadTriggered = true;
+                    viewModel.loadDevices(inspectionId, inv.locationId, inv.buildingId);
+                }
             }
         });
     }
 
-    private void observeDevices(InspectionDetailViewModel viewModel) {
-        if (viewModel.getDevices() == null) return;
+    private void onDevicesChanged(Resource<List<DeviceEntity>> resource) {
+        if (resource == null) return;
 
-        viewModel.getDevices().observe(getViewLifecycleOwner(), resource -> {
-            switch (resource.getStatus()) {
-                case LOADING:
-                    binding.progressDevices.setVisibility(View.VISIBLE);
+        switch (resource.getStatus()) {
+            case LOADING:
+                binding.progressDevices.setVisibility(View.VISIBLE);
+                binding.textEmpty.setVisibility(View.GONE);
+                binding.recyclerDevices.setVisibility(View.GONE);
+                break;
+
+            case SUCCESS:
+                binding.progressDevices.setVisibility(View.GONE);
+                List<DeviceEntity> data = resource.getData();
+                if (data != null && !data.isEmpty()) {
+                    adapter.submitList(data);
+                    binding.recyclerDevices.setVisibility(View.VISIBLE);
                     binding.textEmpty.setVisibility(View.GONE);
-                    break;
-
-                case SUCCESS:
-                    binding.progressDevices.setVisibility(View.GONE);
-                    if (resource.getData() != null && !resource.getData().isEmpty()) {
-                        adapter.submitList(resource.getData());
-                        binding.recyclerDevices.setVisibility(View.VISIBLE);
-                        binding.textEmpty.setVisibility(View.GONE);
-                    } else {
-                        binding.recyclerDevices.setVisibility(View.GONE);
-                        binding.textEmpty.setVisibility(View.VISIBLE);
-                    }
-                    break;
-
-                case ERROR:
-                    binding.progressDevices.setVisibility(View.GONE);
+                } else {
+                    binding.recyclerDevices.setVisibility(View.GONE);
                     binding.textEmpty.setVisibility(View.VISIBLE);
-                    binding.textEmpty.setText(resource.getMessage());
-                    break;
-            }
-        });
+                    binding.textEmpty.setText(R.string.devices_empty);
+                }
+                break;
+
+            case ERROR:
+                binding.progressDevices.setVisibility(View.GONE);
+                binding.recyclerDevices.setVisibility(View.GONE);
+                binding.textEmpty.setVisibility(View.VISIBLE);
+                binding.textEmpty.setText(resource.getMessage());
+                break;
+        }
     }
 
     @Override
