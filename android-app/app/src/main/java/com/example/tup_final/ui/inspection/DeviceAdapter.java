@@ -65,6 +65,14 @@ public class DeviceAdapter extends ListAdapter<DeviceEntity, DeviceAdapter.Devic
                             ? device.deviceCategory.replace("_", " ")
                             : "—");
 
+            if (device.zoneName != null && !device.zoneName.isEmpty()) {
+                binding.textDeviceZone.setVisibility(android.view.View.VISIBLE);
+                binding.textDeviceZone.setText(
+                        itemView.getContext().getString(R.string.device_zone_format, device.zoneName));
+            } else {
+                binding.textDeviceZone.setVisibility(android.view.View.GONE);
+            }
+
             if (device.deviceSerialNumber != null) {
                 binding.textSerialNumber.setText(
                         itemView.getContext().getString(R.string.device_serial_format,

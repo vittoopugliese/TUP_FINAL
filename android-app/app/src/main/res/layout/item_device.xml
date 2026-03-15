@@ -36,7 +36,7 @@
             app:layout_constraintStart_toEndOf="@id/view_status_indicator"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Category -->
+        <!-- Category / Type -->
         <TextView
             android:id="@+id/text_device_category"
             android:layout_width="0dp"
@@ -50,6 +50,22 @@
             app:layout_constraintStart_toEndOf="@id/view_status_indicator"
             app:layout_constraintTop_toBottomOf="@id/text_device_name" />
 
+        <!-- Zone context (optional) -->
+        <TextView
+            android:id="@+id/text_device_zone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="2dp"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:visibility="gone"
+            tools:text="Zona: Sala emergencias"
+            tools:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/view_status_indicator"
+            app:layout_constraintTop_toBottomOf="@id/text_device_category" />
+
         <!-- Serial number -->
         <TextView
             android:id="@+id/text_serial_number"
@@ -62,7 +78,7 @@
             tools:text="S/N: 12345"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/view_status_indicator"
-            app:layout_constraintTop_toBottomOf="@id/text_device_category" />
+            app:layout_constraintTop_toBottomOf="@id/text_device_zone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

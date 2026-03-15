@@ -168,15 +168,15 @@ INSERT INTO devices (id, zone_id, location_id, building_id, manufacturer_id, mod
 ('dev-040', 'zone-025', 'loc-023', 'bld-010', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor taller', 'Extintor ABC 6kg', 5012, '2024-06-01', '2025-06-01', TRUE, NULL, '2025-02-25 08:00:00', '2025-02-25 08:00:00'),
 ('dev-041', 'zone-026', 'loc-024', 'bld-010', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector biblioteca', 'Detector sala lectura', 4011, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-25 08:00:00', '2025-02-25 08:00:00');
 
--- Inspections (building_id y location_id son refs lógicas)
+-- Inspections (building-wide: location_id NULL; building_id es ref lógica)
 INSERT INTO inspections (id, building_id, location_id, type, status, scheduled_date, approval_date, result, notes, signer, signed, sign_date, started_at, inspection_report_id, inspection_template_id, cover_page_id, created_at, updated_at) VALUES
-('insp-001', 'bld-001', 'loc-001', 'Weekly', 'IN_PROGRESS', '2025-03-15 08:00:00', NULL, NULL, 'Inspección semanal - Sala emergencias', NULL, FALSE, NULL, '2025-03-15 08:00:00', NULL, 'tpl-001', NULL, '2025-03-10 09:00:00', '2025-03-15 08:00:00'),
-('insp-002', 'bld-001', 'loc-002', 'Monthly', 'DONE_COMPLETED', '2025-03-01 09:00:00', '2025-03-01 16:00:00', 'SUCCESS', 'Inspección mensual - Sala bombas OK', 'María García', TRUE, '2025-03-01 16:00:00', '2025-03-01 09:00:00', 'rpt-001', 'tpl-002', NULL, '2025-02-25 09:00:00', '2025-03-01 16:00:00'),
-('insp-003', 'bld-001', 'loc-003', 'Weekly', 'PENDING', '2025-03-18 10:00:00', NULL, NULL, 'Pendiente - Corredor Norte', NULL, FALSE, NULL, NULL, NULL, 'tpl-001', NULL, '2025-03-12 09:00:00', '2025-03-12 09:00:00'),
-('insp-004', 'bld-002', 'loc-005', 'Monthly', 'PENDING', '2025-03-20 08:00:00', NULL, NULL, 'Inspección mensual depósito', NULL, FALSE, NULL, NULL, NULL, 'tpl-002', NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
-('insp-005', 'bld-002', 'loc-006', 'Annually', 'PENDING', '2025-04-01 09:00:00', NULL, NULL, 'Inspección anual - Sala máquinas', NULL, FALSE, NULL, NULL, NULL, 'tpl-003', NULL, '2025-03-01 09:00:00', '2025-03-01 09:00:00'),
-('insp-006', 'bld-003', 'loc-007', 'Daily', 'IN_PROGRESS', '2025-03-14 07:00:00', NULL, NULL, 'Inspección diaria quirófanos', NULL, FALSE, NULL, '2025-03-14 07:00:00', NULL, 'tpl-001', NULL, '2025-03-14 06:00:00', '2025-03-14 07:00:00'),
-('insp-007', 'bld-003', 'loc-008', 'Weekly', 'DONE_FAILED', '2025-03-10 09:00:00', '2025-03-10 14:00:00', 'FAILED', 'Falló detector 101 - requiere reemplazo', 'Juan Pérez', TRUE, '2025-03-10 14:00:00', '2025-03-10 09:00:00', 'rpt-002', 'tpl-002', NULL, '2025-03-05 09:00:00', '2025-03-10 14:00:00');
+('insp-001', 'bld-001', NULL, 'Weekly', 'IN_PROGRESS', '2025-03-15 08:00:00', NULL, NULL, 'Inspección semanal - Hospital Central', NULL, FALSE, NULL, '2025-03-15 08:00:00', NULL, 'tpl-001', NULL, '2025-03-10 09:00:00', '2025-03-15 08:00:00'),
+('insp-002', 'bld-001', NULL, 'Monthly', 'DONE_COMPLETED', '2025-03-01 09:00:00', '2025-03-01 16:00:00', 'SUCCESS', 'Inspección mensual - Sala bombas OK', 'María García', TRUE, '2025-03-01 16:00:00', '2025-03-01 09:00:00', 'rpt-001', 'tpl-002', NULL, '2025-02-25 09:00:00', '2025-03-01 16:00:00'),
+('insp-003', 'bld-001', NULL, 'Weekly', 'PENDING', '2025-03-18 10:00:00', NULL, NULL, 'Pendiente - Corredor Norte', NULL, FALSE, NULL, NULL, NULL, 'tpl-001', NULL, '2025-03-12 09:00:00', '2025-03-12 09:00:00'),
+('insp-004', 'bld-002', NULL, 'Monthly', 'PENDING', '2025-03-20 08:00:00', NULL, NULL, 'Inspección mensual depósito', NULL, FALSE, NULL, NULL, NULL, 'tpl-002', NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('insp-005', 'bld-002', NULL, 'Annually', 'PENDING', '2025-04-01 09:00:00', NULL, NULL, 'Inspección anual - Sala máquinas', NULL, FALSE, NULL, NULL, NULL, 'tpl-003', NULL, '2025-03-01 09:00:00', '2025-03-01 09:00:00'),
+('insp-006', 'bld-003', NULL, 'Daily', 'IN_PROGRESS', '2025-03-14 07:00:00', NULL, NULL, 'Inspección diaria quirófanos', NULL, FALSE, NULL, '2025-03-14 07:00:00', NULL, 'tpl-001', NULL, '2025-03-14 06:00:00', '2025-03-14 07:00:00'),
+('insp-007', 'bld-003', NULL, 'Weekly', 'DONE_FAILED', '2025-03-10 09:00:00', '2025-03-10 14:00:00', 'FAILED', 'Falló detector 101 - requiere reemplazo', 'Juan Pérez', TRUE, '2025-03-10 14:00:00', '2025-03-10 09:00:00', 'rpt-002', 'tpl-002', NULL, '2025-03-05 09:00:00', '2025-03-10 14:00:00');
 
 -- Inspection assignments (FK: inspection_id -> inspections)
 INSERT INTO inspection_assignments (id, inspection_id, user_email, role, created_at) VALUES

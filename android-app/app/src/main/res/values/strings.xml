@@ -178,6 +178,7 @@
     <string name="devices_empty">No hay dispositivos asociados.</string>
     <string name="device_serial_format">S/N: %d</string>
     <string name="device_no_serial">Sin número de serie</string>
+    <string name="device_zone_format">Zona: %s</string>
     <string name="expand_collapse">Expandir o colapsar</string>
     <string name="navigate_to_steps">Ir a pasos del test</string>
     <string name="zone_devices_count">%d dispositivos</string>

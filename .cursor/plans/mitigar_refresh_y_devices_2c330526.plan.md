@@ -4,22 +4,22 @@ overview: Corregir el refresh de inspecciones tras creación para que sea determ
 todos:
   - id: dedupe-home-refresh
     content: Eliminar recargas duplicadas en Home y dejar un solo trigger de refresh post-create
-    status: pending
+    status: completed
   - id: persist-created-inspection
     content: Persistir localmente la inspección creada y sincronizar filtros/lista de Home
-    status: pending
+    status: completed
   - id: align-devices-scope
     content: Alinear la carga de devices con el alcance building-wide real de la inspección
-    status: pending
+    status: completed
   - id: surface-partial-device-failures
     content: Evitar éxitos parciales silenciosos en la carga de devices y agregar fallback coherente
-    status: pending
+    status: completed
   - id: improve-device-presentation
     content: Enriquecer la representación de devices con contexto de location/zone o tipo legible
-    status: pending
+    status: completed
   - id: clean-legacy-inspection-data
     content: Sanear datos seed legacy que mezclan locationId con tests multi-location
-    status: pending
+    status: completed
 isProject: false
 ---
 

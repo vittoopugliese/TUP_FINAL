@@ -200,7 +200,11 @@ public class CreateInspectionFragment extends Fragment {
 
             if (resource.getStatus() == Resource.Status.SUCCESS) {
                 Toast.makeText(requireContext(), R.string.create_inspection_success, Toast.LENGTH_SHORT).show();
-                requireActivity().getSupportFragmentManager().setFragmentResult("create_inspection_success", new Bundle());
+                Bundle result = new Bundle();
+                if (resource.getData() != null && resource.getData().getId() != null) {
+                    result.putString("inspectionId", resource.getData().getId());
+                }
+                requireActivity().getSupportFragmentManager().setFragmentResult("create_inspection_success", result);
                 NavHostFragment.findNavController(this).navigateUp();
             } else if (resource.getStatus() == Resource.Status.ERROR) {
                 String msg = resource.getMessage();

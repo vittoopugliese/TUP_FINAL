@@ -3,6 +3,7 @@ package com.example.tup_final.data.entity;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -66,6 +67,10 @@ public class DeviceEntity {
     public String createdAt;
     /** Marca de tiempo de actualización (ISO string). */
     public String updatedAt;
+
+    /** Nombre de la zona (no persistido, para UI). */
+    @Ignore
+    public String zoneName;
 
     public DeviceEntity() {}
 }

@@ -68,8 +68,8 @@ public class InspectionTestsRepository {
 
     /**
      * Obtiene todos los devices de la inspección como lista plana.
-     * Si locationId está definido, usa esa location. Si no (building-wide), obtiene
-     * todas las locations del building y agrega devices de cada una.
+     * Prioriza buildingId para alinear con el flujo Locations (building-wide).
+     * Solo usa locationId cuando buildingId no está disponible (fallback).
      */
     public LiveData<Resource<List<DeviceEntity>>> getDevicesForInspection(
             String inspectionId, String locationId, String buildingId) {
@@ -79,9 +79,7 @@ public class InspectionTestsRepository {
         executor.execute(() -> {
             try {
                 List<String> locationIds = new ArrayList<>();
-                if (locationId != null && !locationId.isEmpty()) {
-                    locationIds.add(locationId);
-                } else if (buildingId != null && !buildingId.isEmpty()) {
+                if (buildingId != null && !buildingId.isEmpty()) {
                     Response<List<LocationListResponse>> locResponse =
                             locationApi.getLocations(buildingId).execute();
                     if (locResponse.isSuccessful() && locResponse.body() != null) {
@@ -90,27 +88,81 @@ public class InspectionTestsRepository {
                                 locationIds.add(loc.getId());
                             }
                         }
+                    } else {
+                        List<DeviceEntity> fromCache = loadDevicesFromRoom(buildingId, new ArrayList<>());
+                        mainHandler.post(() -> result.setValue(fromCache.isEmpty()
+                                ? Resource.error("No se pudieron cargar ubicaciones. Verificá tu conexión.")
+                                : Resource.success(fromCache)));
+                        return;
                     }
+                } else if (locationId != null && !locationId.isEmpty()) {
+                    locationIds.add(locationId);
                 }
 
                 List<DeviceEntity> allDevices = new ArrayList<>();
+                boolean anyLocationFailed = false;
                 for (String locId : locationIds) {
-                    Response<List<ZoneWithDevicesResponse>> response =
-                            zonesApi.getZonesWithDevicesAndTests(locId, inspectionId).execute();
-                    if (response.isSuccessful() && response.body() != null) {
-                        List<DeviceEntity> flat = flattenZonesToDevices(response.body(), buildingId);
-                        allDevices.addAll(flat);
+                    try {
+                        Response<List<ZoneWithDevicesResponse>> response =
+                                zonesApi.getZonesWithDevicesAndTests(locId, inspectionId).execute();
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<ZoneWithDevicesResponse> zones = response.body();
+                            persistToRoom(zones, locId, inspectionId, buildingId);
+                            List<DeviceEntity> flat = flattenZonesToDevices(zones, buildingId);
+                            allDevices.addAll(flat);
+                        } else {
+                            anyLocationFailed = true;
+                        }
+                    } catch (Exception ignored) {
+                        anyLocationFailed = true;
                     }
                 }
 
-                mainHandler.post(() -> result.setValue(Resource.success(allDevices)));
+                if (anyLocationFailed && allDevices.isEmpty()) {
+                    List<DeviceEntity> fromCache = loadDevicesFromRoom(buildingId, locationIds);
+                    mainHandler.post(() -> result.setValue(fromCache.isEmpty()
+                            ? Resource.error("Error al cargar algunos dispositivos. Verificá tu conexión.")
+                            : Resource.success(fromCache)));
+                } else {
+                    mainHandler.post(() -> result.setValue(Resource.success(allDevices)));
+                }
             } catch (Exception e) {
-                mainHandler.post(() -> result.setValue(Resource.error(
-                        e.getMessage() != null ? e.getMessage() : "Error al cargar dispositivos")));
+                try {
+                    List<DeviceEntity> fromCache = loadDevicesFromRoom(buildingId, new ArrayList<>());
+                    mainHandler.post(() -> result.setValue(fromCache.isEmpty()
+                            ? Resource.error(e.getMessage() != null ? e.getMessage() : "Error al cargar dispositivos")
+                            : Resource.success(fromCache)));
+                } catch (Exception ex) {
+                    mainHandler.post(() -> result.setValue(Resource.error(
+                            e.getMessage() != null ? e.getMessage() : "Error al cargar dispositivos")));
+                }
             }
         });
 
         return result;
+    }
+
+    private List<DeviceEntity> loadDevicesFromRoom(String buildingId, List<String> locationIds) {
+        List<DeviceEntity> list;
+        if (buildingId != null && !buildingId.isEmpty()) {
+            list = deviceDao.getByBuildingId(buildingId);
+        } else if (locationIds != null && !locationIds.isEmpty()) {
+            list = new ArrayList<>();
+            for (String locId : locationIds) {
+                List<DeviceEntity> byLoc = deviceDao.getByLocationId(locId);
+                if (byLoc != null) list.addAll(byLoc);
+            }
+        } else {
+            return new ArrayList<>();
+        }
+        if (list == null) return new ArrayList<>();
+        for (DeviceEntity d : list) {
+            if (d.zoneId != null) {
+                ZoneEntity z = zoneDao.getById(d.zoneId);
+                if (z != null) d.zoneName = z.name;
+            }
+        }
+        return list;
     }
 
     private List<DeviceEntity> flattenZonesToDevices(List<ZoneWithDevicesResponse> zones,
@@ -124,6 +176,7 @@ public class InspectionTestsRepository {
                     de.zoneId = d.getZoneId();
                     de.locationId = d.getLocationId();
                     de.buildingId = buildingId;
+                    de.zoneName = z.getName();
                     de.name = d.getName();
                     de.deviceCategory = d.getDeviceCategory();
                     de.deviceSerialNumber = d.getDeviceSerialNumber();
@@ -297,6 +350,11 @@ public class InspectionTestsRepository {
 
     private void persistToRoom(List<ZoneWithDevicesResponse> dtos,
                                String locationId, String inspectionId) {
+        persistToRoom(dtos, locationId, inspectionId, null);
+    }
+
+    private void persistToRoom(List<ZoneWithDevicesResponse> dtos,
+                               String locationId, String inspectionId, String buildingId) {
         for (ZoneWithDevicesResponse z : dtos) {
             ZoneEntity ze = new ZoneEntity(z.getId(), z.getLocationId(), z.getName(), z.getDetails());
             zoneDao.insert(ze);
@@ -307,6 +365,7 @@ public class InspectionTestsRepository {
                     de.id = d.getId();
                     de.zoneId = d.getZoneId();
                     de.locationId = d.getLocationId();
+                    de.buildingId = buildingId;
                     de.name = d.getName();
                     de.deviceCategory = d.getDeviceCategory();
                     de.deviceSerialNumber = d.getDeviceSerialNumber();

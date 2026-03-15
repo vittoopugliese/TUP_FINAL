@@ -58,6 +58,7 @@ public class HomeFragment extends Fragment {
     private AutoCompleteTextView inputLocation;
     private AutoCompleteTextView inputStatus;
     private TextView textActiveFilters;
+    private String pendingScrollToInspectionId = null;
 
     @Nullable
     @Override
@@ -88,12 +89,6 @@ public class HomeFragment extends Fragment {
         setupFragmentResultListener();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        viewModel.loadInspections();
-    }
-
     private void setupFab(View view) {
         view.findViewById(R.id.fab_create_inspection).setOnClickListener(v ->
                 NavHostFragment.findNavController(HomeFragment.this)
@@ -102,7 +97,30 @@ public class HomeFragment extends Fragment {
 
     private void setupFragmentResultListener() {
         requireActivity().getSupportFragmentManager().setFragmentResultListener("create_inspection_success",
-                getViewLifecycleOwner(), (requestKey, result) -> viewModel.loadInspections());
+                getViewLifecycleOwner(), (requestKey, result) -> {
+                    pendingScrollToInspectionId = result != null ? result.getString("inspectionId") : null;
+                    viewModel.clearFilters();
+                    resetFilterInputs();
+                    viewModel.loadInspections();
+                });
+    }
+
+    private void resetFilterInputs() {
+        if (inputBuilding != null) inputBuilding.setText("", false);
+        if (inputLocation != null) inputLocation.setText("", false);
+        if (inputStatus != null) inputStatus.setText("", false);
+        if (btnFilterDate != null) btnFilterDate.setText(R.string.filter_date_hint);
+    }
+
+    private void scrollToInspection(String inspectionId, List<InspectionEntity> inspections) {
+        if (inspectionId == null || inspections == null || recyclerInspections == null) return;
+        for (int i = 0; i < inspections.size(); i++) {
+            if (inspectionId.equals(inspections.get(i).id)) {
+                final int position = i;
+                recyclerInspections.post(() -> recyclerInspections.smoothScrollToPosition(position));
+                return;
+            }
+        }
     }
 
     private void setupFilterCollapse(View view) {
@@ -204,10 +222,7 @@ public class HomeFragment extends Fragment {
         view.findViewById(R.id.btn_filter_apply).setOnClickListener(v -> viewModel.applyFilters());
         view.findViewById(R.id.btn_filter_clear).setOnClickListener(v -> {
             viewModel.clearFilters();
-            inputBuilding.setText("", false);
-            inputLocation.setText("", false);
-            inputStatus.setText("", false);
-            btnFilterDate.setText(R.string.filter_date_hint);
+            resetFilterInputs();
         });
     }
 
@@ -236,7 +251,12 @@ public class HomeFragment extends Fragment {
     private void observeData() {
         viewModel.getFilteredInspections().observe(getViewLifecycleOwner(), inspections -> {
             if (inspections != null) {
-                adapter.submitList(new ArrayList<>(inspections));
+                adapter.submitList(new ArrayList<>(inspections), () -> {
+                    if (pendingScrollToInspectionId != null) {
+                        scrollToInspection(pendingScrollToInspectionId, inspections);
+                        pendingScrollToInspectionId = null;
+                    }
+                });
                 textInspectionsCount.setText(getString(R.string.inspections_count, inspections.size()));
             }
         });

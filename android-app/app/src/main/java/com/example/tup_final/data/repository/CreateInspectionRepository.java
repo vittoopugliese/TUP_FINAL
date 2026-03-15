@@ -6,6 +6,8 @@ import android.os.Looper;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.tup_final.data.entity.InspectionEntity;
+import com.example.tup_final.data.local.InspectionDao;
 import com.example.tup_final.data.remote.BuildingApi;
 import com.example.tup_final.data.remote.InspectionApi;
 import com.example.tup_final.data.remote.InspectionTemplateApi;
@@ -35,16 +37,19 @@ public class CreateInspectionRepository {
     private final BuildingApi buildingApi;
     private final InspectionTemplateApi inspectionTemplateApi;
     private final InspectionApi inspectionApi;
+    private final InspectionDao inspectionDao;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
     public CreateInspectionRepository(BuildingApi buildingApi,
                                      InspectionTemplateApi inspectionTemplateApi,
-                                     InspectionApi inspectionApi) {
+                                     InspectionApi inspectionApi,
+                                     InspectionDao inspectionDao) {
         this.buildingApi = buildingApi;
         this.inspectionTemplateApi = inspectionTemplateApi;
         this.inspectionApi = inspectionApi;
+        this.inspectionDao = inspectionDao;
     }
 
     public LiveData<Resource<List<BuildingListResponse>>> getBuildings() {
@@ -121,7 +126,10 @@ public class CreateInspectionRepository {
             try {
                 Response<CreateInspectionResponse> response = inspectionApi.createInspection(request).execute();
                 if (response.isSuccessful() && response.body() != null) {
-                    mainHandler.post(() -> result.setValue(Resource.success(response.body())));
+                    CreateInspectionResponse created = response.body();
+                    InspectionEntity entity = mapToEntity(created);
+                    inspectionDao.insert(entity);
+                    mainHandler.post(() -> result.setValue(Resource.success(created)));
                 } else {
                     String msg = response.errorBody() != null ? response.errorBody().string() : "Error al crear inspección";
                     mainHandler.post(() -> result.setValue(Resource.error(msg)));
@@ -133,5 +141,28 @@ public class CreateInspectionRepository {
         });
 
         return result;
+    }
+
+    private InspectionEntity mapToEntity(CreateInspectionResponse r) {
+        InspectionEntity e = new InspectionEntity();
+        e.id = r.getId() != null ? r.getId() : "";
+        e.buildingId = r.getBuildingId();
+        e.locationId = null; // building-wide
+        e.type = r.getType();
+        e.status = r.getStatus();
+        e.scheduledDate = r.getScheduledDate();
+        e.approvalDate = null;
+        e.result = null;
+        e.notes = r.getNotes();
+        e.signer = null;
+        e.signed = false;
+        e.signDate = null;
+        e.startedAt = null;
+        e.inspectionReportId = null;
+        e.inspectionTemplateId = r.getInspectionTemplateId();
+        e.coverPageId = null;
+        e.createdAt = null;
+        e.updatedAt = null;
+        return e;
     }
 }

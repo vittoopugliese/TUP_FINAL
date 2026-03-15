@@ -46,6 +46,9 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<Long> dateFromFilter = new MutableLiveData<>(null);
     private final MutableLiveData<Long> dateToFilter = new MutableLiveData<>(null);
 
+    private volatile boolean isLoadingInspections = false;
+    private volatile boolean pendingReloadAfterCurrentLoad = false;
+
     @Inject
     public HomeViewModel(InspectionRepository inspectionRepository) {
         this.inspectionRepository = inspectionRepository;
@@ -56,17 +59,34 @@ public class HomeViewModel extends ViewModel {
 
     /**
      * Carga las inspecciones desde el repositorio.
+     * Si ya hay una carga en curso, programa un refresh al terminar.
      */
     public void loadInspections() {
+        if (isLoadingInspections) {
+            pendingReloadAfterCurrentLoad = true;
+            return;
+        }
+        isLoadingInspections = true;
+        pendingReloadAfterCurrentLoad = false;
+
         LiveData<Resource<List<InspectionEntity>>> source = inspectionRepository.getInspections();
         inspectionsResult.addSource(source, resource -> {
             inspectionsResult.setValue(resource);
             if (resource.getStatus() == Resource.Status.SUCCESS && resource.getData() != null) {
                 allInspections.setValue(resource.getData());
                 applyFilters();
+                loadBuildingIds();
+                loadLocationIds();
             }
             if (resource.getStatus() != Resource.Status.LOADING) {
                 inspectionsResult.removeSource(source);
+            }
+            if (resource.getStatus() != Resource.Status.LOADING) {
+                isLoadingInspections = false;
+                if (pendingReloadAfterCurrentLoad) {
+                    pendingReloadAfterCurrentLoad = false;
+                    loadInspections();
+                }
             }
         });
     }
@@ -171,7 +191,7 @@ public class HomeViewModel extends ViewModel {
             if (millisA == 0 && millisB == 0) return 0;
             if (millisA == 0) return 1;
             if (millisB == 0) return -1;
-            return Long.compare(millisA, millisB);
+            return Long.compare(millisB, millisA);
         });
 
         filteredInspections.setValue(filtered);
