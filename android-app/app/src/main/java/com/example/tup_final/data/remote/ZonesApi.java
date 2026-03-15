@@ -2,6 +2,8 @@ package com.example.tup_final.data.remote;
 
 import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
 import com.example.tup_final.data.remote.dto.DeviceWithTestsResponse;
+import com.example.tup_final.data.remote.dto.MoveDeviceRequest;
+import com.example.tup_final.data.remote.dto.MoveDeviceResponse;
 import com.example.tup_final.data.remote.dto.ZoneWithDevicesResponse;
 
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -41,5 +44,16 @@ public interface ZonesApi {
             @Path("locationId") String locationId,
             @Path("zoneId") String zoneId,
             @Body CreateDeviceRequest request
+    );
+
+    /**
+     * Mueve un dispositivo a otra zona dentro de la misma ubicación.
+     * Backend: PATCH /api/locations/{locationId}/devices/{deviceId}/zone
+     */
+    @PATCH("locations/{locationId}/devices/{deviceId}/zone")
+    Call<MoveDeviceResponse> moveDevice(
+            @Path("locationId") String locationId,
+            @Path("deviceId") String deviceId,
+            @Body MoveDeviceRequest request
     );
 }

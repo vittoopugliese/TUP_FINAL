@@ -15,6 +15,19 @@ INSERT INTO locations (id, building_id, name, details, created_at, updated_at) V
 ('loc-007', 'bld-003', 'Quirófanos', 'Bloque quirúrgico - 3 salas', '2025-01-20 10:00:00', '2025-01-20 10:00:00'),
 ('loc-008', 'bld-003', 'Área de internación', 'Habitaciones 101-120', '2025-01-20 10:00:00', '2025-01-20 10:00:00');
 
+-- Device types (global catalog: extintores, detectores, rociadores, etc.)
+INSERT INTO device_types (id, code, name, category, enabled, sort_order) VALUES
+('dt-001', 'FACP', 'Panel de alarma', 'FACP_DEVICE', TRUE, 1),
+('dt-002', 'JOCKEY_PUMP', 'Bomba jockey', 'JOCKEY_PUMP', TRUE, 2),
+('dt-003', 'FIRE_PUMP', 'Bomba contra incendios', 'FIRE_PUMP', TRUE, 3),
+('dt-004', 'SMOKE_DETECTOR', 'Detector de humo', 'FA_FIELD_DEVICE', TRUE, 4),
+('dt-005', 'EXTINGUISHER', 'Extintor', 'SPRINKLER_DEVICE', TRUE, 5),
+('dt-006', 'SPRINKLER_HEAD', 'Rociador', 'SPRINKLER_DEVICE', TRUE, 6),
+('dt-007', 'DEFIBRILLATOR', 'Desfibrilador', 'FA_FIELD_DEVICE', TRUE, 7),
+('dt-008', 'VITAL_SIGNS_MONITOR', 'Monitor de signos vitales', 'FA_FIELD_DEVICE', TRUE, 8),
+('dt-009', 'HEAT_DETECTOR', 'Detector de calor', 'FA_FIELD_DEVICE', TRUE, 9),
+('dt-010', 'PUMP_CONTROLLER', 'Controlador de bomba', 'PUMP_CONTROLLER', TRUE, 10);
+
 -- Zones (FK: location_id -> locations)
 INSERT INTO zones (id, location_id, name, details) VALUES
 ('zone-001', 'loc-001', 'Equipo médico', 'Desfibriladores y equipos de primeros auxilios'),

@@ -43,10 +43,15 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
         void onAddDevice(ZoneUiModel zone);
     }
 
+    public interface OnMoveDeviceListener {
+        void onMoveDevice(DeviceUiModel device);
+    }
+
     private OnTestClickListener testClickListener;
     private OnZoneExpandListener zoneExpandListener;
     private OnDeviceExpandListener deviceExpandListener;
     private OnAddDeviceListener addDeviceListener;
+    private OnMoveDeviceListener moveDeviceListener;
     private Set<String> expandedZoneIds;
     private Set<String> expandedDeviceIds;
 
@@ -64,6 +69,10 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
 
     public void setOnAddDeviceListener(OnAddDeviceListener listener) {
         this.addDeviceListener = listener;
+    }
+
+    public void setOnMoveDeviceListener(OnMoveDeviceListener listener) {
+        this.moveDeviceListener = listener;
     }
 
     public void setExpandedState(Set<String> expandedZoneIds, Set<String> expandedDeviceIds) {
@@ -252,6 +261,15 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
                     DeviceItem item = (DeviceItem) getItem(pos);
                     deviceExpandListener.onDeviceExpand(item.device.id);
                 }
+            });
+            itemView.setOnLongClickListener(v -> {
+                int pos = getAdapterPosition();
+                if (pos >= 0 && moveDeviceListener != null) {
+                    DeviceItem item = (DeviceItem) getItem(pos);
+                    moveDeviceListener.onMoveDevice(item.device);
+                    return true;
+                }
+                return false;
             });
         }
 

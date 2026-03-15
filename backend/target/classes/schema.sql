@@ -76,6 +76,18 @@ CREATE INDEX IF NOT EXISTS idx_photo_media_url ON photos(media_url);
 CREATE INDEX IF NOT EXISTS idx_photo_step ON photos(step_id);
 CREATE INDEX IF NOT EXISTS idx_photo_device ON photos(device_id);
 
+-- Device types (global read-only catalog)
+CREATE TABLE IF NOT EXISTS device_types (
+    id VARCHAR(36) PRIMARY KEY NOT NULL,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INT NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_device_type_category ON device_types(category);
+CREATE INDEX IF NOT EXISTS idx_device_type_enabled ON device_types(enabled);
+
 -- Zones (FK: locationId -> locations)
 CREATE TABLE IF NOT EXISTS zones (
     id VARCHAR(36) PRIMARY KEY NOT NULL,

@@ -3,6 +3,8 @@ package com.inspections.controller;
 import com.inspections.dto.CreateDeviceRequest;
 import com.inspections.dto.DeviceWithTestsResponse;
 import com.inspections.dto.LocationListResponse;
+import com.inspections.dto.MoveDeviceRequest;
+import com.inspections.dto.MoveDeviceResponse;
 import com.inspections.dto.ZoneWithDevicesResponse;
 import com.inspections.entity.Location;
 import com.inspections.repository.LocationRepository;
@@ -76,6 +78,17 @@ public class LocationController {
             @Valid @RequestBody CreateDeviceRequest request) {
         DeviceWithTestsResponse created = deviceService.createDevice(locationId, zoneId, request);
         return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(created);
+    }
+
+    @PatchMapping("/{locationId}/devices/{deviceId}/zone")
+    @Operation(summary = "Mover dispositivo a otra zona",
+               description = "Mueve el dispositivo a otra zona dentro de la misma ubicación. Los tests se mantienen.")
+    public ResponseEntity<MoveDeviceResponse> moveDeviceZone(
+            @PathVariable String locationId,
+            @PathVariable String deviceId,
+            @Valid @RequestBody MoveDeviceRequest request) {
+        MoveDeviceResponse result = deviceService.moveDeviceWithinLocation(locationId, deviceId, request);
+        return ResponseEntity.ok(result);
     }
 
     private LocationListResponse mapToResponse(Location loc) {

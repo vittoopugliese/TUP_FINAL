@@ -182,11 +182,19 @@
     <string name="add_device_subtitle">Agregando a %s</string>
     <string name="device_name_hint">Nombre</string>
     <string name="device_category_hint">Categoría</string>
+    <string name="device_type_hint">Tipo de dispositivo</string>
+    <string name="device_derived_category">Categoría: %s</string>
     <string name="device_description_hint">Descripción (opcional)</string>
     <string name="device_serial_hint">Número de serie (opcional)</string>
     <string name="device_enabled_label">Habilitado</string>
     <string name="device_category_required">La categoría es obligatoria</string>
+    <string name="device_type_required">El tipo de dispositivo es obligatorio</string>
     <string name="device_serial_invalid">Número de serie inválido</string>
     <string name="device_created_success">Dispositivo creado correctamente</string>
+    <string name="move_device_title">Mover dispositivo</string>
+    <string name="move_device_subtitle">Mover: %s</string>
+    <string name="move_device_select_destination">Seleccionar zona de destino</string>
+    <string name="move_device_confirm">Mover</string>
+    <string name="move_device_success">Dispositivo movido correctamente</string>
     <string name="device_tests_completed">Completed %1$d of %2$d tests.</string>
 </resources>

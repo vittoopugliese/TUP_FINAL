@@ -11,35 +11,33 @@ import android.widget.Toast;
 
 import com.example.tup_final.R;
 import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
+import com.example.tup_final.data.remote.dto.DeviceTypeResponse;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Bottom sheet para agregar un dispositivo a una zona.
+ * Usa catálogo de tipos; categoría se deriva del tipo seleccionado.
  */
 public class AddDeviceBottomSheet {
 
-    private static final String[] DEVICE_CATEGORIES = {
-            "FA_FIELD_DEVICE",
-            "FACP_DEVICE",
-            "JOCKEY_PUMP",
-            "FIRE_PUMP",
-            "PUMP_CONTROLLER",
-            "SPRINKLER_DEVICE"
-    };
-
     private final BottomSheetDialog dialog;
     private final ZoneUiModel zone;
+    private final List<DeviceTypeResponse> deviceTypes;
     private final OnSubmitListener listener;
 
     private TextInputLayout tilName;
-    private TextInputLayout tilCategory;
+    private TextInputLayout tilType;
     private TextInputLayout tilSerial;
     private TextInputEditText etName;
-    private AutoCompleteTextView actvCategory;
+    private AutoCompleteTextView actvType;
+    private TextView textDerivedCategory;
     private TextInputEditText etDescription;
     private TextInputEditText etSerial;
     private SwitchMaterial switchEnabled;
@@ -47,12 +45,16 @@ public class AddDeviceBottomSheet {
     private MaterialButton btnCancel;
     private ProgressBar progressBar;
 
+    private DeviceTypeResponse selectedType;
+
     public interface OnSubmitListener {
         void onSubmit(CreateDeviceRequest request);
     }
 
-    public AddDeviceBottomSheet(Context context, ZoneUiModel zone, OnSubmitListener listener) {
+    public AddDeviceBottomSheet(Context context, ZoneUiModel zone,
+                                List<DeviceTypeResponse> deviceTypes, OnSubmitListener listener) {
         this.zone = zone;
+        this.deviceTypes = deviceTypes != null ? deviceTypes : new ArrayList<>();
         this.listener = listener;
         this.dialog = new BottomSheetDialog(context);
 
@@ -60,10 +62,11 @@ public class AddDeviceBottomSheet {
         dialog.setContentView(root);
 
         tilName = root.findViewById(R.id.til_device_name);
-        tilCategory = root.findViewById(R.id.til_device_category);
+        tilType = root.findViewById(R.id.til_device_type);
         tilSerial = root.findViewById(R.id.til_device_serial);
         etName = root.findViewById(R.id.et_device_name);
-        actvCategory = root.findViewById(R.id.actv_device_category);
+        actvType = root.findViewById(R.id.actv_device_type);
+        textDerivedCategory = root.findViewById(R.id.text_derived_category);
         etDescription = root.findViewById(R.id.et_device_description);
         etSerial = root.findViewById(R.id.et_device_serial);
         switchEnabled = root.findViewById(R.id.switch_device_enabled);
@@ -74,9 +77,19 @@ public class AddDeviceBottomSheet {
         TextView subtitle = root.findViewById(R.id.text_add_device_subtitle);
         subtitle.setText(context.getString(R.string.add_device_subtitle, zone.name));
 
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(context,
-                android.R.layout.simple_dropdown_item_1line, DEVICE_CATEGORIES);
-        actvCategory.setAdapter(categoryAdapter);
+        String[] typeNames = new String[this.deviceTypes.size()];
+        for (int i = 0; i < this.deviceTypes.size(); i++) {
+            typeNames[i] = this.deviceTypes.get(i).getName();
+        }
+        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(context,
+                android.R.layout.simple_dropdown_item_1line, typeNames);
+        actvType.setAdapter(typeAdapter);
+        actvType.setOnItemClickListener((parent, view, position, id) -> {
+            selectedType = this.deviceTypes.get(position);
+            textDerivedCategory.setVisibility(View.VISIBLE);
+            textDerivedCategory.setText(context.getString(R.string.device_derived_category,
+                    selectedType.getCategory()));
+        });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnSave.setOnClickListener(v -> trySubmit());
@@ -94,7 +107,7 @@ public class AddDeviceBottomSheet {
         btnSave.setEnabled(!loading);
         btnCancel.setEnabled(!loading);
         etName.setEnabled(!loading);
-        actvCategory.setEnabled(!loading);
+        actvType.setEnabled(!loading);
         etDescription.setEnabled(!loading);
         etSerial.setEnabled(!loading);
         switchEnabled.setEnabled(!loading);
@@ -109,11 +122,10 @@ public class AddDeviceBottomSheet {
 
     private void trySubmit() {
         tilName.setError(null);
-        tilCategory.setError(null);
+        tilType.setError(null);
         tilSerial.setError(null);
 
         String name = etName.getText() != null ? etName.getText().toString().trim() : "";
-        String category = actvCategory.getText() != null ? actvCategory.getText().toString().trim() : "";
         String description = etDescription.getText() != null ? etDescription.getText().toString().trim() : null;
         String serialStr = etSerial.getText() != null ? etSerial.getText().toString().trim() : null;
 
@@ -122,8 +134,8 @@ public class AddDeviceBottomSheet {
             tilName.setError(dialog.getContext().getString(R.string.error_name_required));
             valid = false;
         }
-        if (category.isEmpty()) {
-            tilCategory.setError(dialog.getContext().getString(R.string.device_category_required));
+        if (selectedType == null) {
+            tilType.setError(dialog.getContext().getString(R.string.device_type_required));
             valid = false;
         }
 
@@ -141,8 +153,8 @@ public class AddDeviceBottomSheet {
 
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setName(name);
-        request.setDeviceCategory(category);
-        request.setDescription(description.isEmpty() ? null : description);
+        request.setDeviceTypeId(selectedType.getId());
+        request.setDescription(description != null && !description.isEmpty() ? description : null);
         request.setSerialNumber(serialNumber);
         request.setEnabled(switchEnabled.isChecked());
 

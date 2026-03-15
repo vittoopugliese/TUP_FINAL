@@ -47,21 +47,32 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/til_device_category"
+            android:id="@+id/til_device_type"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/device_category_hint"
+            android:hint="@string/device_type_hint"
             app:errorEnabled="true"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="8dp">
 
             <AutoCompleteTextView
-                android:id="@+id/actv_device_category"
+                android:id="@+id/actv_device_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
                 android:focusable="false" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/text_derived_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"
+            tools:text="Categoría: FA_FIELD_DEVICE"
+            tools:visibility="visible" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_device_description"

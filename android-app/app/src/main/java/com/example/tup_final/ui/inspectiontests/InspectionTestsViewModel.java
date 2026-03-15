@@ -5,6 +5,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
+import com.example.tup_final.data.remote.dto.DeviceTypeResponse;
+import com.example.tup_final.data.remote.dto.MoveDeviceRequest;
+import com.example.tup_final.data.remote.dto.MoveDeviceResponse;
 import com.example.tup_final.data.repository.InspectionTestsRepository;
 import com.example.tup_final.util.Resource;
 
@@ -23,6 +26,8 @@ public class InspectionTestsViewModel extends ViewModel {
 
     private LiveData<Resource<List<ZoneUiModel>>> zonesData;
     private final MutableLiveData<Resource<DeviceUiModel>> createDeviceResult = new MutableLiveData<>();
+    private final MutableLiveData<Resource<MoveDeviceResponse>> moveDeviceResult = new MutableLiveData<>();
+    private final MutableLiveData<Resource<List<DeviceTypeResponse>>> deviceTypesResult = new MutableLiveData<>();
     private final MutableLiveData<Set<String>> expandedZoneIds = new MutableLiveData<>(new HashSet<>());
     private final MutableLiveData<Set<String>> expandedDeviceIds = new MutableLiveData<>(new HashSet<>());
 
@@ -42,6 +47,26 @@ public class InspectionTestsViewModel extends ViewModel {
 
     public void createDevice(String locationId, String zoneId, CreateDeviceRequest request) {
         repository.createDevice(locationId, zoneId, request, createDeviceResult);
+    }
+
+    public void moveDevice(String locationId, String deviceId, MoveDeviceRequest request) {
+        repository.moveDevice(locationId, deviceId, request, moveDeviceResult);
+    }
+
+    public void loadDeviceTypes() {
+        repository.loadDeviceTypes(deviceTypesResult);
+    }
+
+    public LiveData<Resource<List<DeviceTypeResponse>>> getDeviceTypes() {
+        return deviceTypesResult;
+    }
+
+    public LiveData<Resource<MoveDeviceResponse>> getMoveDeviceResult() {
+        return moveDeviceResult;
+    }
+
+    public void clearMoveDeviceResult() {
+        moveDeviceResult.setValue(null);
     }
 
     public LiveData<Resource<DeviceUiModel>> getCreateDeviceResult() {

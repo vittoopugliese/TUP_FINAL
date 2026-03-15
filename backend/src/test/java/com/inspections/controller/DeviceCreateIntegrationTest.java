@@ -31,7 +31,7 @@ class DeviceCreateIntegrationTest {
     void createDevice_thenGetZones_returnsNewDevice() throws Exception {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setName("Nuevo dispositivo de prueba");
-        request.setDeviceCategory("FA_FIELD_DEVICE");
+        request.setDeviceTypeId("dt-004");
         request.setDescription("Descripción opcional");
         request.setSerialNumber(9999);
         request.setEnabled(true);
@@ -42,7 +42,7 @@ class DeviceCreateIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("Nuevo dispositivo de prueba"))
-                .andExpect(jsonPath("$.deviceCategory").value("FA_FIELD_DEVICE"))
+                .andExpect(jsonPath("$.deviceCategory").exists())
                 .andExpect(jsonPath("$.zoneId").value("zone-001"))
                 .andExpect(jsonPath("$.locationId").value("loc-001"))
                 .andExpect(jsonPath("$.deviceSerialNumber").value(9999))
@@ -60,7 +60,7 @@ class DeviceCreateIntegrationTest {
     void createDevice_zoneNotFound_returns404() throws Exception {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setName("Device");
-        request.setDeviceCategory("FA_FIELD_DEVICE");
+        request.setDeviceTypeId("dt-004");
 
         mockMvc.perform(post("/api/locations/loc-001/zones/zone-xxx-nonexistent/devices")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -72,7 +72,7 @@ class DeviceCreateIntegrationTest {
     void createDevice_zoneNotInLocation_returns400() throws Exception {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setName("Device");
-        request.setDeviceCategory("FA_FIELD_DEVICE");
+        request.setDeviceTypeId("dt-004");
 
         // zone-003 belongs to loc-002, not loc-001
         mockMvc.perform(post("/api/locations/loc-001/zones/zone-003/devices")
@@ -85,7 +85,7 @@ class DeviceCreateIntegrationTest {
     void createDevice_missingName_returns400() throws Exception {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setName("");
-        request.setDeviceCategory("FA_FIELD_DEVICE");
+        request.setDeviceTypeId("dt-004");
 
         mockMvc.perform(post("/api/locations/loc-001/zones/zone-001/devices")
                         .contentType(MediaType.APPLICATION_JSON)

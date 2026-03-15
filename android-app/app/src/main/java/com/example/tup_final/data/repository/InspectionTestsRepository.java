@@ -12,9 +12,13 @@ import com.example.tup_final.data.entity.ZoneEntity;
 import com.example.tup_final.data.local.DeviceDao;
 import com.example.tup_final.data.local.TestDao;
 import com.example.tup_final.data.local.ZoneDao;
+import com.example.tup_final.data.remote.DeviceTypesApi;
 import com.example.tup_final.data.remote.ZonesApi;
 import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
 import com.example.tup_final.data.remote.dto.DeviceWithTestsResponse;
+import com.example.tup_final.data.remote.dto.DeviceTypeResponse;
+import com.example.tup_final.data.remote.dto.MoveDeviceRequest;
+import com.example.tup_final.data.remote.dto.MoveDeviceResponse;
 import com.example.tup_final.data.remote.dto.TestResponse;
 import com.example.tup_final.data.remote.dto.ZoneWithDevicesResponse;
 import com.example.tup_final.ui.inspectiontests.DeviceUiModel;
@@ -40,6 +44,7 @@ import retrofit2.Response;
 public class InspectionTestsRepository {
 
     private final ZonesApi zonesApi;
+    private final DeviceTypesApi deviceTypesApi;
     private final ZoneDao zoneDao;
     private final DeviceDao deviceDao;
     private final TestDao testDao;
@@ -47,9 +52,10 @@ public class InspectionTestsRepository {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
-    public InspectionTestsRepository(ZonesApi zonesApi, ZoneDao zoneDao,
-                                   DeviceDao deviceDao, TestDao testDao) {
+    public InspectionTestsRepository(ZonesApi zonesApi, DeviceTypesApi deviceTypesApi,
+                                   ZoneDao zoneDao, DeviceDao deviceDao, TestDao testDao) {
         this.zonesApi = zonesApi;
+        this.deviceTypesApi = deviceTypesApi;
         this.zoneDao = zoneDao;
         this.deviceDao = deviceDao;
         this.testDao = testDao;
@@ -123,6 +129,58 @@ public class InspectionTestsRepository {
             } catch (Exception e) {
                 String msg = e.getMessage() != null ? e.getMessage() : "Error de conexión";
                 mainHandler.post(() -> result.setValue(Resource.error(msg)));
+            }
+        });
+    }
+
+    /**
+     * Mueve un dispositivo a otra zona dentro de la misma ubicación.
+     */
+    public void moveDevice(String locationId, String deviceId, MoveDeviceRequest request,
+                           MutableLiveData<Resource<MoveDeviceResponse>> result) {
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<MoveDeviceResponse> response =
+                        zonesApi.moveDevice(locationId, deviceId, request).execute();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    mainHandler.post(() -> result.setValue(Resource.success(response.body())));
+                } else {
+                    String msg = "Error al mover dispositivo";
+                    try {
+                        if (response.errorBody() != null) {
+                            msg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    final String errMsg = msg;
+                    mainHandler.post(() -> result.setValue(Resource.error(errMsg)));
+                }
+            } catch (Exception e) {
+                String msg = e.getMessage() != null ? e.getMessage() : "Error de conexión";
+                mainHandler.post(() -> result.setValue(Resource.error(msg)));
+            }
+        });
+    }
+
+    /**
+     * Obtiene el catálogo de tipos de dispositivo.
+     */
+    public void loadDeviceTypes(MutableLiveData<Resource<List<DeviceTypeResponse>>> result) {
+        result.setValue(Resource.loading());
+        executor.execute(() -> {
+            try {
+                Response<List<DeviceTypeResponse>> response =
+                        deviceTypesApi.getDeviceTypes(false).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    mainHandler.post(() -> result.setValue(Resource.success(response.body())));
+                } else {
+                    mainHandler.post(() -> result.setValue(Resource.error("Error al cargar tipos")));
+                }
+            } catch (Exception e) {
+                mainHandler.post(() -> result.setValue(Resource.error(
+                        e.getMessage() != null ? e.getMessage() : "Error de conexión")));
             }
         });
     }

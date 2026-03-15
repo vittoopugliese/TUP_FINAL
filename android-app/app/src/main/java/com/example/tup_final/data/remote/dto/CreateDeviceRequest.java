@@ -5,14 +5,15 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Request DTO para crear un dispositivo en una zona.
  * zoneId y locationId vienen del path.
+ * deviceTypeId es requerido; deviceCategory se deriva en backend.
  */
 public class CreateDeviceRequest {
 
     @SerializedName("name")
     private String name;
 
-    @SerializedName("deviceCategory")
-    private String deviceCategory;
+    @SerializedName("deviceTypeId")
+    private String deviceTypeId;
 
     @SerializedName("description")
     private String description;
@@ -25,10 +26,10 @@ public class CreateDeviceRequest {
 
     public CreateDeviceRequest() {}
 
-    public CreateDeviceRequest(String name, String deviceCategory, String description,
+    public CreateDeviceRequest(String name, String deviceTypeId, String description,
                                Integer serialNumber, Boolean enabled) {
         this.name = name;
-        this.deviceCategory = deviceCategory;
+        this.deviceTypeId = deviceTypeId;
         this.description = description;
         this.serialNumber = serialNumber;
         this.enabled = enabled != null ? enabled : true;
@@ -37,8 +38,8 @@ public class CreateDeviceRequest {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getDeviceCategory() { return deviceCategory; }
-    public void setDeviceCategory(String deviceCategory) { this.deviceCategory = deviceCategory; }
+    public String getDeviceTypeId() { return deviceTypeId; }
+    public void setDeviceTypeId(String deviceTypeId) { this.deviceTypeId = deviceTypeId; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }

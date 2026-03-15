@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tup_final.R;
+import com.example.tup_final.data.remote.dto.DeviceTypeResponse;
+import com.example.tup_final.data.remote.dto.MoveDeviceRequest;
 import com.example.tup_final.databinding.FragmentInspectionTestsBinding;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.example.tup_final.util.Resource;
@@ -69,6 +71,7 @@ public class InspectionTestsFragment extends Fragment {
         adapter.setOnDeviceExpandListener(deviceId -> viewModel.toggleDeviceExpanded(deviceId));
         adapter.setOnTestClickListener(test -> navigateToSteps(inspectionId, test.id, test.deviceId));
         adapter.setOnAddDeviceListener(zone -> showAddDeviceSheet(zone, locationId, inspectionId));
+        adapter.setOnMoveDeviceListener(device -> showMoveDeviceSheet(device, locationId));
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         if (locationName != null && !locationName.isEmpty()) {
@@ -77,19 +80,43 @@ public class InspectionTestsFragment extends Fragment {
         toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
 
         viewModel.loadZones(locationId, inspectionId);
+        viewModel.loadDeviceTypes();
 
         observeZones();
         observeExpansion();
         observeCreateDevice();
+        observeMoveDevice();
     }
 
     private AddDeviceBottomSheet addDeviceSheet;
+    private MoveDeviceBottomSheet moveDeviceSheet;
+
+    private void showMoveDeviceSheet(DeviceUiModel device, String locationId) {
+        if (moveDeviceSheet != null) {
+            moveDeviceSheet.dismiss();
+        }
+        List<ZoneUiModel> zones = null;
+        Resource<List<ZoneUiModel>> zonesRes = viewModel.getZones().getValue();
+        if (zonesRes != null && zonesRes.getData() != null) {
+            zones = zonesRes.getData();
+        }
+        moveDeviceSheet = new MoveDeviceBottomSheet(requireContext(), device, zones, targetZoneId -> {
+            viewModel.moveDevice(locationId, device.id, new MoveDeviceRequest(targetZoneId));
+            moveDeviceSheet.setLoading(true);
+        });
+        moveDeviceSheet.show();
+    }
 
     private void showAddDeviceSheet(ZoneUiModel zone, String locationId, String inspectionId) {
         if (addDeviceSheet != null) {
             addDeviceSheet.dismiss();
         }
-        addDeviceSheet = new AddDeviceBottomSheet(requireContext(), zone, request -> {
+        List<DeviceTypeResponse> types = null;
+        Resource<List<DeviceTypeResponse>> typesRes = viewModel.getDeviceTypes().getValue();
+        if (typesRes != null && typesRes.getData() != null) {
+            types = typesRes.getData();
+        }
+        addDeviceSheet = new AddDeviceBottomSheet(requireContext(), zone, types, request -> {
             viewModel.createDevice(locationId, zone.id, request);
             addDeviceSheet.setLoading(true);
         });
@@ -127,6 +154,42 @@ public class InspectionTestsFragment extends Fragment {
                         addDeviceSheet.showError(resource.getMessage());
                     }
                     viewModel.clearCreateDeviceResult();
+                    break;
+            }
+        });
+    }
+
+    private void observeMoveDevice() {
+        viewModel.getMoveDeviceResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (moveDeviceSheet == null && resource.getStatus() != LOADING) return;
+
+            switch (resource.getStatus()) {
+                case LOADING:
+                    if (moveDeviceSheet != null) moveDeviceSheet.setLoading(true);
+                    break;
+                case SUCCESS:
+                    String newZoneId = resource.getData() != null ? resource.getData().getNewZoneId() : null;
+                    if (moveDeviceSheet != null) {
+                        moveDeviceSheet.setLoading(false);
+                        moveDeviceSheet.dismiss();
+                        moveDeviceSheet = null;
+                    }
+                    viewModel.clearMoveDeviceResult();
+                    Toast.makeText(requireContext(), R.string.move_device_success, Toast.LENGTH_SHORT).show();
+                    if (newZoneId != null) {
+                        viewModel.ensureZoneExpanded(newZoneId);
+                    }
+                    viewModel.loadZones(
+                            viewModel.getLastLocationId(),
+                            viewModel.getLastInspectionId());
+                    break;
+                case ERROR:
+                    if (moveDeviceSheet != null) {
+                        moveDeviceSheet.setLoading(false);
+                        moveDeviceSheet.showError(resource.getMessage());
+                    }
+                    viewModel.clearMoveDeviceResult();
                     break;
             }
         });
