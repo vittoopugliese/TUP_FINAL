@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
 import com.example.tup_final.data.repository.InspectionTestsRepository;
 import com.example.tup_final.util.Resource;
 
@@ -21,8 +22,12 @@ public class InspectionTestsViewModel extends ViewModel {
     private final InspectionTestsRepository repository;
 
     private LiveData<Resource<List<ZoneUiModel>>> zonesData;
+    private final MutableLiveData<Resource<DeviceUiModel>> createDeviceResult = new MutableLiveData<>();
     private final MutableLiveData<Set<String>> expandedZoneIds = new MutableLiveData<>(new HashSet<>());
     private final MutableLiveData<Set<String>> expandedDeviceIds = new MutableLiveData<>(new HashSet<>());
+
+    private String lastLocationId;
+    private String lastInspectionId;
 
     @Inject
     public InspectionTestsViewModel(InspectionTestsRepository repository) {
@@ -30,7 +35,29 @@ public class InspectionTestsViewModel extends ViewModel {
     }
 
     public void loadZones(String locationId, String inspectionId) {
+        this.lastLocationId = locationId;
+        this.lastInspectionId = inspectionId;
         zonesData = repository.getZonesWithDevicesAndTests(locationId, inspectionId);
+    }
+
+    public void createDevice(String locationId, String zoneId, CreateDeviceRequest request) {
+        repository.createDevice(locationId, zoneId, request, createDeviceResult);
+    }
+
+    public LiveData<Resource<DeviceUiModel>> getCreateDeviceResult() {
+        return createDeviceResult;
+    }
+
+    public void clearCreateDeviceResult() {
+        createDeviceResult.setValue(null);
+    }
+
+    public String getLastLocationId() {
+        return lastLocationId;
+    }
+
+    public String getLastInspectionId() {
+        return lastInspectionId;
     }
 
     public LiveData<Resource<List<ZoneUiModel>>> getZones() {
@@ -54,6 +81,15 @@ public class InspectionTestsViewModel extends ViewModel {
         } else {
             next.add(zoneId);
         }
+        expandedZoneIds.setValue(next);
+    }
+
+    public void ensureZoneExpanded(String zoneId) {
+        Set<String> current = expandedZoneIds.getValue();
+        if (current == null) current = new HashSet<>();
+        if (current.contains(zoneId)) return;
+        Set<String> next = new HashSet<>(current);
+        next.add(zoneId);
         expandedZoneIds.setValue(next);
     }
 

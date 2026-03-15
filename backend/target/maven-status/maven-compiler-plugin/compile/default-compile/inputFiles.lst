@@ -1,3 +1,4 @@
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\CreateDeviceRequest.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\ObservationRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\AuditLog.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\Inspection.java
@@ -40,6 +41,7 @@ C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\c
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\config\OpenApiConfig.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\ForgotPasswordRequest.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\Photo.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\service\DeviceService.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\LocationListResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\AvatarUploadResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\service\InspectionService.java

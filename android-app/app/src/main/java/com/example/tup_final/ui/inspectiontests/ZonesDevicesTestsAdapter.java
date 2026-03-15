@@ -39,9 +39,14 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
         void onDeviceExpand(String deviceId);
     }
 
+    public interface OnAddDeviceListener {
+        void onAddDevice(ZoneUiModel zone);
+    }
+
     private OnTestClickListener testClickListener;
     private OnZoneExpandListener zoneExpandListener;
     private OnDeviceExpandListener deviceExpandListener;
+    private OnAddDeviceListener addDeviceListener;
     private Set<String> expandedZoneIds;
     private Set<String> expandedDeviceIds;
 
@@ -55,6 +60,10 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
 
     public void setOnDeviceExpandListener(OnDeviceExpandListener listener) {
         this.deviceExpandListener = listener;
+    }
+
+    public void setOnAddDeviceListener(OnAddDeviceListener listener) {
+        this.addDeviceListener = listener;
     }
 
     public void setExpandedState(Set<String> expandedZoneIds, Set<String> expandedDeviceIds) {
@@ -187,18 +196,29 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
         private final ImageView iconExpand;
         private final TextView textZoneName;
         private final TextView textDevicesCount;
+        private final View btnAddDevice;
 
         ZoneViewHolder(View itemView) {
             super(itemView);
             iconExpand = itemView.findViewById(R.id.icon_zone_expand);
             textZoneName = itemView.findViewById(R.id.text_zone_name);
             textDevicesCount = itemView.findViewById(R.id.text_zone_devices_count);
+            btnAddDevice = itemView.findViewById(R.id.btn_add_device);
 
             itemView.setOnClickListener(v -> {
+                if (v == btnAddDevice) return;
                 int pos = getAdapterPosition();
                 if (pos >= 0 && zoneExpandListener != null) {
                     ZoneItem item = (ZoneItem) getItem(pos);
                     zoneExpandListener.onZoneExpand(item.zone.id);
+                }
+            });
+
+            btnAddDevice.setOnClickListener(v -> {
+                int pos = getAdapterPosition();
+                if (pos >= 0 && addDeviceListener != null) {
+                    ZoneItem item = (ZoneItem) getItem(pos);
+                    addDeviceListener.onAddDevice(item.zone);
                 }
             });
         }

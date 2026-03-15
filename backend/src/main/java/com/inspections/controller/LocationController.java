@@ -1,13 +1,17 @@
 package com.inspections.controller;
 
+import com.inspections.dto.CreateDeviceRequest;
+import com.inspections.dto.DeviceWithTestsResponse;
 import com.inspections.dto.LocationListResponse;
 import com.inspections.dto.ZoneWithDevicesResponse;
 import com.inspections.entity.Location;
 import com.inspections.repository.LocationRepository;
+import com.inspections.service.DeviceService;
 import com.inspections.service.ZoneService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +31,13 @@ public class LocationController {
 
     private final LocationRepository locationRepository;
     private final ZoneService zoneService;
+    private final DeviceService deviceService;
 
-    public LocationController(LocationRepository locationRepository, ZoneService zoneService) {
+    public LocationController(LocationRepository locationRepository, ZoneService zoneService,
+                              DeviceService deviceService) {
         this.locationRepository = locationRepository;
         this.zoneService = zoneService;
+        this.deviceService = deviceService;
     }
 
     @GetMapping
@@ -58,6 +65,17 @@ public class LocationController {
         List<ZoneWithDevicesResponse> response =
                 zoneService.getZonesWithDevicesAndTests(locationId, inspectionId);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{locationId}/zones/{zoneId}/devices")
+    @Operation(summary = "Crear dispositivo en zona",
+               description = "Crea un dispositivo en la zona indicada. La zona debe pertenecer a la ubicación.")
+    public ResponseEntity<DeviceWithTestsResponse> createDevice(
+            @PathVariable String locationId,
+            @PathVariable String zoneId,
+            @Valid @RequestBody CreateDeviceRequest request) {
+        DeviceWithTestsResponse created = deviceService.createDevice(locationId, zoneId, request);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(created);
     }
 
     private LocationListResponse mapToResponse(Location loc) {

@@ -29,6 +29,7 @@ com\inspections\dto\DeviceWithTestsResponse.class
 com\inspections\dto\ForgotPasswordRequest.class
 com\inspections\security\JwtUtil.class
 com\inspections\repository\TestRepository.class
+com\inspections\dto\CreateDeviceRequest.class
 com\inspections\dto\AuthResponse.class
 com\inspections\entity\Photo.class
 com\inspections\controller\InspectionAssignmentController.class
@@ -41,4 +42,5 @@ com\inspections\dto\AssignmentResponse.class
 com\inspections\repository\ZoneRepository.class
 com\inspections\repository\ObservationRepository.class
 com\inspections\service\AuthService.class
+com\inspections\service\DeviceService.class
 com\inspections\config\DataInitializer.class

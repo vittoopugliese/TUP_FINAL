@@ -13,6 +13,7 @@ import com.example.tup_final.data.local.DeviceDao;
 import com.example.tup_final.data.local.TestDao;
 import com.example.tup_final.data.local.ZoneDao;
 import com.example.tup_final.data.remote.ZonesApi;
+import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
 import com.example.tup_final.data.remote.dto.DeviceWithTestsResponse;
 import com.example.tup_final.data.remote.dto.TestResponse;
 import com.example.tup_final.data.remote.dto.ZoneWithDevicesResponse;
@@ -87,6 +88,43 @@ public class InspectionTestsRepository {
         });
 
         return result;
+    }
+
+    /**
+     * Crea un dispositivo en la zona indicada.
+     * Actualiza el MutableLiveData con el resultado.
+     */
+    public void createDevice(String locationId, String zoneId, CreateDeviceRequest request,
+                            MutableLiveData<Resource<DeviceUiModel>> result) {
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<DeviceWithTestsResponse> response =
+                        zonesApi.createDevice(locationId, zoneId, request).execute();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    DeviceWithTestsResponse d = response.body();
+                    DeviceUiModel model = new DeviceUiModel(
+                            d.getId(), d.getZoneId(), d.getLocationId(),
+                            d.getName(), d.getDeviceCategory(), d.getDeviceSerialNumber(),
+                            d.isEnabled(), new ArrayList<>());
+                    mainHandler.post(() -> result.setValue(Resource.success(model)));
+                } else {
+                    String msg = "Error al crear dispositivo";
+                    try {
+                        if (response.errorBody() != null) {
+                            msg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    final String errMsg = msg;
+                    mainHandler.post(() -> result.setValue(Resource.error(errMsg)));
+                }
+            } catch (Exception e) {
+                String msg = e.getMessage() != null ? e.getMessage() : "Error de conexión";
+                mainHandler.post(() -> result.setValue(Resource.error(msg)));
+            }
+        });
     }
 
     private List<ZoneUiModel> mapToUiModels(List<ZoneWithDevicesResponse> dtos, String inspectionId) {

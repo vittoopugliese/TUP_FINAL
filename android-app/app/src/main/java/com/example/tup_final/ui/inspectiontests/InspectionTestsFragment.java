@@ -68,6 +68,7 @@ public class InspectionTestsFragment extends Fragment {
         adapter.setOnZoneExpandListener(zoneId -> viewModel.toggleZoneExpanded(zoneId));
         adapter.setOnDeviceExpandListener(deviceId -> viewModel.toggleDeviceExpanded(deviceId));
         adapter.setOnTestClickListener(test -> navigateToSteps(inspectionId, test.id, test.deviceId));
+        adapter.setOnAddDeviceListener(zone -> showAddDeviceSheet(zone, locationId, inspectionId));
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         if (locationName != null && !locationName.isEmpty()) {
@@ -79,6 +80,56 @@ public class InspectionTestsFragment extends Fragment {
 
         observeZones();
         observeExpansion();
+        observeCreateDevice();
+    }
+
+    private AddDeviceBottomSheet addDeviceSheet;
+
+    private void showAddDeviceSheet(ZoneUiModel zone, String locationId, String inspectionId) {
+        if (addDeviceSheet != null) {
+            addDeviceSheet.dismiss();
+        }
+        addDeviceSheet = new AddDeviceBottomSheet(requireContext(), zone, request -> {
+            viewModel.createDevice(locationId, zone.id, request);
+            addDeviceSheet.setLoading(true);
+        });
+        addDeviceSheet.show();
+    }
+
+    private void observeCreateDevice() {
+        viewModel.getCreateDeviceResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (addDeviceSheet == null && resource.getStatus() != LOADING) return;
+
+            switch (resource.getStatus()) {
+                case LOADING:
+                    if (addDeviceSheet != null) addDeviceSheet.setLoading(true);
+                    break;
+                case SUCCESS:
+                    String zoneIdToExpand = addDeviceSheet != null ? addDeviceSheet.getZone().id : null;
+                    if (addDeviceSheet != null) {
+                        addDeviceSheet.setLoading(false);
+                        addDeviceSheet.dismiss();
+                        addDeviceSheet = null;
+                    }
+                    viewModel.clearCreateDeviceResult();
+                    Toast.makeText(requireContext(), R.string.device_created_success, Toast.LENGTH_SHORT).show();
+                    if (zoneIdToExpand != null) {
+                        viewModel.ensureZoneExpanded(zoneIdToExpand);
+                    }
+                    viewModel.loadZones(
+                            viewModel.getLastLocationId(),
+                            viewModel.getLastInspectionId());
+                    break;
+                case ERROR:
+                    if (addDeviceSheet != null) {
+                        addDeviceSheet.setLoading(false);
+                        addDeviceSheet.showError(resource.getMessage());
+                    }
+                    viewModel.clearCreateDeviceResult();
+                    break;
+            }
+        });
     }
 
     private void observeZones() {

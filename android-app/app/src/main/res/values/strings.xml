@@ -177,5 +177,16 @@
     <string name="expand_collapse">Expandir o colapsar</string>
     <string name="navigate_to_steps">Ir a pasos del test</string>
     <string name="zone_devices_count">%d dispositivos</string>
+    <string name="add_device">Agregar dispositivo</string>
+    <string name="add_device_title">Agregar dispositivo</string>
+    <string name="add_device_subtitle">Agregando a %s</string>
+    <string name="device_name_hint">Nombre</string>
+    <string name="device_category_hint">Categoría</string>
+    <string name="device_description_hint">Descripción (opcional)</string>
+    <string name="device_serial_hint">Número de serie (opcional)</string>
+    <string name="device_enabled_label">Habilitado</string>
+    <string name="device_category_required">La categoría es obligatoria</string>
+    <string name="device_serial_invalid">Número de serie inválido</string>
+    <string name="device_created_success">Dispositivo creado correctamente</string>
     <string name="device_tests_completed">Completed %1$d of %2$d tests.</string>
 </resources>
