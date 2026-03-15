@@ -53,14 +53,17 @@
             android:layout_height="wrap_content"
             android:hint="@string/device_type_hint"
             app:errorEnabled="true"
+            app:endIconMode="dropdown_menu"
             android:layout_marginBottom="8dp">
 
-            <AutoCompleteTextView
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/actv_device_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
-                android:focusable="false" />
+                android:focusable="true"
+                android:clickable="true"
+                android:cursorVisible="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView

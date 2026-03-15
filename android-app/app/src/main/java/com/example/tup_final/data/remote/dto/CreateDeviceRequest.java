@@ -15,6 +15,9 @@ public class CreateDeviceRequest {
     @SerializedName("deviceTypeId")
     private String deviceTypeId;
 
+    @SerializedName("inspectionId")
+    private String inspectionId;
+
     @SerializedName("description")
     private String description;
 
@@ -40,6 +43,9 @@ public class CreateDeviceRequest {
 
     public String getDeviceTypeId() { return deviceTypeId; }
     public void setDeviceTypeId(String deviceTypeId) { this.deviceTypeId = deviceTypeId; }
+
+    public String getInspectionId() { return inspectionId; }
+    public void setInspectionId(String inspectionId) { this.inspectionId = inspectionId; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }

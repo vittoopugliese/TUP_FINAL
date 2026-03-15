@@ -28,6 +28,38 @@ INSERT INTO device_types (id, code, name, category, enabled, sort_order) VALUES
 ('dt-009', 'HEAT_DETECTOR', 'Detector de calor', 'FA_FIELD_DEVICE', TRUE, 9),
 ('dt-010', 'PUMP_CONTROLLER', 'Controlador de bomba', 'PUMP_CONTROLLER', TRUE, 10);
 
+-- Test templates (catalog for inherited tests)
+INSERT INTO test_templates (id, code, name, description, enabled, sort_order) VALUES
+('tt-001', 'FACP_VERIFY', 'Verificación FACP', 'Revisión del panel de alarma', TRUE, 1),
+('tt-002', 'JOCKEY_PUMP_TEST', 'Prueba Jockey Pump', 'Verificación de presión', TRUE, 2),
+('tt-003', 'SMOKE_DETECTOR_TEST', 'Prueba detector humo', 'Verificación detector de humo', TRUE, 3),
+('tt-004', 'DEFIBRILLATOR_TEST', 'Prueba desfibrilador', 'Verificación de carga y electrodos', TRUE, 4),
+('tt-005', 'MONITOR_CALIBRATION', 'Calibración monitor', 'Verificar lecturas de SpO2 y ECG', TRUE, 5),
+('tt-006', 'EXTINGUISHER_INSPECT', 'Inspección extintor', 'Verificar sello, manómetro y fecha vencimiento', TRUE, 6),
+('tt-007', 'FACP_SIREN_TEST', 'Test de sirena FACP', 'Activar sirena y verificar audibilidad', TRUE, 7),
+('tt-008', 'FIRE_PUMP_TEST', 'Prueba Fire Pump', 'Verificación de arranque y presión nominal', TRUE, 8),
+('tt-009', 'JOCKEY_VALVES_VERIFY', 'Verificación válvulas Jockey', 'Revisión de válvulas de aislamiento', TRUE, 9),
+('tt-010', 'HEAT_DETECTOR_TEST', 'Prueba detector calor', 'Test funcional con fuente de calor', TRUE, 10),
+('tt-011', 'MONITOR_GAS_CALIBRATION', 'Calibración monitor gases', 'Verificar sensor gases anestésicos', TRUE, 11),
+('tt-012', 'SPRINKLER_HEAD_TEST', 'Prueba rociador', 'Verificar alineación y obstrucción', TRUE, 12),
+('tt-013', 'PUMP_CONTROLLER_VERIFY', 'Verificación controlador bomba', 'Revisión de indicadores y alarmas', TRUE, 13);
+
+-- Device type -> test template mappings (inherited tests per device type)
+INSERT INTO device_type_test_templates (device_type_id, test_template_id, sort_order) VALUES
+('dt-001', 'tt-001', 1),
+('dt-001', 'tt-007', 2),
+('dt-002', 'tt-002', 1),
+('dt-002', 'tt-009', 2),
+('dt-003', 'tt-008', 1),
+('dt-004', 'tt-003', 1),
+('dt-005', 'tt-006', 1),
+('dt-006', 'tt-012', 1),
+('dt-007', 'tt-004', 1),
+('dt-008', 'tt-005', 1),
+('dt-008', 'tt-011', 2),
+('dt-009', 'tt-010', 1),
+('dt-010', 'tt-013', 1);
+
 -- Zones (FK: location_id -> locations)
 INSERT INTO zones (id, location_id, name, details) VALUES
 ('zone-001', 'loc-001', 'Equipo médico', 'Desfibriladores y equipos de primeros auxilios'),

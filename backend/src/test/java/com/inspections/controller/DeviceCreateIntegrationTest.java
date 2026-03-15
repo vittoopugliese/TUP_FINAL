@@ -57,6 +57,37 @@ class DeviceCreateIntegrationTest {
     }
 
     @Test
+    void createDevice_withInspectionId_createsInheritedTests() throws Exception {
+        CreateDeviceRequest request = new CreateDeviceRequest();
+        request.setName("Device con tests heredados");
+        request.setDeviceTypeId("dt-004"); // SMOKE_DETECTOR -> tt-003
+        request.setInspectionId("insp-001");
+
+        mockMvc.perform(post("/api/locations/loc-001/zones/zone-001/devices")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.tests").isArray())
+                .andExpect(jsonPath("$.tests.length()").value(greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.tests[0].name").value("Prueba detector humo"))
+                .andExpect(jsonPath("$.tests[0].status").value("PENDING"));
+    }
+
+    @Test
+    void createDevice_inspectionNotInLocation_returns400() throws Exception {
+        CreateDeviceRequest request = new CreateDeviceRequest();
+        request.setName("Device");
+        request.setDeviceTypeId("dt-004");
+        request.setInspectionId("insp-004"); // insp-004 is loc-005, not loc-001
+
+        mockMvc.perform(post("/api/locations/loc-001/zones/zone-001/devices")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void createDevice_zoneNotFound_returns404() throws Exception {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setName("Device");

@@ -5,6 +5,7 @@ C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\e
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\AssignmentResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\ResetPasswordRequest.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\UpdateProfileRequest.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\DeviceTypeTestTemplateId.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\InspectionAssignment.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\AuthRequest.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\controller\UserController.java
@@ -18,12 +19,14 @@ C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\e
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\DeviceType.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\config\DataInitializer.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\controller\InspectionAssignmentController.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\DeviceTypeTestTemplate.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\ZoneRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\Observation.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\MoveDeviceRequest.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\TestResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\Device.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\InspectionRepository.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\DeviceTypeTestTemplateRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\DeviceTypeRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\DeviceWithTestsResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\controller\LocationController.java
@@ -36,6 +39,7 @@ C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\r
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\TestRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\config\SecurityConfig.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\StepRepository.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\TestTemplateRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\service\AuthService.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\AssignmentRequest.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\Location.java
@@ -54,6 +58,7 @@ C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\d
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\AuthResponse.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\repository\InspectionAssignmentRepository.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\service\EmailService.java
+C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\TestTemplate.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\PasswordResetToken.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\entity\Step.java
 C:\Users\torib\Desktop\Program\TUP_FINAL\backend\src\main\java\com\inspections\dto\MoveDeviceResponse.java

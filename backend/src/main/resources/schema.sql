@@ -88,6 +88,30 @@ CREATE TABLE IF NOT EXISTS device_types (
 CREATE INDEX IF NOT EXISTS idx_device_type_category ON device_types(category);
 CREATE INDEX IF NOT EXISTS idx_device_type_enabled ON device_types(enabled);
 
+-- Test templates (global catalog for inherited tests)
+CREATE TABLE IF NOT EXISTS test_templates (
+    id VARCHAR(36) PRIMARY KEY NOT NULL,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INT NOT NULL DEFAULT 0
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_test_template_code ON test_templates(code);
+CREATE INDEX IF NOT EXISTS idx_test_template_enabled ON test_templates(enabled);
+
+-- Device type -> test template mapping (which tests each device type inherits)
+CREATE TABLE IF NOT EXISTS device_type_test_templates (
+    device_type_id VARCHAR(36) NOT NULL,
+    test_template_id VARCHAR(36) NOT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (device_type_id, test_template_id),
+    CONSTRAINT fk_dtt_device_type FOREIGN KEY (device_type_id) REFERENCES device_types(id),
+    CONSTRAINT fk_dtt_test_template FOREIGN KEY (test_template_id) REFERENCES test_templates(id)
+);
+CREATE INDEX IF NOT EXISTS idx_dtt_device_type ON device_type_test_templates(device_type_id);
+CREATE INDEX IF NOT EXISTS idx_dtt_test_template ON device_type_test_templates(test_template_id);
+
 -- Zones (FK: locationId -> locations)
 CREATE TABLE IF NOT EXISTS zones (
     id VARCHAR(36) PRIMARY KEY NOT NULL,
@@ -139,6 +163,7 @@ CREATE TABLE IF NOT EXISTS tests (
 CREATE INDEX IF NOT EXISTS idx_test_device ON tests(device_id);
 CREATE INDEX IF NOT EXISTS idx_test_inspection ON tests(inspection_id);
 CREATE INDEX IF NOT EXISTS idx_test_status ON tests(status);
+CREATE INDEX IF NOT EXISTS idx_test_device_inspection_template ON tests(device_id, inspection_id, test_template_id);
 
 -- Steps (FK: testId -> tests)
 CREATE TABLE IF NOT EXISTS steps (

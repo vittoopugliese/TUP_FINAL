@@ -118,6 +118,15 @@ public class InspectionTestsViewModel extends ViewModel {
         expandedZoneIds.setValue(next);
     }
 
+    public void ensureDeviceExpanded(String deviceId) {
+        Set<String> current = expandedDeviceIds.getValue();
+        if (current == null) current = new HashSet<>();
+        if (current.contains(deviceId)) return;
+        Set<String> next = new HashSet<>(current);
+        next.add(deviceId);
+        expandedDeviceIds.setValue(next);
+    }
+
     public void toggleDeviceExpanded(String deviceId) {
         Set<String> current = expandedDeviceIds.getValue();
         if (current == null) current = new HashSet<>();

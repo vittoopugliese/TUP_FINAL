@@ -111,10 +111,18 @@ public class InspectionTestsRepository {
 
                 if (response.isSuccessful() && response.body() != null) {
                     DeviceWithTestsResponse d = response.body();
+                    List<TestUiModel> tests = new ArrayList<>();
+                    if (d.getTests() != null) {
+                        for (TestResponse t : d.getTests()) {
+                            tests.add(new TestUiModel(
+                                    t.getId(), t.getDeviceId(), t.getInspectionId(),
+                                    t.getName(), t.getDescription(), t.getStatus()));
+                        }
+                    }
                     DeviceUiModel model = new DeviceUiModel(
                             d.getId(), d.getZoneId(), d.getLocationId(),
                             d.getName(), d.getDeviceCategory(), d.getDeviceSerialNumber(),
-                            d.isEnabled(), new ArrayList<>());
+                            d.isEnabled(), tests);
                     mainHandler.post(() -> result.setValue(Resource.success(model)));
                 } else {
                     String msg = "Error al crear dispositivo";

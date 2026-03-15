@@ -116,7 +116,7 @@ public class InspectionTestsFragment extends Fragment {
         if (typesRes != null && typesRes.getData() != null) {
             types = typesRes.getData();
         }
-        addDeviceSheet = new AddDeviceBottomSheet(requireContext(), zone, types, request -> {
+        addDeviceSheet = new AddDeviceBottomSheet(requireContext(), zone, inspectionId, types, request -> {
             viewModel.createDevice(locationId, zone.id, request);
             addDeviceSheet.setLoading(true);
         });
@@ -134,6 +134,7 @@ public class InspectionTestsFragment extends Fragment {
                     break;
                 case SUCCESS:
                     String zoneIdToExpand = addDeviceSheet != null ? addDeviceSheet.getZone().id : null;
+                    String deviceIdToExpand = resource.getData() != null ? resource.getData().id : null;
                     if (addDeviceSheet != null) {
                         addDeviceSheet.setLoading(false);
                         addDeviceSheet.dismiss();
@@ -143,6 +144,9 @@ public class InspectionTestsFragment extends Fragment {
                     Toast.makeText(requireContext(), R.string.device_created_success, Toast.LENGTH_SHORT).show();
                     if (zoneIdToExpand != null) {
                         viewModel.ensureZoneExpanded(zoneIdToExpand);
+                    }
+                    if (deviceIdToExpand != null) {
+                        viewModel.ensureDeviceExpanded(deviceIdToExpand);
                     }
                     viewModel.loadZones(
                             viewModel.getLastLocationId(),

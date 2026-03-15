@@ -29,6 +29,7 @@ public class AddDeviceBottomSheet {
 
     private final BottomSheetDialog dialog;
     private final ZoneUiModel zone;
+    private final String inspectionId;
     private final List<DeviceTypeResponse> deviceTypes;
     private final OnSubmitListener listener;
 
@@ -52,9 +53,13 @@ public class AddDeviceBottomSheet {
     }
 
     public AddDeviceBottomSheet(Context context, ZoneUiModel zone,
+                                String inspectionId,
                                 List<DeviceTypeResponse> deviceTypes, OnSubmitListener listener) {
         this.zone = zone;
-        this.deviceTypes = deviceTypes != null ? deviceTypes : new ArrayList<>();
+        this.inspectionId = inspectionId;
+        this.deviceTypes = (deviceTypes != null && !deviceTypes.isEmpty())
+                ? deviceTypes
+                : buildFallbackDeviceTypes();
         this.listener = listener;
         this.dialog = new BottomSheetDialog(context);
 
@@ -84,6 +89,13 @@ public class AddDeviceBottomSheet {
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(context,
                 android.R.layout.simple_dropdown_item_1line, typeNames);
         actvType.setAdapter(typeAdapter);
+        actvType.setKeyListener(null);
+        actvType.setOnClickListener(v -> actvType.showDropDown());
+        actvType.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                actvType.showDropDown();
+            }
+        });
         actvType.setOnItemClickListener((parent, view, position, id) -> {
             selectedType = this.deviceTypes.get(position);
             textDerivedCategory.setVisibility(View.VISIBLE);
@@ -154,6 +166,7 @@ public class AddDeviceBottomSheet {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setName(name);
         request.setDeviceTypeId(selectedType.getId());
+        request.setInspectionId(inspectionId != null && !inspectionId.isEmpty() ? inspectionId : null);
         request.setDescription(description != null && !description.isEmpty() ? description : null);
         request.setSerialNumber(serialNumber);
         request.setEnabled(switchEnabled.isChecked());
@@ -165,5 +178,26 @@ public class AddDeviceBottomSheet {
 
     public ZoneUiModel getZone() {
         return zone;
+    }
+
+    private List<DeviceTypeResponse> buildFallbackDeviceTypes() {
+        List<DeviceTypeResponse> list = new ArrayList<>();
+        list.add(newType("dt-005", "EXTINGUISHER", "Extintor", "SPRINKLER_DEVICE"));
+        list.add(newType("dt-004", "SMOKE_DETECTOR", "Detector de humo", "FA_FIELD_DEVICE"));
+        list.add(newType("dt-006", "SPRINKLER_HEAD", "Rociador", "SPRINKLER_DEVICE"));
+        list.add(newType("dt-001", "FACP", "Panel de alarma", "FACP_DEVICE"));
+        list.add(newType("dt-002", "JOCKEY_PUMP", "Bomba jockey", "JOCKEY_PUMP"));
+        list.add(newType("dt-003", "FIRE_PUMP", "Bomba contra incendios", "FIRE_PUMP"));
+        return list;
+    }
+
+    private DeviceTypeResponse newType(String id, String code, String name, String category) {
+        DeviceTypeResponse type = new DeviceTypeResponse();
+        type.setId(id);
+        type.setCode(code);
+        type.setName(name);
+        type.setCategory(category);
+        type.setEnabled(true);
+        return type;
     }
 }
