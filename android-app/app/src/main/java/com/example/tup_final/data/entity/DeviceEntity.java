@@ -41,10 +41,6 @@ public class DeviceEntity {
     public String zoneId;
     public String locationId;
     public String buildingId;
-    /** FK para el fabricante. */
-    public String manufacturerId;
-    /** FK para el modelo. */
-    public String modelId;
     /** FK para el tipo de dispositivo. */
     public String deviceTypeId;
     /**

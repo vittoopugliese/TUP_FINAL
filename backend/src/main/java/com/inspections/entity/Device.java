@@ -24,8 +24,6 @@ public class Device {
     private String zoneId;
     private String locationId;
     private String buildingId;
-    private String manufacturerId;
-    private String modelId;
     private String deviceTypeId;
 
     /**
@@ -87,22 +85,6 @@ public class Device {
 
     public void setBuildingId(String buildingId) {
         this.buildingId = buildingId;
-    }
-
-    public String getManufacturerId() {
-        return manufacturerId;
-    }
-
-    public void setManufacturerId(String v) {
-        this.manufacturerId = v;
-    }
-
-    public String getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
     }
 
     public String getDeviceTypeId() {

@@ -94,8 +94,6 @@ CREATE TABLE devices (
     zoneId TEXT NOT NULL,
     locationId TEXT NOT NULL,
     buildingId TEXT,
-    manufacturerId TEXT,
-    modelId TEXT,
     deviceTypeId TEXT,
     deviceCategory TEXT,
     name TEXT,
