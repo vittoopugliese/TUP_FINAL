@@ -22,6 +22,8 @@ public class InspectionEntity {
     public String id;
     /** FK para el edificio. */
     public String buildingId;
+    /** Nombre legible del edificio (para mostrar en UI). */
+    public String buildingName;
     /** FK para la ubicación (Location). */
     public String locationId;
     /** Tipo: Daily, Weekly, Monthly, Annually. */

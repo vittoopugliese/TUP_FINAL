@@ -64,7 +64,6 @@
     <string name="filter_expand_hint">Mostrar filtros</string>
     <string name="filter_collapse_hint">Ocultar filtros</string>
     <string name="filter_building">Edificio</string>
-    <string name="filter_location">Ubicación</string>
     <string name="filter_date">Fecha</string>
     <string name="filter_status">Estado</string>
     <string name="filter_apply">Aplicar</string>
@@ -73,7 +72,6 @@
     <string name="filter_all">Todos</string>
     <string name="filter_active_status">Estado: %s</string>
     <string name="filter_active_building">Edificio: %s</string>
-    <string name="filter_active_location">Ubicación: %s</string>
     <string name="filter_active_date">Fecha: %s</string>
     <string name="inspections_loading">Cargando inspecciones…</string>
 

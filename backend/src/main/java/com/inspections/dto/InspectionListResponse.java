@@ -10,6 +10,7 @@ public class InspectionListResponse {
 
     private String id;
     private String buildingId;
+    private String buildingName;
     private String locationId;
     private String status;
     private Instant scheduledDate;
@@ -17,10 +18,11 @@ public class InspectionListResponse {
 
     public InspectionListResponse() {}
 
-    public InspectionListResponse(String id, String buildingId, String locationId, String status,
-                                   Instant scheduledDate, String type) {
+    public InspectionListResponse(String id, String buildingId, String buildingName, String locationId,
+                                   String status, Instant scheduledDate, String type) {
         this.id = id;
         this.buildingId = buildingId;
+        this.buildingName = buildingName;
         this.locationId = locationId;
         this.status = status;
         this.scheduledDate = scheduledDate;
@@ -32,6 +34,9 @@ public class InspectionListResponse {
 
     public String getBuildingId() { return buildingId; }
     public void setBuildingId(String buildingId) { this.buildingId = buildingId; }
+
+    public String getBuildingName() { return buildingName; }
+    public void setBuildingName(String buildingName) { this.buildingName = buildingName; }
 
     public String getLocationId() { return locationId; }
     public void setLocationId(String locationId) { this.locationId = locationId; }

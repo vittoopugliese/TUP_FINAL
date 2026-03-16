@@ -232,8 +232,10 @@ public class GeneralInfoFragment extends Fragment {
     }
 
     private void bindInspection(InspectionEntity inspection) {
-        binding.textBuilding.setText(
-                inspection.buildingId != null ? inspection.buildingId : "—");
+        String displayName = inspection.buildingName != null && !inspection.buildingName.isEmpty()
+                ? inspection.buildingName
+                : (inspection.buildingId != null ? inspection.buildingId : "—");
+        binding.textBuilding.setText(displayName);
 
         binding.textType.setText(
                 inspection.type != null ? inspection.type : "—");

@@ -55,7 +55,6 @@ public class HomeFragment extends Fragment {
     private ImageView iconFilterChevron;
     private boolean filtersExpanded = false;
     private AutoCompleteTextView inputBuilding;
-    private AutoCompleteTextView inputLocation;
     private AutoCompleteTextView inputStatus;
     private TextView textActiveFilters;
     private String pendingScrollToInspectionId = null;
@@ -107,7 +106,6 @@ public class HomeFragment extends Fragment {
 
     private void resetFilterInputs() {
         if (inputBuilding != null) inputBuilding.setText("", false);
-        if (inputLocation != null) inputLocation.setText("", false);
         if (inputStatus != null) inputStatus.setText("", false);
         if (btnFilterDate != null) btnFilterDate.setText(R.string.filter_date_hint);
     }
@@ -161,7 +159,6 @@ public class HomeFragment extends Fragment {
 
     private void setupFilterPanel(View view) {
         inputBuilding = view.findViewById(R.id.input_filter_building);
-        inputLocation = view.findViewById(R.id.input_filter_location);
         inputStatus = view.findViewById(R.id.input_filter_status);
 
         // Status dropdown
@@ -191,23 +188,6 @@ public class HomeFragment extends Fragment {
                 inputBuilding.setOnItemClickListener((parent, v, position, id) -> {
                     String selected = buildingIds.get(position);
                     viewModel.setBuildingFilter(
-                            getString(R.string.filter_all).equals(selected) ? null : selected);
-                    collapseFilters();
-                });
-            }
-        });
-
-        // Location dropdown - populated when data loads
-        viewModel.getLocationIdsResult().observe(getViewLifecycleOwner(), resource -> {
-            if (resource.getStatus() == Resource.Status.SUCCESS && resource.getData() != null) {
-                List<String> locationIds = new ArrayList<>(resource.getData());
-                locationIds.add(0, getString(R.string.filter_all));
-                ArrayAdapter<String> locationAdapter = new ArrayAdapter<>(requireContext(),
-                        android.R.layout.simple_dropdown_item_1line, locationIds);
-                inputLocation.setAdapter(locationAdapter);
-                inputLocation.setOnItemClickListener((parent, v, position, id) -> {
-                    String selected = locationIds.get(position);
-                    viewModel.setLocationFilter(
                             getString(R.string.filter_all).equals(selected) ? null : selected);
                     collapseFilters();
                 });
@@ -275,7 +255,6 @@ public class HomeFragment extends Fragment {
         androidx.lifecycle.Observer<Object> updateSummary = o -> updateActiveFiltersSummary();
         viewModel.getStatusFilter().observe(getViewLifecycleOwner(), updateSummary);
         viewModel.getBuildingFilter().observe(getViewLifecycleOwner(), updateSummary);
-        viewModel.getLocationFilter().observe(getViewLifecycleOwner(), updateSummary);
         viewModel.getDateFromFilter().observe(getViewLifecycleOwner(), updateSummary);
         viewModel.getDateToFilter().observe(getViewLifecycleOwner(), updateSummary);
     }
@@ -283,14 +262,12 @@ public class HomeFragment extends Fragment {
     private void updateActiveFiltersSummary() {
         String status = viewModel.getStatusFilter().getValue();
         String building = viewModel.getBuildingFilter().getValue();
-        String location = viewModel.getLocationFilter().getValue();
         Long dateFrom = viewModel.getDateFromFilter().getValue();
         Long dateTo = viewModel.getDateToFilter().getValue();
 
         List<String> parts = new ArrayList<>();
         if (status != null) parts.add(getString(R.string.filter_active_status, status));
         if (building != null) parts.add(getString(R.string.filter_active_building, building));
-        if (location != null) parts.add(getString(R.string.filter_active_location, location));
         if (dateFrom != null && dateTo != null) {
             SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
             format.setTimeZone(TimeZone.getTimeZone("UTC"));

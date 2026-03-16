@@ -212,9 +212,16 @@ public class InspectionService {
     }
 
     private InspectionListResponse mapToListResponse(Inspection inspection) {
+        String buildingName = null;
+        if (inspection.getBuildingId() != null && !inspection.getBuildingId().isBlank()) {
+            buildingName = buildingRepository.findById(inspection.getBuildingId())
+                    .map(Building::getName)
+                    .orElse(null);
+        }
         return new InspectionListResponse(
                 inspection.getId(),
                 inspection.getBuildingId(),
+                buildingName,
                 inspection.getLocationId(),
                 inspection.getStatus(),
                 inspection.getScheduledDate(),

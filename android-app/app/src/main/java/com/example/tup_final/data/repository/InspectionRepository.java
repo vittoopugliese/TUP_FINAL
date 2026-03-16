@@ -143,6 +143,7 @@ public class InspectionRepository {
             InspectionEntity entity = new InspectionEntity();
             entity.id = dto.getId() != null ? dto.getId() : "";
             entity.buildingId = dto.getBuildingId();
+            entity.buildingName = dto.getBuildingName();
             entity.type = dto.getType();
             entity.status = dto.getStatus();
             entity.scheduledDate = dto.getScheduledDate();

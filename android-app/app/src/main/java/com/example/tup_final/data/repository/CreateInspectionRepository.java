@@ -147,6 +147,7 @@ public class CreateInspectionRepository {
         InspectionEntity e = new InspectionEntity();
         e.id = r.getId() != null ? r.getId() : "";
         e.buildingId = r.getBuildingId();
+        e.buildingName = r.getBuildingName();
         e.locationId = null; // building-wide
         e.type = r.getType();
         e.status = r.getStatus();

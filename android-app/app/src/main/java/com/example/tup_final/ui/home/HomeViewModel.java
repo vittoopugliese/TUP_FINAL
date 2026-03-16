@@ -23,7 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 /**
  * ViewModel para HomeFragment. Gestiona la lista de inspecciones y los filtros
- * (edificio, ubicación, fecha, estado).
+ * (edificio, fecha, estado).
  */
 @HiltViewModel
 public class HomeViewModel extends ViewModel {
@@ -38,10 +38,8 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<List<InspectionEntity>> filteredInspections = new MutableLiveData<>(new ArrayList<>());
     private final MediatorLiveData<Resource<List<InspectionEntity>>> inspectionsResult = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<List<String>>> buildingIdsResult = new MediatorLiveData<>();
-    private final MediatorLiveData<Resource<List<String>>> locationIdsResult = new MediatorLiveData<>();
 
     private final MutableLiveData<String> buildingFilter = new MutableLiveData<>(null);
-    private final MutableLiveData<String> locationFilter = new MutableLiveData<>(null);
     private final MutableLiveData<String> statusFilter = new MutableLiveData<>(null);
     private final MutableLiveData<Long> dateFromFilter = new MutableLiveData<>(null);
     private final MutableLiveData<Long> dateToFilter = new MutableLiveData<>(null);
@@ -54,7 +52,6 @@ public class HomeViewModel extends ViewModel {
         this.inspectionRepository = inspectionRepository;
         loadInspections();
         loadBuildingIds();
-        loadLocationIds();
     }
 
     /**
@@ -76,7 +73,6 @@ public class HomeViewModel extends ViewModel {
                 allInspections.setValue(resource.getData());
                 applyFilters();
                 loadBuildingIds();
-                loadLocationIds();
             }
             if (resource.getStatus() != Resource.Status.LOADING) {
                 inspectionsResult.removeSource(source);
@@ -104,19 +100,6 @@ public class HomeViewModel extends ViewModel {
         });
     }
 
-    /**
-     * Carga los IDs de ubicaciones para el dropdown del filtro.
-     */
-    public void loadLocationIds() {
-        LiveData<Resource<List<String>>> source = inspectionRepository.getDistinctLocationIds();
-        locationIdsResult.addSource(source, resource -> {
-            locationIdsResult.setValue(resource);
-            if (resource.getStatus() != Resource.Status.LOADING) {
-                locationIdsResult.removeSource(source);
-            }
-        });
-    }
-
     public LiveData<Resource<List<InspectionEntity>>> getInspectionsResult() {
         return inspectionsResult;
     }
@@ -129,17 +112,8 @@ public class HomeViewModel extends ViewModel {
         return buildingIdsResult;
     }
 
-    public LiveData<Resource<List<String>>> getLocationIdsResult() {
-        return locationIdsResult;
-    }
-
     public void setBuildingFilter(String buildingId) {
         buildingFilter.setValue(buildingId != null && buildingId.trim().isEmpty() ? null : buildingId);
-        applyFilters();
-    }
-
-    public void setLocationFilter(String locationId) {
-        locationFilter.setValue(locationId != null && locationId.trim().isEmpty() ? null : locationId);
         applyFilters();
     }
 
@@ -156,7 +130,6 @@ public class HomeViewModel extends ViewModel {
 
     public void clearFilters() {
         buildingFilter.setValue(null);
-        locationFilter.setValue(null);
         statusFilter.setValue(null);
         dateFromFilter.setValue(null);
         dateToFilter.setValue(null);
@@ -171,7 +144,6 @@ public class HomeViewModel extends ViewModel {
         }
 
         String building = buildingFilter.getValue();
-        String location = locationFilter.getValue();
         String status = statusFilter.getValue();
         Long fromMillis = dateFromFilter.getValue();
         Long toMillis = dateToFilter.getValue();
@@ -179,7 +151,6 @@ public class HomeViewModel extends ViewModel {
         List<InspectionEntity> filtered = new ArrayList<>();
         for (InspectionEntity inspection : all) {
             if (!matchesBuilding(inspection, building)) continue;
-            if (!matchesLocation(inspection, location)) continue;
             if (!matchesStatus(inspection, status)) continue;
             if (!matchesDateRange(inspection, fromMillis, toMillis)) continue;
             filtered.add(inspection);
@@ -200,11 +171,6 @@ public class HomeViewModel extends ViewModel {
     private boolean matchesBuilding(InspectionEntity inspection, String building) {
         if (building == null || building.trim().isEmpty()) return true;
         return building.equals(inspection.buildingId);
-    }
-
-    private boolean matchesLocation(InspectionEntity inspection, String location) {
-        if (location == null || location.trim().isEmpty()) return true;
-        return location.equals(inspection.locationId);
     }
 
     private boolean matchesStatus(InspectionEntity inspection, String status) {
@@ -229,10 +195,6 @@ public class HomeViewModel extends ViewModel {
 
     public LiveData<String> getBuildingFilter() {
         return buildingFilter;
-    }
-
-    public LiveData<String> getLocationFilter() {
-        return locationFilter;
     }
 
     public LiveData<String> getStatusFilter() {

@@ -9,7 +9,7 @@ public class CreateInspectionResponse {
 
     private String id;
     private String buildingId;
-    private String name;
+    private String buildingName;
     private String type;
     private String status;
     private Instant scheduledDate;
@@ -22,13 +22,13 @@ public class CreateInspectionResponse {
 
     public CreateInspectionResponse() {}
 
-    public CreateInspectionResponse(String id, String buildingId, String name, String type,
+    public CreateInspectionResponse(String id, String buildingId, String buildingName, String type,
                                     String status, Instant scheduledDate, String inspectionTemplateId,
                                     String notes, int locationsCount, int zonesCount,
                                     int devicesCount, int testsCount) {
         this.id = id;
         this.buildingId = buildingId;
-        this.name = name;
+        this.buildingName = buildingName;
         this.type = type;
         this.status = status;
         this.scheduledDate = scheduledDate;
@@ -46,8 +46,8 @@ public class CreateInspectionResponse {
     public String getBuildingId() { return buildingId; }
     public void setBuildingId(String buildingId) { this.buildingId = buildingId; }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getBuildingName() { return buildingName; }
+    public void setBuildingName(String buildingName) { this.buildingName = buildingName; }
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }

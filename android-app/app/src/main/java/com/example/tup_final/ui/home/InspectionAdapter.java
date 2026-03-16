@@ -75,6 +75,7 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
                     return areItemsTheSame(oldItem, newItem)
                             && stringEquals(oldItem.status, newItem.status)
                             && stringEquals(oldItem.buildingId, newItem.buildingId)
+                            && stringEquals(oldItem.buildingName, newItem.buildingName)
                             && stringEquals(oldItem.scheduledDate, newItem.scheduledDate);
                 }
 
@@ -132,9 +133,11 @@ public class InspectionAdapter extends ListAdapter<InspectionEntity, InspectionA
             card.setStrokeColor(statusColor);
             statusIndicator.setBackgroundColor(statusColor);
 
-            String buildingName = inspection.buildingId != null
-                    ? inspection.buildingId : itemView.getContext().getString(R.string.inspection_no_building);
-            textBuilding.setText(buildingName);
+            String displayName = inspection.buildingName != null && !inspection.buildingName.isEmpty()
+                    ? inspection.buildingName
+                    : (inspection.buildingId != null ? inspection.buildingId
+                    : itemView.getContext().getString(R.string.inspection_no_building));
+            textBuilding.setText(displayName);
 
             chipStatus.setText(getStatusLabel(inspection.status));
             Drawable bg = chipStatus.getBackground();

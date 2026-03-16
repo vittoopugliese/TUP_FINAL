@@ -13,8 +13,8 @@ public class CreateInspectionResponse {
     @SerializedName("buildingId")
     private String buildingId;
 
-    @SerializedName("name")
-    private String name;
+    @SerializedName("buildingName")
+    private String buildingName;
 
     @SerializedName("type")
     private String type;
@@ -49,8 +49,8 @@ public class CreateInspectionResponse {
     public String getBuildingId() { return buildingId; }
     public void setBuildingId(String buildingId) { this.buildingId = buildingId; }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getBuildingName() { return buildingName; }
+    public void setBuildingName(String buildingName) { this.buildingName = buildingName; }
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
