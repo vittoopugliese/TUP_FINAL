@@ -70,11 +70,11 @@ public class InspectionRepository {
                 Response<List<InspectionListResponse>> response = inspectionApi.getInspections().execute();
                 if (response.isSuccessful() && response.body() != null) {
                     List<InspectionEntity> entities = mapToEntities(response.body());
+                    inspectionDao.deleteAll();
                     if (!entities.isEmpty()) {
                         inspectionDao.insertAll(entities);
                     }
-                    List<InspectionEntity> merged = inspectionDao.getAll();
-                    mainHandler.post(() -> result.setValue(Resource.success(merged)));
+                    mainHandler.post(() -> result.setValue(Resource.success(entities)));
                 } else {
                     loadFromCache(result);
                 }

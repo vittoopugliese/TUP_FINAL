@@ -148,8 +148,6 @@ CREATE TABLE IF NOT EXISTS devices (
     zone_id VARCHAR(36) NOT NULL,
     location_id VARCHAR(36) NOT NULL,
     building_id VARCHAR(36),
-    manufacturer_id VARCHAR(36),
-    model_id VARCHAR(36),
     device_type_id VARCHAR(36),
     device_category VARCHAR(100),
     name VARCHAR(255),

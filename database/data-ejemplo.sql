@@ -43,20 +43,20 @@ INSERT INTO zones (id, locationId, name, details) VALUES
 ('zone-009', 'loc-008', 'Pasillo central', 'Detectores y extintores');
 
 -- Devices (FK: zoneId -> zones, locationId -> locations)
-INSERT INTO devices (id, zoneId, locationId, buildingId, manufacturerId, modelId, deviceTypeId, deviceCategory, name, description, deviceSerialNumber, installationDate, expirationDate, enabled, attributeIds, createdAt, updatedAt) VALUES
-('dev-001', 'zone-002', 'loc-001', 'bld-001', 'mfr-001', 'mod-001', 'dt-001', 'FACP_DEVICE', 'Panel de alarma principal', 'Panel de control FACP - Sala emergencias', 1001, '2024-01-15', '2026-01-15', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
-('dev-002', 'zone-003', 'loc-002', 'bld-001', 'mfr-002', 'mod-002', 'dt-002', 'JOCKEY_PUMP', 'Jockey Pump A', 'Bomba de mantenimiento de presión', 2001, '2024-03-01', '2025-09-01', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
-('dev-003', 'zone-003', 'loc-002', 'bld-001', 'mfr-002', 'mod-003', 'dt-003', 'FIRE_PUMP', 'Fire Pump principal', 'Bomba principal contra incendios', 3001, '2024-02-10', '2026-02-10', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
-('dev-004', 'zone-004', 'loc-003', 'bld-001', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector de humo DH-01', 'Detector fotoeléctrico corredor norte', 4001, '2024-05-20', '2027-05-20', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
-('dev-005', 'zone-005', 'loc-004', 'bld-001', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor ABC 6kg', 'Extintor polvo químico oficinas', 5001, '2024-06-01', '2025-06-01', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
-('dev-006', 'zone-006', 'loc-005', 'bld-002', 'mfr-005', 'mod-006', 'dt-006', 'SPRINKLER_DEVICE', 'Rociador cabeza 1', 'Rociador tipo pendiente nave A', 6001, '2024-04-15', '2029-04-15', 1, NULL, '2025-01-15T09:00:00Z', '2025-01-15T09:00:00Z'),
-('dev-007', 'zone-007', 'loc-006', 'bld-002', 'mfr-002', 'mod-002', 'dt-002', 'JOCKEY_PUMP', 'Jockey Pump B', 'Bomba mantenimiento depósito', 2002, '2024-07-01', '2025-07-01', 1, NULL, '2025-01-15T09:00:00Z', '2025-01-15T09:00:00Z'),
-('dev-008', 'zone-008', 'loc-007', 'bld-003', 'mfr-001', 'mod-007', 'dt-001', 'FACP_DEVICE', 'Panel quirófanos', 'Panel de alarma bloque quirúrgico', 1002, '2024-08-10', '2026-08-10', 1, NULL, '2025-01-20T10:00:00Z', '2025-01-20T10:00:00Z'),
-('dev-009', 'zone-009', 'loc-008', 'bld-003', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector pasillo 101', 'Detector área internación', 4002, '2024-09-01', '2027-09-01', 1, NULL, '2025-01-20T10:00:00Z', '2025-01-20T10:00:00Z'),
-('dev-010', 'zone-001', 'loc-001', 'bld-001', 'mfr-001', 'mod-008', 'dt-007', 'FA_FIELD_DEVICE', 'Desfibrilador DEA-01', 'Desfibrilador automático sala emergencias', 7001, '2024-02-01', '2027-02-01', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
-('dev-015', 'zone-006', 'loc-005', 'bld-002', 'mfr-005', 'mod-006', 'dt-006', 'SPRINKLER_DEVICE', 'Rociador cabeza 2', 'Rociador tipo montante nave A', 6002, '2024-04-15', '2029-04-15', 1, NULL, '2025-01-15T09:00:00Z', '2025-01-15T09:00:00Z'),
-('dev-016', 'zone-008', 'loc-007', 'bld-003', 'mfr-003', 'mod-009', 'dt-008', 'FA_FIELD_DEVICE', 'Monitor anestesia Q1', 'Monitor gases anestésicos quirófano 1', 7003, '2024-09-01', '2028-09-01', 1, NULL, '2025-01-20T10:00:00Z', '2025-01-20T10:00:00Z'),
-('dev-017', 'zone-009', 'loc-008', 'bld-003', 'mfr-004', 'mod-005', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor pasillo internación', 'Extintor ABC 4kg pasillo central', 5003, '2024-10-01', '2025-10-01', 1, NULL, '2025-01-20T10:00:00Z', '2025-01-20T10:00:00Z');
+INSERT INTO devices (id, zoneId, locationId, buildingId, deviceTypeId, deviceCategory, name, description, deviceSerialNumber, installationDate, expirationDate, enabled, attributeIds, createdAt, updatedAt) VALUES
+('dev-001', 'zone-002', 'loc-001', 'bld-001', 'dt-001', 'FACP_DEVICE', 'Panel de alarma principal', 'Panel de control FACP - Sala emergencias', 1001, '2024-01-15', '2026-01-15', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
+('dev-002', 'zone-003', 'loc-002', 'bld-001', 'dt-002', 'JOCKEY_PUMP', 'Jockey Pump A', 'Bomba de mantenimiento de presión', 2001, '2024-03-01', '2025-09-01', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
+('dev-003', 'zone-003', 'loc-002', 'bld-001', 'dt-003', 'FIRE_PUMP', 'Fire Pump principal', 'Bomba principal contra incendios', 3001, '2024-02-10', '2026-02-10', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
+('dev-004', 'zone-004', 'loc-003', 'bld-001', 'dt-004', 'FA_FIELD_DEVICE', 'Detector de humo DH-01', 'Detector fotoeléctrico corredor norte', 4001, '2024-05-20', '2027-05-20', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
+('dev-005', 'zone-005', 'loc-004', 'bld-001', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor ABC 6kg', 'Extintor polvo químico oficinas', 5001, '2024-06-01', '2025-06-01', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
+('dev-006', 'zone-006', 'loc-005', 'bld-002', 'dt-006', 'SPRINKLER_DEVICE', 'Rociador cabeza 1', 'Rociador tipo pendiente nave A', 6001, '2024-04-15', '2029-04-15', 1, NULL, '2025-01-15T09:00:00Z', '2025-01-15T09:00:00Z'),
+('dev-007', 'zone-007', 'loc-006', 'bld-002', 'dt-002', 'JOCKEY_PUMP', 'Jockey Pump B', 'Bomba mantenimiento depósito', 2002, '2024-07-01', '2025-07-01', 1, NULL, '2025-01-15T09:00:00Z', '2025-01-15T09:00:00Z'),
+('dev-008', 'zone-008', 'loc-007', 'bld-003', 'dt-001', 'FACP_DEVICE', 'Panel quirófanos', 'Panel de alarma bloque quirúrgico', 1002, '2024-08-10', '2026-08-10', 1, NULL, '2025-01-20T10:00:00Z', '2025-01-20T10:00:00Z'),
+('dev-009', 'zone-009', 'loc-008', 'bld-003', 'dt-004', 'FA_FIELD_DEVICE', 'Detector pasillo 101', 'Detector área internación', 4002, '2024-09-01', '2027-09-01', 1, NULL, '2025-01-20T10:00:00Z', '2025-01-20T10:00:00Z'),
+('dev-010', 'zone-001', 'loc-001', 'bld-001', 'dt-007', 'FA_FIELD_DEVICE', 'Desfibrilador DEA-01', 'Desfibrilador automático sala emergencias', 7001, '2024-02-01', '2027-02-01', 1, NULL, '2025-01-10T08:00:00Z', '2025-01-10T08:00:00Z'),
+('dev-015', 'zone-006', 'loc-005', 'bld-002', 'dt-006', 'SPRINKLER_DEVICE', 'Rociador cabeza 2', 'Rociador tipo montante nave A', 6002, '2024-04-15', '2029-04-15', 1, NULL, '2025-01-15T09:00:00Z', '2025-01-15T09:00:00Z'),
+('dev-016', 'zone-008', 'loc-007', 'bld-003', 'dt-008', 'FA_FIELD_DEVICE', 'Monitor anestesia Q1', 'Monitor gases anestésicos quirófano 1', 7003, '2024-09-01', '2028-09-01', 1, NULL, '2025-01-20T10:00:00Z', '2025-01-20T10:00:00Z'),
+('dev-017', 'zone-009', 'loc-008', 'bld-003', 'dt-005', 'SPRINKLER_DEVICE', 'Extintor pasillo internación', 'Extintor ABC 4kg pasillo central', 5003, '2024-10-01', '2025-10-01', 1, NULL, '2025-01-20T10:00:00Z', '2025-01-20T10:00:00Z');
 
 -- Inspections (buildingId y locationId son refs lógicas)
 -- Solo 3 inspecciones demo: PENDING (bld-001), IN_PROGRESS (bld-002), DONE_COMPLETED (bld-003)
