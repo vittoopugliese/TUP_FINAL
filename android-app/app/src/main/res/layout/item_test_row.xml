@@ -27,6 +27,15 @@
         android:textSize="14sp"
         tools:text="few steps v4" />
 
+    <TextView
+        android:id="@+id/text_test_status_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:textSize="11sp"
+        android:textColor="?android:attr/textColorSecondary"
+        tools:text="PENDIENTE" />
+
     <ImageView
         android:id="@+id/icon_test_chevron"
         android:layout_width="20dp"

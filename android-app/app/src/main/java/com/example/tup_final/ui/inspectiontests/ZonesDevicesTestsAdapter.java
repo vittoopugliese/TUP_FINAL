@@ -27,6 +27,22 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
     private static final int TYPE_DEVICE = 1;
     private static final int TYPE_TEST = 2;
 
+    /** Estados normalizados para tests. Fallback: PENDING. */
+    private static final String STATUS_PENDING = "PENDING";
+    private static final String STATUS_COMPLETED = "COMPLETED";
+    private static final String STATUS_FAILED = "FAILED";
+
+    /**
+     * Normaliza el estado del test para UI. Maneja null, variantes (DONE_FAILED, etc.) y minúsculas.
+     */
+    private static String normalizeTestStatus(String status) {
+        if (status == null || status.isEmpty()) return STATUS_PENDING;
+        String s = status.trim().toUpperCase();
+        if ("COMPLETED".equals(s)) return STATUS_COMPLETED;
+        if ("FAILED".equals(s) || "DONE_FAILED".equals(s)) return STATUS_FAILED;
+        return STATUS_PENDING;
+    }
+
     public interface OnTestClickListener {
         void onTestClick(TestUiModel test);
     }
@@ -99,6 +115,13 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
 
             @Override
             public boolean areContentsTheSame(@NonNull ListItem oldItem, @NonNull ListItem newItem) {
+                if (oldItem.getType() != newItem.getType()) return false;
+                if (oldItem.getType() == TYPE_TEST) {
+                    TestItem o = (TestItem) oldItem;
+                    TestItem n = (TestItem) newItem;
+                    return o.test.id.equals(n.test.id)
+                            && java.util.Objects.equals(o.test.status, n.test.status);
+                }
                 return areItemsTheSame(oldItem, newItem);
             }
         });
@@ -275,15 +298,17 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
 
         void bind(DeviceItem item) {
             textDeviceName.setText(item.device.name);
-            int total = item.device.tests != null ? item.device.tests.size() : 0;
-            int completed = 0;
+            int pending = 0, completed = 0, failed = 0;
             if (item.device.tests != null) {
                 for (TestUiModel t : item.device.tests) {
-                    if ("COMPLETED".equals(t.status)) completed++;
+                    String s = normalizeTestStatus(t.status);
+                    if (STATUS_COMPLETED.equals(s)) completed++;
+                    else if (STATUS_FAILED.equals(s)) failed++;
+                    else pending++;
                 }
             }
             textTestsSummary.setText(itemView.getContext().getString(
-                    R.string.device_tests_completed, completed, total));
+                    R.string.device_tests_summary, pending, completed, failed));
 
             int colorRes = item.device.enabled ? android.R.color.holo_green_dark : android.R.color.holo_red_light;
             viewStatus.setBackgroundColor(itemView.getContext().getColor(colorRes));
@@ -296,11 +321,13 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
     class TestViewHolder extends RecyclerView.ViewHolder {
         private final View viewStatus;
         private final TextView textTestName;
+        private final TextView textTestStatusLabel;
 
         TestViewHolder(View itemView) {
             super(itemView);
             viewStatus = itemView.findViewById(R.id.view_test_status);
             textTestName = itemView.findViewById(R.id.text_test_name);
+            textTestStatusLabel = itemView.findViewById(R.id.text_test_status_label);
 
             itemView.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
@@ -313,11 +340,22 @@ public class ZonesDevicesTestsAdapter extends ListAdapter<ZonesDevicesTestsAdapt
 
         void bind(TestItem item) {
             textTestName.setText(item.test.name);
+            String normalized = normalizeTestStatus(item.test.status);
 
-            int colorRes = "COMPLETED".equals(item.test.status)
-                    ? android.R.color.holo_green_dark
-                    : android.R.color.holo_orange_light;
+            int colorRes;
+            int labelRes;
+            if (STATUS_COMPLETED.equals(normalized)) {
+                colorRes = android.R.color.holo_green_dark;
+                labelRes = R.string.test_status_completed;
+            } else if (STATUS_FAILED.equals(normalized)) {
+                colorRes = android.R.color.holo_red_dark;
+                labelRes = R.string.test_status_failed;
+            } else {
+                colorRes = android.R.color.holo_orange_light;
+                labelRes = R.string.test_status_pending;
+            }
             viewStatus.setBackgroundColor(itemView.getContext().getColor(colorRes));
+            textTestStatusLabel.setText(labelRes);
         }
     }
 }

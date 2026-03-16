@@ -169,101 +169,68 @@ INSERT INTO devices (id, zone_id, location_id, building_id, manufacturer_id, mod
 ('dev-041', 'zone-026', 'loc-024', 'bld-010', 'mfr-003', 'mod-004', 'dt-004', 'FA_FIELD_DEVICE', 'Detector biblioteca', 'Detector sala lectura', 4011, '2024-05-20', '2027-05-20', TRUE, NULL, '2025-02-25 08:00:00', '2025-02-25 08:00:00');
 
 -- Inspections (building-wide: location_id NULL; building_id es ref lógica)
+-- Solo 3 inspecciones demo: PENDING (bld-001), IN_PROGRESS (bld-002), DONE_COMPLETED (bld-003)
 INSERT INTO inspections (id, building_id, location_id, type, status, scheduled_date, approval_date, result, notes, signer, signed, sign_date, started_at, inspection_report_id, inspection_template_id, cover_page_id, created_at, updated_at) VALUES
-('insp-001', 'bld-001', NULL, 'Weekly', 'IN_PROGRESS', '2025-03-15 08:00:00', NULL, NULL, 'Inspección semanal - Hospital Central', NULL, FALSE, NULL, '2025-03-15 08:00:00', NULL, 'tpl-001', NULL, '2025-03-10 09:00:00', '2025-03-15 08:00:00'),
-('insp-002', 'bld-001', NULL, 'Monthly', 'DONE_COMPLETED', '2025-03-01 09:00:00', '2025-03-01 16:00:00', 'SUCCESS', 'Inspección mensual - Sala bombas OK', 'María García', TRUE, '2025-03-01 16:00:00', '2025-03-01 09:00:00', 'rpt-001', 'tpl-002', NULL, '2025-02-25 09:00:00', '2025-03-01 16:00:00'),
-('insp-003', 'bld-001', NULL, 'Weekly', 'PENDING', '2025-03-18 10:00:00', NULL, NULL, 'Pendiente - Corredor Norte', NULL, FALSE, NULL, NULL, NULL, 'tpl-001', NULL, '2025-03-12 09:00:00', '2025-03-12 09:00:00'),
-('insp-004', 'bld-002', NULL, 'Monthly', 'PENDING', '2025-03-20 08:00:00', NULL, NULL, 'Inspección mensual depósito', NULL, FALSE, NULL, NULL, NULL, 'tpl-002', NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
-('insp-005', 'bld-002', NULL, 'Annually', 'PENDING', '2025-04-01 09:00:00', NULL, NULL, 'Inspección anual - Sala máquinas', NULL, FALSE, NULL, NULL, NULL, 'tpl-003', NULL, '2025-03-01 09:00:00', '2025-03-01 09:00:00'),
-('insp-006', 'bld-003', NULL, 'Daily', 'IN_PROGRESS', '2025-03-14 07:00:00', NULL, NULL, 'Inspección diaria quirófanos', NULL, FALSE, NULL, '2025-03-14 07:00:00', NULL, 'tpl-001', NULL, '2025-03-14 06:00:00', '2025-03-14 07:00:00'),
-('insp-007', 'bld-003', NULL, 'Weekly', 'DONE_FAILED', '2025-03-10 09:00:00', '2025-03-10 14:00:00', 'FAILED', 'Falló detector 101 - requiere reemplazo', 'Juan Pérez', TRUE, '2025-03-10 14:00:00', '2025-03-10 09:00:00', 'rpt-002', 'tpl-002', NULL, '2025-03-05 09:00:00', '2025-03-10 14:00:00');
+('insp-001', 'bld-001', NULL, 'Weekly', 'PENDING', '2025-03-20 08:00:00', NULL, NULL, 'Inspección semanal - Hospital Central (programada)', NULL, FALSE, NULL, NULL, NULL, 'tpl-001', NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('insp-002', 'bld-002', NULL, 'Monthly', 'IN_PROGRESS', '2025-03-18 10:00:00', NULL, NULL, 'Inspección mensual depósito - en curso', NULL, FALSE, NULL, '2025-03-18 09:00:00', NULL, 'tpl-002', NULL, '2025-03-15 09:00:00', '2025-03-18 09:00:00'),
+('insp-003', 'bld-003', NULL, 'Weekly', 'DONE_COMPLETED', '2025-03-15 09:00:00', '2025-03-15 16:00:00', 'SUCCESS', 'Inspección semanal Clínica Sur - completada OK', 'María García', TRUE, '2025-03-15 16:00:00', '2025-03-15 09:00:00', 'rpt-001', 'tpl-002', NULL, '2025-03-12 09:00:00', '2025-03-15 16:00:00');
 
 -- Inspection assignments (FK: inspection_id -> inspections)
 INSERT INTO inspection_assignments (id, inspection_id, user_email, role, created_at) VALUES
 ('asgn-001', 'insp-001', 'inspector@example.com', 'INSPECTOR', '2025-03-10 09:00:00'),
 ('asgn-002', 'insp-001', 'operator@example.com', 'OPERATOR', '2025-03-10 09:00:00'),
-('asgn-003', 'insp-001', 'ana.martinez@empresa.com', 'OPERATOR', '2025-03-10 09:30:00'),
-('asgn-004', 'insp-002', 'inspector@example.com', 'INSPECTOR', '2025-02-25 09:00:00'),
-('asgn-005', 'insp-003', 'juan.perez@empresa.com', 'INSPECTOR', '2025-03-12 09:00:00'),
-('asgn-006', 'insp-004', 'inspector@example.com', 'INSPECTOR', '2025-03-10 09:00:00'),
-('asgn-007', 'insp-005', 'juan.perez@empresa.com', 'INSPECTOR', '2025-03-01 09:00:00'),
-('asgn-008', 'insp-006', 'inspector@example.com', 'INSPECTOR', '2025-03-14 06:00:00'),
-('asgn-009', 'insp-006', 'operator@example.com', 'OPERATOR', '2025-03-14 06:00:00'),
-('asgn-010', 'insp-007', 'juan.perez@empresa.com', 'INSPECTOR', '2025-03-05 09:00:00');
+('asgn-003', 'insp-002', 'inspector@example.com', 'INSPECTOR', '2025-03-15 09:00:00'),
+('asgn-004', 'insp-002', 'operator@example.com', 'OPERATOR', '2025-03-15 09:00:00'),
+('asgn-005', 'insp-003', 'inspector@example.com', 'INSPECTOR', '2025-03-12 09:00:00');
 
--- Photos
+-- Photos (para observations)
 INSERT INTO photos (id, media_url, name, description, file_details_json, local_path, timestamp, inspector_id, step_id, device_id, created_at) VALUES
-('photo-001', 'https://example.com/media/photo1.jpg', 'Evidencia_FACP.jpg', 'Foto del panel de alarma', '{"size": 245000}', NULL, '2025-03-15 08:15:00', 'admin-001', 'step-001', 'dev-001', '2025-03-15 08:15:00'),
-('photo-002', 'https://example.com/media/photo2.jpg', 'Evidencia_Jockey.jpg', 'Foto de la jockey pump', '{"size": 312000}', NULL, '2025-03-15 08:30:00', 'admin-001', 'step-002', 'dev-002', '2025-03-15 08:30:00'),
-('photo-003', 'https://example.com/media/photo3.jpg', 'Detector_falla.jpg', 'Detector 101 con falla', '{"size": 189000}', NULL, '2025-03-10 14:00:00', 'admin-001', 'step-004', 'dev-009', '2025-03-10 14:00:00');
+('photo-001', 'https://example.com/media/photo1.jpg', 'Evidencia_rociador.jpg', 'Foto rociador alineado', '{"size": 245000}', NULL, '2025-03-18 09:15:00', 'admin-001', 'step-008', 'dev-006', '2025-03-18 09:15:00'),
+('photo-002', 'https://example.com/media/photo2.jpg', 'Evidencia_Jockey.jpg', 'Foto Jockey Pump presión baja', '{"size": 312000}', NULL, '2025-03-18 09:30:00', 'admin-001', 'step-009', 'dev-007', '2025-03-18 09:30:00');
 
 -- Tests (FK: device_id -> devices, inspection_id -> inspections)
--- insp-001 (IN_PROGRESS, bld-001): tests across loc-001 and loc-002
+-- insp-001 PENDING (bld-001): mayoría PENDING, 1 COMPLETED para variedad
+-- insp-002 IN_PROGRESS (bld-002): mezcla PENDING, COMPLETED, FAILED
+-- insp-003 DONE_COMPLETED (bld-003): todos COMPLETED
 INSERT INTO tests (id, device_id, inspection_id, test_template_id, test_step_ids, name, description, status, applicable, created_at, updated_at) VALUES
-('test-001', 'dev-001', 'insp-001', 'tt-001', '["step-001","step-002"]', 'Verificación FACP', 'Revisión del panel de alarma', 'PENDING', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('test-002', 'dev-002', 'insp-001', 'tt-002', '["step-003"]', 'Prueba Jockey Pump', 'Verificación de presión', 'COMPLETED', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:30:00'),
-('test-003', 'dev-001', 'insp-002', 'tt-001', '["step-004"]', 'Verificación FACP', 'Revisión mensual completada', 'COMPLETED', TRUE, '2025-03-01 09:00:00', '2025-03-01 16:00:00'),
-('test-004', 'dev-004', 'insp-003', 'tt-003', '["step-005"]', 'Prueba detector', 'Verificación detector humo', 'PENDING', TRUE, '2025-03-12 09:00:00', '2025-03-12 09:00:00'),
-('test-005', 'dev-009', 'insp-007', 'tt-003', '["step-006"]', 'Prueba detector 101', 'Detector falló - reemplazo requerido', 'FAILED', TRUE, '2025-03-10 09:00:00', '2025-03-10 14:00:00'),
-('test-006', 'dev-010', 'insp-001', 'tt-004', '["step-007","step-008"]', 'Prueba desfibrilador', 'Verificación de carga y electrodos', 'PENDING', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('test-007', 'dev-011', 'insp-001', 'tt-005', '["step-009"]', 'Calibración monitor', 'Verificar lecturas de SpO2 y ECG', 'COMPLETED', TRUE, '2025-03-15 08:00:00', '2025-03-15 09:00:00'),
-('test-008', 'dev-012', 'insp-001', 'tt-006', '["step-010"]', 'Inspección extintor CO2', 'Verificar sello, manómetro y fecha vencimiento', 'PENDING', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('test-009', 'dev-001', 'insp-001', 'tt-007', '["step-011","step-012"]', 'Test de sirena FACP', 'Activar sirena y verificar audibilidad', 'COMPLETED', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:45:00'),
-('test-010', 'dev-003', 'insp-001', 'tt-008', '["step-013","step-014"]', 'Prueba Fire Pump', 'Verificación de arranque y presión nominal', 'PENDING', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('test-011', 'dev-002', 'insp-001', 'tt-009', '["step-015"]', 'Verificación válvulas Jockey', 'Revisión de válvulas de aislamiento', 'PENDING', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('test-012', 'dev-004', 'insp-001', 'tt-003', '["step-016"]', 'Prueba detector humo DH-01', 'Test funcional con aerosol', 'PENDING', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('test-013', 'dev-013', 'insp-001', 'tt-010', '["step-017"]', 'Prueba detector calor DC-01', 'Test funcional con fuente de calor', 'PENDING', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('test-014', 'dev-005', 'insp-001', 'tt-006', '["step-018"]', 'Inspección extintor ABC', 'Verificar sello y presión manómetro', 'COMPLETED', TRUE, '2025-03-15 08:00:00', '2025-03-15 09:30:00'),
-('test-015', 'dev-014', 'insp-001', 'tt-001', '["step-019","step-020"]', 'Verificación panel oficinas', 'Revisión del panel secundario', 'PENDING', TRUE, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('test-016', 'dev-008', 'insp-006', 'tt-001', '["step-021","step-022"]', 'Verificación panel quirófanos', 'Revisión diaria del panel de alarma', 'PENDING', TRUE, '2025-03-14 07:00:00', '2025-03-14 07:00:00'),
-('test-017', 'dev-016', 'insp-006', 'tt-011', '["step-023"]', 'Calibración monitor anestesia', 'Verificar sensor gases anestésicos', 'COMPLETED', TRUE, '2025-03-14 07:00:00', '2025-03-14 07:30:00'),
-('test-018', 'dev-009', 'insp-007', 'tt-003', '["step-024"]', 'Verificación visual detector 101', 'Inspección visual de estado físico', 'FAILED', TRUE, '2025-03-10 09:00:00', '2025-03-10 14:00:00'),
-('test-019', 'dev-017', 'insp-007', 'tt-006', '["step-025"]', 'Inspección extintor pasillo', 'Verificar sello y accesibilidad', 'COMPLETED', TRUE, '2025-03-10 09:00:00', '2025-03-10 12:00:00'),
-('test-020', 'dev-006', 'insp-004', 'tt-012', '["step-026"]', 'Prueba rociador cabeza 1', 'Verificar alineación y obstrucción', 'PENDING', TRUE, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
-('test-021', 'dev-015', 'insp-004', 'tt-012', '["step-027"]', 'Prueba rociador cabeza 2', 'Verificar alineación y obstrucción', 'PENDING', TRUE, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
-('test-022', 'dev-013', 'insp-003', 'tt-010', '["step-028"]', 'Prueba detector calor corredor', 'Test funcional DC-01', 'PENDING', TRUE, '2025-03-12 09:00:00', '2025-03-12 09:00:00');
+('test-001', 'dev-001', 'insp-001', 'tt-001', '["step-001","step-002"]', 'Verificación FACP', 'Revisión del panel de alarma', 'PENDING', TRUE, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('test-002', 'dev-002', 'insp-001', 'tt-002', '["step-003"]', 'Prueba Jockey Pump', 'Verificación de presión', 'PENDING', TRUE, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('test-003', 'dev-004', 'insp-001', 'tt-003', '["step-004"]', 'Prueba detector humo', 'Verificación detector DH-01', 'PENDING', TRUE, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('test-004', 'dev-005', 'insp-001', 'tt-006', '["step-005"]', 'Inspección extintor ABC', 'Verificar sello y manómetro', 'COMPLETED', TRUE, '2025-03-10 09:00:00', '2025-03-10 10:00:00'),
+('test-005', 'dev-010', 'insp-001', 'tt-004', '["step-006","step-007"]', 'Prueba desfibrilador', 'Verificación de carga y electrodos', 'PENDING', TRUE, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('test-006', 'dev-006', 'insp-002', 'tt-012', '["step-008"]', 'Prueba rociador cabeza 1', 'Verificar alineación y obstrucción', 'COMPLETED', TRUE, '2025-03-18 09:00:00', '2025-03-18 09:45:00'),
+('test-007', 'dev-007', 'insp-002', 'tt-002', '["step-009"]', 'Prueba Jockey Pump B', 'Verificación de presión depósito', 'FAILED', TRUE, '2025-03-18 09:00:00', '2025-03-18 10:00:00'),
+('test-008', 'dev-015', 'insp-002', 'tt-012', '["step-010"]', 'Prueba rociador cabeza 2', 'Verificar alineación nave A', 'PENDING', TRUE, '2025-03-18 09:00:00', '2025-03-18 09:00:00'),
+('test-009', 'dev-008', 'insp-003', 'tt-001', '["step-011","step-012"]', 'Verificación panel quirófanos', 'Revisión del panel de alarma', 'COMPLETED', TRUE, '2025-03-15 09:00:00', '2025-03-15 16:00:00'),
+('test-010', 'dev-009', 'insp-003', 'tt-003', '["step-013"]', 'Prueba detector pasillo 101', 'Verificación detector humo', 'COMPLETED', TRUE, '2025-03-15 09:00:00', '2025-03-15 14:00:00'),
+('test-011', 'dev-016', 'insp-003', 'tt-011', '["step-014"]', 'Calibración monitor anestesia', 'Verificar sensor gases anestésicos', 'COMPLETED', TRUE, '2025-03-15 09:00:00', '2025-03-15 15:00:00'),
+('test-012', 'dev-017', 'insp-003', 'tt-006', '["step-015"]', 'Inspección extintor pasillo', 'Verificar sello y accesibilidad', 'COMPLETED', TRUE, '2025-03-15 09:00:00', '2025-03-15 15:30:00');
 
 -- Steps (FK: test_id -> tests)
 INSERT INTO steps (id, test_id, name, test_step_type, applicable, status, description, value_json, min_value, max_value, created_at, updated_at) VALUES
-('step-001', 'test-001', 'Lectura de display', 'SIMPLE_VALUE', TRUE, 'PENDING', 'Verificar lectura en display principal', NULL, NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-002', 'test-001', 'Alarma en verde', 'BINARY', TRUE, 'SUCCESS', 'Indicador de alarma en estado normal', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:10:00'),
-('step-003', 'test-002', 'Presión (psi)', 'RANGE', TRUE, 'COMPLETED', 'Medir presión en salida', '{"value": 85.5, "valueType": "NUMERIC_UNIT_VALUE"}', 50.0, 120.0, '2025-03-15 08:00:00', '2025-03-15 08:30:00'),
-('step-004', 'test-003', 'Verificación general', 'BINARY', TRUE, 'SUCCESS', 'Inspección visual OK', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-01 09:00:00', '2025-03-01 16:00:00'),
-('step-005', 'test-004', 'Prueba de humo', 'BINARY', TRUE, 'PENDING', 'Simular humo y verificar alarma', NULL, NULL, NULL, '2025-03-12 09:00:00', '2025-03-12 09:00:00'),
-('step-006', 'test-005', 'Prueba de humo', 'BINARY', TRUE, 'FAILED', 'Detector no respondió - falla', '{"value": false, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 14:00:00'),
-('step-007', 'test-006', 'Nivel de carga batería', 'RANGE', TRUE, 'PENDING', 'Verificar que la batería tiene carga suficiente', NULL, 80.0, 100.0, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-008', 'test-006', 'Estado electrodos', 'BINARY', TRUE, 'PENDING', 'Verificar que los electrodos no están vencidos', NULL, NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-009', 'test-007', 'Lectura SpO2', 'RANGE', TRUE, 'COMPLETED', 'Verificar lectura de oximetría', '{"value": 98, "valueType": "NUMERIC_VALUE"}', 90.0, 100.0, '2025-03-15 08:00:00', '2025-03-15 09:00:00'),
-('step-010', 'test-008', 'Manómetro en verde', 'BINARY', TRUE, 'PENDING', 'Verificar presión del extintor en zona verde', NULL, NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-011', 'test-009', 'Activar sirena', 'BINARY', TRUE, 'COMPLETED', 'Pulsar botón de sirena en panel', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:40:00'),
-('step-012', 'test-009', 'Audibilidad a 10m', 'BINARY', TRUE, 'COMPLETED', 'Verificar sirena audible a 10 metros', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:45:00'),
-('step-013', 'test-010', 'Arranque automático', 'BINARY', TRUE, 'PENDING', 'Simular caída de presión y verificar arranque', NULL, NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-014', 'test-010', 'Presión nominal (psi)', 'RANGE', TRUE, 'PENDING', 'Medir presión de descarga', NULL, 100.0, 175.0, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-015', 'test-011', 'Válvulas abiertas', 'BINARY', TRUE, 'PENDING', 'Verificar que válvulas de aislamiento están abiertas', NULL, NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-016', 'test-012', 'Test aerosol humo', 'BINARY', TRUE, 'PENDING', 'Aplicar aerosol de prueba en detector', NULL, NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-017', 'test-013', 'Test fuente calor', 'BINARY', TRUE, 'PENDING', 'Aplicar fuente de calor controlada', NULL, NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-018', 'test-014', 'Sello intacto', 'BINARY', TRUE, 'COMPLETED', 'Verificar que el sello de seguridad está intacto', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 09:30:00'),
-('step-019', 'test-015', 'Display funcional', 'BINARY', TRUE, 'PENDING', 'Verificar que el display muestra información', NULL, NULL, NULL, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-020', 'test-015', 'Batería de respaldo', 'RANGE', TRUE, 'PENDING', 'Verificar voltaje batería backup', NULL, 11.5, 14.0, '2025-03-15 08:00:00', '2025-03-15 08:00:00'),
-('step-021', 'test-016', 'Display operativo', 'BINARY', TRUE, 'PENDING', 'Verificar display del panel quirófanos', NULL, NULL, NULL, '2025-03-14 07:00:00', '2025-03-14 07:00:00'),
-('step-022', 'test-016', 'Sin alarmas activas', 'BINARY', TRUE, 'PENDING', 'Verificar que no hay alarmas pendientes', NULL, NULL, NULL, '2025-03-14 07:00:00', '2025-03-14 07:00:00'),
-('step-023', 'test-017', 'Lectura sensor gases', 'RANGE', TRUE, 'COMPLETED', 'Verificar calibración del sensor', '{"value": 2.1, "valueType": "NUMERIC_UNIT_VALUE"}', 0.0, 5.0, '2025-03-14 07:00:00', '2025-03-14 07:30:00'),
-('step-024', 'test-018', 'Inspección visual carcasa', 'BINARY', TRUE, 'FAILED', 'Carcasa dañada - grieta visible', '{"value": false, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 14:00:00'),
-('step-025', 'test-019', 'Sello y accesibilidad', 'BINARY', TRUE, 'COMPLETED', 'Extintor accesible y con sello intacto', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 12:00:00'),
-('step-026', 'test-020', 'Alineación rociador', 'BINARY', TRUE, 'PENDING', 'Verificar que el rociador está alineado correctamente', NULL, NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
-('step-027', 'test-021', 'Alineación rociador', 'BINARY', TRUE, 'PENDING', 'Verificar que el rociador está alineado correctamente', NULL, NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
-('step-028', 'test-022', 'Test fuente calor', 'BINARY', TRUE, 'PENDING', 'Aplicar fuente de calor controlada', NULL, NULL, NULL, '2025-03-12 09:00:00', '2025-03-12 09:00:00');
+('step-001', 'test-001', 'Lectura de display', 'SIMPLE_VALUE', TRUE, 'PENDING', 'Verificar lectura en display principal', NULL, NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('step-002', 'test-001', 'Alarma en verde', 'BINARY', TRUE, 'PENDING', 'Indicador de alarma en estado normal', NULL, NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('step-003', 'test-002', 'Presión (psi)', 'RANGE', TRUE, 'PENDING', 'Medir presión en salida', NULL, 50.0, 120.0, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('step-004', 'test-003', 'Prueba de humo', 'BINARY', TRUE, 'PENDING', 'Simular humo y verificar alarma', NULL, NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('step-005', 'test-004', 'Sello intacto', 'BINARY', TRUE, 'COMPLETED', 'Verificar que el sello está intacto', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 10:00:00'),
+('step-006', 'test-005', 'Nivel de carga batería', 'RANGE', TRUE, 'PENDING', 'Verificar carga suficiente', NULL, 80.0, 100.0, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('step-007', 'test-005', 'Estado electrodos', 'BINARY', TRUE, 'PENDING', 'Electrodos no vencidos', NULL, NULL, NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('step-008', 'test-006', 'Alineación rociador', 'BINARY', TRUE, 'COMPLETED', 'Rociador alineado correctamente', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-18 09:00:00', '2025-03-18 09:45:00'),
+('step-009', 'test-007', 'Presión (psi)', 'RANGE', TRUE, 'FAILED', 'Presión fuera de rango - falla', '{"value": 35.0, "valueType": "NUMERIC_UNIT_VALUE"}', 50.0, 120.0, '2025-03-18 09:00:00', '2025-03-18 10:00:00'),
+('step-010', 'test-008', 'Alineación rociador', 'BINARY', TRUE, 'PENDING', 'Verificar alineación', NULL, NULL, NULL, '2025-03-18 09:00:00', '2025-03-18 09:00:00'),
+('step-011', 'test-009', 'Display operativo', 'BINARY', TRUE, 'COMPLETED', 'Display del panel OK', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15 09:00:00', '2025-03-15 16:00:00'),
+('step-012', 'test-009', 'Sin alarmas activas', 'BINARY', TRUE, 'COMPLETED', 'No hay alarmas pendientes', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15 09:00:00', '2025-03-15 16:00:00'),
+('step-013', 'test-010', 'Prueba de humo', 'BINARY', TRUE, 'COMPLETED', 'Detector respondió correctamente', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15 09:00:00', '2025-03-15 14:00:00'),
+('step-014', 'test-011', 'Lectura sensor gases', 'RANGE', TRUE, 'COMPLETED', 'Calibración OK', '{"value": 2.1, "valueType": "NUMERIC_UNIT_VALUE"}', 0.0, 5.0, '2025-03-15 09:00:00', '2025-03-15 15:00:00'),
+('step-015', 'test-012', 'Sello y accesibilidad', 'BINARY', TRUE, 'COMPLETED', 'Extintor accesible y sello intacto', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15 09:00:00', '2025-03-15 15:30:00');
 
 -- Observations (FK: test_step_id -> steps, inspection_id -> inspections)
 INSERT INTO observations (id, test_step_id, inspection_id, name, type, description, deficiency_type_id, media_id, created_at, updated_at) VALUES
-('obs-001', 'step-001', 'insp-001', 'Evidencia visual', 'REMARKS', 'Panel limpio y sin fallas', NULL, 'photo-001', '2025-03-15 08:15:00', '2025-03-15 08:15:00'),
-('obs-002', 'step-002', 'insp-001', 'Nota adicional', 'RECOMMENDATIONS', 'Revisar batería de respaldo en próxima inspección', NULL, NULL, '2025-03-15 08:20:00', '2025-03-15 08:20:00'),
-('obs-003', 'step-006', 'insp-007', 'Deficiencia detectada', 'DEFICIENCY', 'Detector 101 no responde - requiere reemplazo inmediato', 'def-001', 'photo-003', '2025-03-10 14:00:00', '2025-03-10 14:00:00');
+('obs-001', 'step-008', 'insp-002', 'Evidencia visual', 'REMARKS', 'Rociador alineado correctamente', NULL, 'photo-001', '2025-03-18 09:15:00', '2025-03-18 09:15:00'),
+('obs-002', 'step-009', 'insp-002', 'Deficiencia detectada', 'DEFICIENCY', 'Presión baja - requiere revisión de bomba', 'def-001', 'photo-002', '2025-03-18 10:00:00', '2025-03-18 10:00:00');
 
 -- Audit logs (user_id referencia admin creado en DataInitializer)
 INSERT INTO audit_logs (id, user_id, entity_type, entity_id, action, metadata_json, created_at) VALUES
-('log-001', 'admin-001', 'Inspection', 'insp-001', 'CREATE', '{"ip": "192.168.1.10"}', '2025-03-15 08:00:00'),
-('log-002', 'admin-001', 'Test', 'test-002', 'UPDATE', '{"status": "PENDING"}', '2025-03-15 08:30:00'),
-('log-003', 'admin-001', 'Inspection', 'insp-002', 'SIGN', '{"signer": "María García"}', '2025-03-01 16:00:00'),
-('log-004', 'admin-001', 'Inspection', 'insp-007', 'SIGN', '{"signer": "Juan Pérez", "result": "FAILED"}', '2025-03-10 14:00:00'),
-('log-005', 'admin-001', 'Inspection', 'insp-006', 'START', '{"startedAt": "2025-03-14T07:00:00Z"}', '2025-03-14 07:00:00');
+('log-001', 'admin-001', 'Inspection', 'insp-001', 'CREATE', '{"ip": "192.168.1.10"}', '2025-03-10 09:00:00'),
+('log-002', 'admin-001', 'Inspection', 'insp-002', 'START', '{"startedAt": "2025-03-18T09:00:00Z"}', '2025-03-18 09:00:00'),
+('log-003', 'admin-001', 'Inspection', 'insp-003', 'SIGN', '{"signer": "María García"}', '2025-03-15 16:00:00');
