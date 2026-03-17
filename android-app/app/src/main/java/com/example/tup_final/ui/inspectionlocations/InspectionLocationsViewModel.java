@@ -1,6 +1,7 @@
 package com.example.tup_final.ui.inspectionlocations;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.tup_final.data.entity.LocationWithStats;
@@ -21,17 +22,18 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class InspectionLocationsViewModel extends ViewModel {
 
     private final LocationRepository locationRepository;
+    private final MutableLiveData<Resource<List<LocationWithStats>>> locationsData = new MutableLiveData<>();
 
     @Inject
     public InspectionLocationsViewModel(LocationRepository locationRepository) {
         this.locationRepository = locationRepository;
     }
 
-    /**
-     * Obtiene las ubicaciones del edificio de la inspección.
-     * Si buildingId es null o vacío, retorna todas las ubicaciones.
-     */
-    public LiveData<Resource<List<LocationWithStats>>> getLocationsByBuildingId(String buildingId) {
-        return locationRepository.getLocationsByBuildingId(buildingId);
+    public void loadLocations(String buildingId) {
+        locationRepository.loadLocationsByBuildingId(buildingId, locationsData);
+    }
+
+    public LiveData<Resource<List<LocationWithStats>>> getLocations() {
+        return locationsData;
     }
 }

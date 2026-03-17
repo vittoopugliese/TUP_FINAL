@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
+import com.example.tup_final.data.remote.dto.CreateZoneRequest;
 import com.example.tup_final.data.remote.dto.DeviceTypeResponse;
 import com.example.tup_final.data.remote.dto.MoveDeviceRequest;
 import com.example.tup_final.data.remote.dto.MoveDeviceResponse;
@@ -24,7 +25,8 @@ public class InspectionTestsViewModel extends ViewModel {
 
     private final InspectionTestsRepository repository;
 
-    private LiveData<Resource<List<ZoneUiModel>>> zonesData;
+    private final MutableLiveData<Resource<List<ZoneUiModel>>> zonesData = new MutableLiveData<>();
+    private final MutableLiveData<Resource<ZoneUiModel>> createZoneResult = new MutableLiveData<>();
     private final MutableLiveData<Resource<DeviceUiModel>> createDeviceResult = new MutableLiveData<>();
     private final MutableLiveData<Resource<MoveDeviceResponse>> moveDeviceResult = new MutableLiveData<>();
     private final MutableLiveData<Resource<List<DeviceTypeResponse>>> deviceTypesResult = new MutableLiveData<>();
@@ -42,7 +44,11 @@ public class InspectionTestsViewModel extends ViewModel {
     public void loadZones(String locationId, String inspectionId) {
         this.lastLocationId = locationId;
         this.lastInspectionId = inspectionId;
-        zonesData = repository.getZonesWithDevicesAndTests(locationId, inspectionId);
+        repository.loadZonesWithDevicesAndTests(locationId, inspectionId, zonesData);
+    }
+
+    public void createZone(String locationId, CreateZoneRequest request) {
+        repository.createZone(locationId, request, createZoneResult);
     }
 
     public void createDevice(String locationId, String zoneId, CreateDeviceRequest request) {
@@ -75,6 +81,14 @@ public class InspectionTestsViewModel extends ViewModel {
 
     public void clearCreateDeviceResult() {
         createDeviceResult.setValue(null);
+    }
+
+    public LiveData<Resource<ZoneUiModel>> getCreateZoneResult() {
+        return createZoneResult;
+    }
+
+    public void clearCreateZoneResult() {
+        createZoneResult.setValue(null);
     }
 
     public String getLastLocationId() {

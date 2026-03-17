@@ -199,6 +199,22 @@
     <string name="move_device_select_destination">Seleccionar zona de destino</string>
     <string name="move_device_confirm">Mover</string>
     <string name="move_device_success">Dispositivo movido correctamente</string>
+
+    <!-- Zone creation / FAB actions -->
+    <string name="create_zone_title">Crear zona</string>
+    <string name="create_zone_subtitle">En %s</string>
+    <string name="zone_name_hint">Nombre</string>
+    <string name="zone_details_hint">Detalles (opcional)</string>
+    <string name="zone_created_success">Zona creada correctamente</string>
+    <string name="error_zone_name_required">El nombre de la zona es obligatorio</string>
+    <string name="select_zone_title">Seleccionar zona</string>
+    <string name="auto_zone_name">General</string>
+    <string name="fab_create_zone">Crear zona</string>
+    <string name="fab_add_device">Agregar dispositivo</string>
+    <string name="fab_create_zone_desc">Crear nueva zona</string>
+    <string name="fab_add_device_desc">Agregar dispositivo a una zona</string>
+    <string name="device_types_loading">Cargando tipos de dispositivo…</string>
+
     <string name="device_tests_completed">Completed %1$d of %2$d tests.</string>
     <string name="device_tests_summary">Pendiente: %1$d • Completado: %2$d • Fallido: %3$d</string>
     <string name="test_status_pending">Pendiente</string>

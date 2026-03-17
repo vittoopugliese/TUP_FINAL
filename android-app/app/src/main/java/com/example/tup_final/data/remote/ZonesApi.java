@@ -1,6 +1,7 @@
 package com.example.tup_final.data.remote;
 
 import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
+import com.example.tup_final.data.remote.dto.CreateZoneRequest;
 import com.example.tup_final.data.remote.dto.DeviceWithTestsResponse;
 import com.example.tup_final.data.remote.dto.MoveDeviceRequest;
 import com.example.tup_final.data.remote.dto.MoveDeviceResponse;
@@ -27,12 +28,22 @@ public interface ZonesApi {
 
     /**
      * Obtiene las zonas de una ubicación con sus devices y tests para una inspección.
-     * Backend esperado: GET /api/locations/{locationId}/zones?inspectionId=xxx
+     * Backend: GET /api/locations/{locationId}/zones?inspectionId=xxx
      */
     @GET("locations/{locationId}/zones")
     Call<List<ZoneWithDevicesResponse>> getZonesWithDevicesAndTests(
             @Path("locationId") String locationId,
             @Query("inspectionId") String inspectionId
+    );
+
+    /**
+     * Crea una zona en la ubicación indicada.
+     * Backend: POST /api/locations/{locationId}/zones
+     */
+    @POST("locations/{locationId}/zones")
+    Call<ZoneWithDevicesResponse> createZone(
+            @Path("locationId") String locationId,
+            @Body CreateZoneRequest request
     );
 
     /**

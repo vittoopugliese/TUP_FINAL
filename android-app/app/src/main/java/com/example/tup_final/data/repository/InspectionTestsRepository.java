@@ -17,6 +17,7 @@ import com.example.tup_final.data.remote.LocationApi;
 import com.example.tup_final.data.remote.ZonesApi;
 import com.example.tup_final.data.remote.dto.LocationListResponse;
 import com.example.tup_final.data.remote.dto.CreateDeviceRequest;
+import com.example.tup_final.data.remote.dto.CreateZoneRequest;
 import com.example.tup_final.data.remote.dto.DeviceWithTestsResponse;
 import com.example.tup_final.data.remote.dto.DeviceTypeResponse;
 import com.example.tup_final.data.remote.dto.MoveDeviceRequest;
@@ -189,11 +190,10 @@ public class InspectionTestsRepository {
     }
 
     /**
-     * Obtiene zonas con devices y tests para una ubicación e inspección.
+     * Carga zonas con devices y tests. Actualiza el MutableLiveData pasado.
      */
-    public LiveData<Resource<List<ZoneUiModel>>> getZonesWithDevicesAndTests(
-            String locationId, String inspectionId) {
-        MutableLiveData<Resource<List<ZoneUiModel>>> result = new MutableLiveData<>();
+    public void loadZonesWithDevicesAndTests(String locationId, String inspectionId,
+                                            MutableLiveData<Resource<List<ZoneUiModel>>> result) {
         result.setValue(Resource.loading());
 
         executor.execute(() -> {
@@ -219,8 +219,44 @@ public class InspectionTestsRepository {
                 }
             }
         });
+    }
 
-        return result;
+    /**
+     * Crea una zona en la ubicación indicada.
+     */
+    public void createZone(String locationId, CreateZoneRequest request,
+                          MutableLiveData<Resource<ZoneUiModel>> result) {
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<ZoneWithDevicesResponse> response =
+                        zonesApi.createZone(locationId, request).execute();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    ZoneWithDevicesResponse z = response.body();
+                    ZoneEntity ze = new ZoneEntity(z.getId(), z.getLocationId(), z.getName(), z.getDetails());
+                    zoneDao.insert(ze);
+
+                    ZoneUiModel model = new ZoneUiModel(
+                            z.getId(), z.getLocationId(), z.getName(), z.getDetails(),
+                            new ArrayList<>());
+                    mainHandler.post(() -> result.setValue(Resource.success(model)));
+                } else {
+                    String msg = "Error al crear zona";
+                    try {
+                        if (response.errorBody() != null) {
+                            msg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    final String errMsg = msg;
+                    mainHandler.post(() -> result.setValue(Resource.error(errMsg)));
+                }
+            } catch (Exception e) {
+                String msg = e.getMessage() != null ? e.getMessage() : "Error de conexión";
+                mainHandler.post(() -> result.setValue(Resource.error(msg)));
+            }
+        });
     }
 
     /**
