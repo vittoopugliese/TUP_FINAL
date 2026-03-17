@@ -237,6 +237,28 @@
     <string name="test_status_completed">Completado</string>
     <string name="test_status_failed">Fallido</string>
 
+    <!-- Observations / Deficiencies -->
+    <string name="obs_btn_add">Agregar Observación</string>
+    <string name="obs_sheet_title">Nueva Observación</string>
+    <string name="obs_type_label">Tipo</string>
+    <string name="obs_type_observation">Observación</string>
+    <string name="obs_type_deficiency">Deficiencia</string>
+    <string name="obs_description_hint">Descripción (obligatorio)</string>
+    <string name="obs_photo_label_optional">Foto (opcional)</string>
+    <string name="obs_photo_label_required">Foto (obligatoria)</string>
+    <string name="obs_take_photo">Tomar foto</string>
+    <string name="obs_pick_gallery">De galería</string>
+    <string name="obs_remove_photo">Quitar foto</string>
+    <string name="obs_photo_preview_desc">Vista previa de la foto adjunta</string>
+    <string name="obs_photo_required_error">La foto es obligatoria para una Deficiencia</string>
+    <string name="obs_description_required_error">La descripción es obligatoria</string>
+    <string name="obs_deficiency_warning">Deficiencia: requiere foto obligatoria</string>
+    <string name="obs_btn_save">Guardar</string>
+    <string name="obs_saved_success">Observación guardada correctamente</string>
+    <string name="obs_save_error">No se pudo guardar la observación</string>
+    <string name="obs_section_title">Observaciones (%d)</string>
+    <string name="obs_camera_permission_denied">Se necesita permiso de cámara para tomar fotos</string>
+
     <!-- Create Inspection -->
     <string name="create_inspection_title">Nueva Inspección</string>
     <string name="create_inspection_building_hint">Seleccionar edificio</string>

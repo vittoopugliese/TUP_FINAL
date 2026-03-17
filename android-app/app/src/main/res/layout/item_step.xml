@@ -53,6 +53,35 @@
             android:layout_marginTop="8dp"
             android:minHeight="48dp" />
 
+        <!-- Divisor entre input y observaciones -->
+        <View
+            android:id="@+id/divider_observations"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="4dp"
+            android:background="?android:attr/listDivider"
+            android:visibility="gone" />
+
+        <!-- Lista de observaciones existentes -->
+        <LinearLayout
+            android:id="@+id/container_observations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" />
+
+        <!-- Botón Agregar Observación -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_observation"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/obs_btn_add"
+            app:icon="@android:drawable/ic_input_add"
+            android:textSize="13sp" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

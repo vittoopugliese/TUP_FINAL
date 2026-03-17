@@ -34,6 +34,7 @@ com\inspections\dto\AssignmentRequest.class
 com\inspections\repository\DeviceRepository.class
 com\inspections\repository\StepRepository.class
 com\inspections\dto\CreateInspectionRequest.class
+com\inspections\dto\CreateObservationRequest.class
 com\inspections\config\OpenApiConfig.class
 com\inspections\entity\DeviceTypeTestTemplate.class
 com\inspections\entity\Location.class
@@ -50,6 +51,7 @@ com\inspections\entity\Photo.class
 com\inspections\service\StepService.class
 com\inspections\entity\Building.class
 com\inspections\controller\InspectionAssignmentController.class
+com\inspections\dto\ObservationResponse.class
 com\inspections\entity\DeviceTypeTestTemplateId.class
 com\inspections\entity\Step.class
 com\inspections\dto\CreateInspectionResponse.class
@@ -60,10 +62,12 @@ com\inspections\repository\LocationRepository.class
 com\inspections\repository\AuditLogRepository.class
 com\inspections\dto\AssignmentResponse.class
 com\inspections\repository\ZoneRepository.class
+com\inspections\service\ObservationService.class
 com\inspections\repository\DeviceTypeTestTemplateRepository.class
 com\inspections\entity\InspectionTemplate.class
 com\inspections\dto\StepResponse.class
 com\inspections\controller\InspectionTemplateController.class
+com\inspections\controller\ObservationController.class
 com\inspections\repository\ObservationRepository.class
 com\inspections\service\AuthService.class
 com\inspections\service\DeviceService.class
