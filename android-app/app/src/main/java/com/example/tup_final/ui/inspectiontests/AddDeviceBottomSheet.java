@@ -59,7 +59,7 @@ public class AddDeviceBottomSheet {
         this.inspectionId = inspectionId;
         this.deviceTypes = (deviceTypes != null && !deviceTypes.isEmpty())
                 ? deviceTypes
-                : buildFallbackDeviceTypes();
+                : new ArrayList<>();
         this.listener = listener;
         this.dialog = new BottomSheetDialog(context);
 
@@ -178,26 +178,5 @@ public class AddDeviceBottomSheet {
 
     public ZoneUiModel getZone() {
         return zone;
-    }
-
-    private List<DeviceTypeResponse> buildFallbackDeviceTypes() {
-        List<DeviceTypeResponse> list = new ArrayList<>();
-        list.add(newType("dt-005", "EXTINGUISHER", "Extintor", "SPRINKLER_DEVICE"));
-        list.add(newType("dt-004", "SMOKE_DETECTOR", "Detector de humo", "FA_FIELD_DEVICE"));
-        list.add(newType("dt-006", "SPRINKLER_HEAD", "Rociador", "SPRINKLER_DEVICE"));
-        list.add(newType("dt-001", "FACP", "Panel de alarma", "FACP_DEVICE"));
-        list.add(newType("dt-002", "JOCKEY_PUMP", "Bomba jockey", "JOCKEY_PUMP"));
-        list.add(newType("dt-003", "FIRE_PUMP", "Bomba contra incendios", "FIRE_PUMP"));
-        return list;
-    }
-
-    private DeviceTypeResponse newType(String id, String code, String name, String category) {
-        DeviceTypeResponse type = new DeviceTypeResponse();
-        type.setId(id);
-        type.setCode(code);
-        type.setName(name);
-        type.setCategory(category);
-        type.setEnabled(true);
-        return type;
     }
 }

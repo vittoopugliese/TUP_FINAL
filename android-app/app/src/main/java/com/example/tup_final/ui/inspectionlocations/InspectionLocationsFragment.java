@@ -81,7 +81,8 @@ public class InspectionLocationsFragment extends Fragment {
                     .navigate(R.id.action_inspection_locations_to_inspection_tests, args);
         });
 
-        observeData(buildingId);
+        viewModel.loadLocations(buildingId);
+        observeData();
         setupButtons(view, buildingId, inspectionId);
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
@@ -93,8 +94,19 @@ public class InspectionLocationsFragment extends Fragment {
         });
     }
 
-    private void observeData(String buildingId) {
-        viewModel.getLocationsByBuildingId(buildingId).observe(getViewLifecycleOwner(), resource -> {
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (viewModel != null && getArguments() != null) {
+            String buildingId = getArguments().getString(ARG_BUILDING_ID, "");
+            if (buildingId != null && !buildingId.isEmpty()) {
+                viewModel.loadLocations(buildingId);
+            }
+        }
+    }
+
+    private void observeData() {
+        viewModel.getLocations().observe(getViewLifecycleOwner(), resource -> {
             if (resource == null) return;
 
             switch (resource.getStatus()) {

@@ -137,7 +137,7 @@ public class DeviceService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Inspection not found: " + inspectionId));
 
-        if (!locationId.equals(inspection.getLocationId())) {
+        if (inspection.getLocationId() != null && !locationId.equals(inspection.getLocationId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Inspection " + inspectionId + " does not belong to location " + locationId);
         }

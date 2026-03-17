@@ -10,12 +10,12 @@ import com.example.tup_final.data.entity.LocationEntity;
 import com.example.tup_final.data.entity.LocationWithStats;
 import com.example.tup_final.data.local.LocationDao;
 import com.example.tup_final.data.remote.LocationApi;
+import com.example.tup_final.data.remote.dto.CreateLocationRequest;
 import com.example.tup_final.data.remote.dto.LocationListResponse;
 import com.example.tup_final.util.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,12 +44,11 @@ public class LocationRepository {
     }
 
     /**
-     * Obtiene las ubicaciones de un edificio con estadísticas de tests.
-     * Offline-first: intenta sincronizar desde API, cachea en Room, fallback a Room.
-     * Si buildingId es null o vacío, retorna todas las ubicaciones.
+     * Carga ubicaciones de un edificio. Actualiza el MutableLiveData pasado.
+     * Offline-first: intenta API, cachea en Room, fallback a Room.
      */
-    public LiveData<Resource<List<LocationWithStats>>> getLocationsByBuildingId(String buildingId) {
-        MutableLiveData<Resource<List<LocationWithStats>>> result = new MutableLiveData<>();
+    public void loadLocationsByBuildingId(String buildingId,
+                                         MutableLiveData<Resource<List<LocationWithStats>>> result) {
         result.setValue(Resource.loading());
 
         executor.execute(() -> {
@@ -92,7 +91,11 @@ public class LocationRepository {
                 }
             }
         });
+    }
 
+    public LiveData<Resource<List<LocationWithStats>>> getLocationsByBuildingId(String buildingId) {
+        MutableLiveData<Resource<List<LocationWithStats>>> result = new MutableLiveData<>();
+        loadLocationsByBuildingId(buildingId, result);
         return result;
     }
 
@@ -138,7 +141,7 @@ public class LocationRepository {
     }
 
     /**
-     * Crea una nueva ubicación. Valida que el nombre no esté duplicado.
+     * Crea una nueva ubicación en el backend. Valida duplicados localmente.
      * Si buildingId se proporciona, la ubicación queda asociada al edificio.
      */
     public LiveData<Resource<LocationEntity>> createLocation(String name, String details, String buildingId) {
@@ -157,16 +160,36 @@ public class LocationRepository {
                     return;
                 }
 
-                LocationEntity entity = new LocationEntity();
-                entity.id = UUID.randomUUID().toString();
-                entity.buildingId = (buildingId != null && !buildingId.isEmpty()) ? buildingId : null;
-                entity.name = trimmedName;
-                entity.details = details != null ? details.trim() : null;
-                entity.createdAt = null;
-                entity.updatedAt = null;
+                CreateLocationRequest request = new CreateLocationRequest(
+                        trimmedName,
+                        details != null ? details.trim() : null,
+                        (buildingId != null && !buildingId.isEmpty()) ? buildingId : null);
 
-                locationDao.insert(entity);
-                mainHandler.post(() -> result.setValue(Resource.success(entity)));
+                retrofit2.Response<LocationListResponse> response =
+                        locationApi.createLocation(request).execute();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    LocationListResponse dto = response.body();
+                    LocationEntity entity = new LocationEntity();
+                    entity.id = dto.getId() != null ? dto.getId() : "";
+                    entity.buildingId = dto.getBuildingId();
+                    entity.name = dto.getName();
+                    entity.details = dto.getDetails();
+                    entity.createdAt = null;
+                    entity.updatedAt = null;
+
+                    locationDao.insert(entity);
+                    mainHandler.post(() -> result.setValue(Resource.success(entity)));
+                } else {
+                    String msg = "Error al crear ubicación";
+                    try {
+                        if (response.errorBody() != null) {
+                            msg = response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    final String errMsg = msg;
+                    mainHandler.post(() -> result.setValue(Resource.error(errMsg)));
+                }
             } catch (Exception e) {
                 mainHandler.post(() -> result.setValue(
                         Resource.error(e.getMessage() != null ? e.getMessage() : "Error al crear ubicación")));

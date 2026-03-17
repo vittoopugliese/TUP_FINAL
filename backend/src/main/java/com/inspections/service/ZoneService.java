@@ -1,5 +1,6 @@
 package com.inspections.service;
 
+import com.inspections.dto.CreateZoneRequest;
 import com.inspections.dto.DeviceWithTestsResponse;
 import com.inspections.dto.TestResponse;
 import com.inspections.dto.ZoneWithDevicesResponse;
@@ -7,11 +8,16 @@ import com.inspections.entity.Device;
 import com.inspections.entity.InspectionTest;
 import com.inspections.entity.Zone;
 import com.inspections.repository.DeviceRepository;
+import com.inspections.repository.LocationRepository;
 import com.inspections.repository.TestRepository;
 import com.inspections.repository.ZoneRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -23,13 +29,16 @@ public class ZoneService {
     private final ZoneRepository zoneRepository;
     private final DeviceRepository deviceRepository;
     private final TestRepository testRepository;
+    private final LocationRepository locationRepository;
 
     public ZoneService(ZoneRepository zoneRepository,
                        DeviceRepository deviceRepository,
-                       TestRepository testRepository) {
+                       TestRepository testRepository,
+                       LocationRepository locationRepository) {
         this.zoneRepository = zoneRepository;
         this.deviceRepository = deviceRepository;
         this.testRepository = testRepository;
+        this.locationRepository = locationRepository;
     }
 
     /**
@@ -66,5 +75,26 @@ public class ZoneService {
                     zone.getName(), zone.getDetails(),
                     deviceResponses);
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * Crea una nueva zona en la ubicación indicada.
+     * Valida que la ubicación exista antes de crear.
+     */
+    public ZoneWithDevicesResponse createZone(String locationId, CreateZoneRequest request) {
+        locationRepository.findById(locationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Location not found: " + locationId));
+
+        String id = UUID.randomUUID().toString();
+        Zone zone = new Zone();
+        zone.setId(id);
+        zone.setLocationId(locationId);
+        zone.setName(request.getName().trim());
+        zone.setDetails(request.getDetails() != null ? request.getDetails().trim() : null);
+        zoneRepository.save(zone);
+        return new ZoneWithDevicesResponse(
+                id, locationId, zone.getName(), zone.getDetails(),
+                Collections.emptyList());
     }
 }

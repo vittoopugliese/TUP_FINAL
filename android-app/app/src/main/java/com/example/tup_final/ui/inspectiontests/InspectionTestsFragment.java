@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -17,10 +18,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tup_final.R;
+import com.example.tup_final.data.remote.dto.CreateZoneRequest;
 import com.example.tup_final.data.remote.dto.DeviceTypeResponse;
 import com.example.tup_final.data.remote.dto.MoveDeviceRequest;
 import com.example.tup_final.databinding.FragmentInspectionTestsBinding;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.example.tup_final.util.Resource;
 
 import java.util.ArrayList;
@@ -86,10 +89,95 @@ public class InspectionTestsFragment extends Fragment {
         observeExpansion();
         observeCreateDevice();
         observeMoveDevice();
+        observeCreateZone();
+
+        binding.fabActions.setOnClickListener(v -> showFabActionsSheet(locationId, locationName, inspectionId));
     }
 
     private AddDeviceBottomSheet addDeviceSheet;
+    private AddZoneBottomSheet addZoneSheet;
+    private BottomSheetDialog fabActionsSheet;
     private MoveDeviceBottomSheet moveDeviceSheet;
+
+    /** Si true, al completar createZone abrimos AddDeviceBottomSheet con la zona creada. */
+    private boolean pendingOpenAddDeviceAfterZone;
+
+    private void showFabActionsSheet(String locationId, String locationName, String inspectionId) {
+        if (fabActionsSheet != null) {
+            fabActionsSheet.dismiss();
+        }
+        View root = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_fab_actions, null);
+        fabActionsSheet = new BottomSheetDialog(requireContext());
+        fabActionsSheet.setContentView(root);
+
+        root.findViewById(R.id.option_create_zone).setOnClickListener(v -> {
+            fabActionsSheet.dismiss();
+            fabActionsSheet = null;
+            openAddZoneSheet(locationId, locationName);
+        });
+
+        root.findViewById(R.id.option_add_device).setOnClickListener(v -> {
+            fabActionsSheet.dismiss();
+            fabActionsSheet = null;
+            handleAddDeviceFromFab(locationId, inspectionId);
+        });
+
+        fabActionsSheet.show();
+    }
+
+    private void openAddZoneSheet(String locationId, String locationName) {
+        if (addZoneSheet != null) {
+            addZoneSheet.dismiss();
+        }
+        pendingOpenAddDeviceAfterZone = false;
+        addZoneSheet = new AddZoneBottomSheet(requireContext(), locationName, request -> {
+            viewModel.createZone(locationId, request);
+            if (addZoneSheet != null) addZoneSheet.setLoading(true);
+        });
+        addZoneSheet.show();
+    }
+
+    private void handleAddDeviceFromFab(String locationId, String inspectionId) {
+        List<DeviceTypeResponse> types = null;
+        Resource<List<DeviceTypeResponse>> typesRes = viewModel.getDeviceTypes().getValue();
+        if (typesRes != null && typesRes.getData() != null) {
+            types = typesRes.getData();
+        }
+        if (types == null || types.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.device_types_loading, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<ZoneUiModel> zones = null;
+        Resource<List<ZoneUiModel>> zonesRes = viewModel.getZones().getValue();
+        if (zonesRes != null && zonesRes.getData() != null) {
+            zones = zonesRes.getData();
+        }
+
+        if (zones == null || zones.isEmpty()) {
+            pendingOpenAddDeviceAfterZone = true;
+            CreateZoneRequest request = new CreateZoneRequest(getString(R.string.auto_zone_name), null);
+            viewModel.createZone(locationId, request);
+        } else {
+            showZonePickerForAddDevice(zones, locationId, inspectionId, types);
+        }
+    }
+
+    private void showZonePickerForAddDevice(List<ZoneUiModel> zones, String locationId,
+                                            String inspectionId, List<DeviceTypeResponse> types) {
+        String[] names = new String[zones.size()];
+        for (int i = 0; i < zones.size(); i++) {
+            names[i] = zones.get(i).name;
+        }
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.select_zone_title)
+                .setItems(names, (dialog, which) -> {
+                    ZoneUiModel zone = zones.get(which);
+                    showAddDeviceSheet(zone, locationId, inspectionId, types);
+                })
+                .setNegativeButton(R.string.btn_cancel, null)
+                .show();
+    }
 
     private void showMoveDeviceSheet(DeviceUiModel device, String locationId) {
         if (moveDeviceSheet != null) {
@@ -116,11 +204,72 @@ public class InspectionTestsFragment extends Fragment {
         if (typesRes != null && typesRes.getData() != null) {
             types = typesRes.getData();
         }
+        if (types == null || types.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.device_types_loading, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        showAddDeviceSheet(zone, locationId, inspectionId, types);
+    }
+
+    private void showAddDeviceSheet(ZoneUiModel zone, String locationId, String inspectionId,
+                                   List<DeviceTypeResponse> types) {
+        if (addDeviceSheet != null) {
+            addDeviceSheet.dismiss();
+        }
         addDeviceSheet = new AddDeviceBottomSheet(requireContext(), zone, inspectionId, types, request -> {
             viewModel.createDevice(locationId, zone.id, request);
             addDeviceSheet.setLoading(true);
         });
         addDeviceSheet.show();
+    }
+
+    private void observeCreateZone() {
+        viewModel.getCreateZoneResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (addZoneSheet == null && !pendingOpenAddDeviceAfterZone && resource.getStatus() != LOADING) return;
+
+            switch (resource.getStatus()) {
+                case LOADING:
+                    if (addZoneSheet != null) addZoneSheet.setLoading(true);
+                    break;
+                case SUCCESS:
+                    ZoneUiModel createdZone = resource.getData();
+                    if (addZoneSheet != null) {
+                        addZoneSheet.setLoading(false);
+                        addZoneSheet.dismiss();
+                        addZoneSheet = null;
+                    }
+                    viewModel.clearCreateZoneResult();
+                    Toast.makeText(requireContext(), R.string.zone_created_success, Toast.LENGTH_SHORT).show();
+                    viewModel.loadZones(viewModel.getLastLocationId(), viewModel.getLastInspectionId());
+                    if (pendingOpenAddDeviceAfterZone && createdZone != null) {
+                        pendingOpenAddDeviceAfterZone = false;
+                        viewModel.ensureZoneExpanded(createdZone.id);
+                        List<DeviceTypeResponse> types = null;
+                        Resource<List<DeviceTypeResponse>> typesRes = viewModel.getDeviceTypes().getValue();
+                        if (typesRes != null && typesRes.getData() != null) {
+                            types = typesRes.getData();
+                        }
+                        if (types != null && !types.isEmpty()) {
+                            showAddDeviceSheet(createdZone, viewModel.getLastLocationId(),
+                                    viewModel.getLastInspectionId(), types);
+                        }
+                    }
+                    break;
+                case ERROR:
+                    pendingOpenAddDeviceAfterZone = false;
+                    if (addZoneSheet != null) {
+                        addZoneSheet.setLoading(false);
+                        addZoneSheet.showError(resource.getMessage());
+                    } else {
+                        Toast.makeText(requireContext(),
+                                resource.getMessage() != null ? resource.getMessage() : getString(R.string.locations_error),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    viewModel.clearCreateZoneResult();
+                    break;
+            }
+        });
     }
 
     private void observeCreateDevice() {
