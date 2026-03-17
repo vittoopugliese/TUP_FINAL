@@ -32,8 +32,7 @@ Inspection (evento principal, vinculado a edificio/planta)
 - **devices** - Dispositivos (tipo, modelo, fabricante)
 - **device_types** - Catálogo de tipos (extintor, detector, rociador, etc.)
 - **tests** - Tests predefinidos por tipo de dispositivo (estados: PENDING, COMPLETED, FAILED)
-- **steps** - Pasos de verificación (estados: PENDING, SUCCESS, FAILED)
-- **step_values** - Valores ingresados por step (binary, date_range, simple_value, numeric_range, multi_value)
+- **steps** - Pasos de verificación (estados: PENDING, COMPLETED, FAILED). Valores en `valueJson` + `minValue`/`maxValue` para rangos numéricos.
 - **observations** - Observaciones y deficiencias
 - **photos** - Fotografías con metadatos (timestamp, GPS, inspector)
 - **audit_log** - Registro de auditoría (fecha/hora/usuario)
@@ -51,7 +50,22 @@ Inspection (evento principal, vinculado a edificio/planta)
 
 ### Estados de step
 
-- `PENDING`, `SUCCESS`, `FAILED`
+- `PENDING` - Sin valor o incompleto
+- `COMPLETED` - Valor válido ingresado (legacy: `SUCCESS` se mapea a COMPLETED)
+- `FAILED` - Validación fallida o deficiencia
+
+### Tipos de step (testStepType) y contrato valueJson
+
+| Tipo | Descripción | valueJson |
+|------|-------------|-----------|
+| BINARY | Sí/No dropdown | `{"value": true\|false\|null, "valueType": "BOOLEAN_VALUE"}` |
+| DATE_RANGE | Dos fechas (desde/hasta) | `{"from": "ISO_DATE", "to": "ISO_DATE", "valueType": "DATE_RANGE_VALUE"}` |
+| SIMPLE_VALUE | Texto, número o fecha simple | `{"value": "...", "valueType": "STRING_VALUE"\|"NUMERIC_VALUE"\|"DATE_VALUE"}` |
+| NUMERIC_RANGE | Valor numérico con min/max | `{"value": number, "valueType": "NUMERIC_VALUE"}` + minValue/maxValue en columnas |
+| MULTI_VALUE | Múltiples subcampos | `{"values": [{"name":"...","value":"...","valueType":"..."}]}` |
+| RANGE | Legacy numérico | Mapear a NUMERIC_RANGE |
+
+N/A por step: `applicable=false`. Excluido de validación y resultado.
 
 ## Tareas a Implementar (según planning)
 

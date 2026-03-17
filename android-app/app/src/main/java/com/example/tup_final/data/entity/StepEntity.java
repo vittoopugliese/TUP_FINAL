@@ -9,9 +9,10 @@ import androidx.room.PrimaryKey;
 /**
  * Entidad Room para Step (Test Step).
  * Elemento individual de un Test que requiere entrada de datos o validación.
- * Tipos: BINARY, RANGE, SIMPLE_VALUE, MULTI_VALUE, AUTOMATIC.
- * Puede tener Observaciones (anotaciones) adjuntas.
- * Estados: PENDING, SUCCESS, FAILED.
+ * Tipos editables: BINARY, DATE_RANGE, SIMPLE_VALUE, NUMERIC_RANGE, MULTI_VALUE.
+ * RANGE legacy se mapea a NUMERIC_RANGE. AUTOMATIC fuera de alcance.
+ * Estados: PENDING, COMPLETED, FAILED (SUCCESS legacy -> COMPLETED).
+ * N/A: applicable=false.
  */
 
 @Entity(
@@ -32,21 +33,21 @@ public class StepEntity {
     /** FK para el Test. */
     public String testId;
     public String name;
-    /** Tipo: BINARY, RANGE, SIMPLE_VALUE, MULTI_VALUE, AUTOMATIC. */
+    /** Tipo: BINARY, DATE_RANGE, SIMPLE_VALUE, NUMERIC_RANGE, MULTI_VALUE, RANGE(legacy). */
     public String testStepType;
     /** Si el step aplica (N/A en el nivel de step). */
     public boolean applicable = true;
-    /** Estado: PENDING, SUCCESS, FAILED. */
+    /** Estado: PENDING, COMPLETED, FAILED. */
     public String status;
     /** Descripción del step. */
     public String description;
     /**
-     * Valor almacenado como JSON. La estructura depende del testStepType:
+     * Valor almacenado como JSON. Ver docs/step-types-contract.md.
      * - BINARY: { "value": boolean, "valueType": "BOOLEAN_VALUE" }
-     * - RANGE: minValue, maxValue (NumericUnitValue o DateValue)
-     * - SIMPLE_VALUE: StringValue, NumericUnitValue, DateValue o BooleanValue
-     * - MULTI_VALUE: array de { name, value, valueType, measureUnitId? }
-     * - AUTOMATIC: formula, dependsOn, value (solo lectura)
+     * - DATE_RANGE: { "from": "ISO_DATE", "to": "ISO_DATE", "valueType": "DATE_RANGE_VALUE" }
+     * - SIMPLE_VALUE: { "value": ..., "valueType": "STRING_VALUE"|"NUMERIC_VALUE"|"DATE_VALUE" }
+     * - NUMERIC_RANGE: { "value": number } + minValue/maxValue columnas
+     * - MULTI_VALUE: { "values": [ { "name", "value", "valueType" } ] }
      */
     public String valueJson;
     /** Valor mínimo para el tipo RANGE (numérico). */

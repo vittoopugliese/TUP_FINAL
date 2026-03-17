@@ -28,8 +28,24 @@
 ## Navegación a Steps
 - [ ] Tap en test navega a StepsFragment
 - [ ] Argumentos inspectionId, testId, deviceId se pasan correctamente
-- [ ] StepsFragment muestra placeholder/cargando
+- [ ] StepsFragment carga steps por testId (loading -> lista o error)
 - [ ] Back desde Steps vuelve a la vista de tests con estado de expansión preservado
+- [ ] Al completar test y volver, el estado del test se actualiza en la lista (refresh)
+
+## Vista Steps (T5.1.2 / T5.1.3 / T5.1.4)
+- [ ] Header "Pasos del Test" y toolbar con back
+- [ ] Lista de steps con índice (#1, #2...) y nombre
+- [ ] BINARY: dropdown Sí/No, guardado al seleccionar
+- [ ] DATE_RANGE: dos date pickers (Desde/Hasta), validación from <= to
+- [ ] SIMPLE_VALUE: input texto, guardado con debounce
+- [ ] NUMERIC_RANGE: input numérico con min/max, validación de rango
+- [ ] MULTI_VALUE: 3 campos, todos requeridos para completar
+- [ ] N/A por step: checkbox deshabilita inputs y excluye de validación
+- [ ] Validaciones en tiempo real: mensajes de error debajo del campo
+- [ ] Botón Completar deshabilitado si hay steps obligatorios inválidos o incompletos
+- [ ] Botón Completar habilitado cuando todos los steps aplicables son válidos
+- [ ] Al cambiar cualquier step se recalcula estado del test
+- [ ] Fallback a Room si backend falla o no responde
 
 ## Accesibilidad
 - [ ] Content descriptions en íconos expand/collapse

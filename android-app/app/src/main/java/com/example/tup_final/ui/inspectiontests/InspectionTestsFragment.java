@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -43,6 +44,8 @@ public class InspectionTestsFragment extends Fragment {
     private static final String ARG_INSPECTION_ID = "inspectionId";
     private static final String ARG_LOCATION_ID = "locationId";
     private static final String ARG_LOCATION_NAME = "locationName";
+    /** Clave para recibir resultado al volver de StepsFragment. */
+    public static final String RESULT_KEY_STEPS_COMPLETED = "steps_completed";
 
     private InspectionTestsViewModel viewModel;
     private ZonesDevicesTestsAdapter adapter;
@@ -85,6 +88,7 @@ public class InspectionTestsFragment extends Fragment {
         viewModel.loadZones(locationId, inspectionId);
         viewModel.loadDeviceTypes();
 
+        setupStepsResultListener(locationId, inspectionId);
         observeZones();
         observeExpansion();
         observeCreateDevice();
@@ -412,6 +416,13 @@ public class InspectionTestsFragment extends Fragment {
         List<ZonesDevicesTestsAdapter.ListItem> items = ZonesDevicesTestsAdapter.buildFlatList(
                 zones, zoneIds, deviceIds);
         adapter.submitList(new ArrayList<>(items));
+    }
+
+    private void setupStepsResultListener(String locationId, String inspectionId) {
+        FragmentManager fm = requireActivity().getSupportFragmentManager();
+        fm.setFragmentResultListener(RESULT_KEY_STEPS_COMPLETED, this, (key, bundle) -> {
+            viewModel.loadZones(locationId, inspectionId);
+        });
     }
 
     private void navigateToSteps(String inspectionId, String testId, String deviceId) {

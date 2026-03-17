@@ -113,10 +113,26 @@
     <string name="inspection_locations_empty">No hay ubicaciones en este edificio.</string>
     <string name="inspection_tests_title">Zonas y Tests</string>
     <string name="inspection_tests_empty">No hay zonas ni dispositivos en esta ubicación.</string>
-    <string name="steps_title">Pasos del Test</string>
+    <string name="steps_title">Pasos</string>
+    <string name="steps_header">Pasos del Test</string>
     <string name="steps_placeholder">Cargando pasos del test %s…</string>
     <string name="steps_not_available">Los pasos de este test no están disponibles todavía.</string>
     <string name="steps_invalid_test">Test inválido. No se pueden cargar los pasos.</string>
+    <string name="steps_empty">No hay pasos en este test.</string>
+    <string name="steps_complete">Completar</string>
+    <string name="step_na">N/A</string>
+    <string name="step_date_from">Desde</string>
+    <string name="step_date_to">Hasta</string>
+    <string name="step_simple_hint">Valor</string>
+    <string name="step_numeric_hint">Valor numérico</string>
+    <string name="step_multi_value_1">Valor 1</string>
+    <string name="step_multi_value_2">Valor 2</string>
+    <string name="step_multi_value_3">Valor 3</string>
+    <string name="step_error_required">Campo obligatorio</string>
+    <string name="step_error_date_range">La fecha Desde debe ser anterior o igual a Hasta</string>
+    <string name="step_error_numeric_range">El valor debe estar entre %1$.1f y %2$.1f</string>
+    <string name="step_error_multi_incomplete">Completar todos los campos requeridos</string>
+    <string name="step_binary_select">Seleccionar…</string>
 
     <!-- Locations -->
     <string name="locations_title">Ubicaciones</string>

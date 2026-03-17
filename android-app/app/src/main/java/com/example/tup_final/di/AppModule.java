@@ -10,6 +10,7 @@ import com.example.tup_final.data.remote.InspectionApi;
 import com.example.tup_final.data.remote.InspectionTemplateApi;
 import com.example.tup_final.data.remote.LocationApi;
 import com.example.tup_final.data.remote.DeviceTypesApi;
+import com.example.tup_final.data.remote.StepsApi;
 import com.example.tup_final.data.remote.ZonesApi;
 import com.example.tup_final.data.remote.UserApi;
 import dagger.Module;
@@ -113,6 +114,12 @@ public final class AppModule {
     @Singleton
     public DeviceTypesApi provideDeviceTypesApi(Retrofit retrofit) {
         return retrofit.create(DeviceTypesApi.class);
+    }
+
+    @Provides
+    @Singleton
+    public StepsApi provideStepsApi(Retrofit retrofit) {
+        return retrofit.create(StepsApi.class);
     }
 
     @Provides

@@ -51,6 +51,7 @@ Documentación completa del sistema Inspections (Sistema de Inspección Digital 
 
 ### Guía de plantillas de test
 - Tipos de input: Binary, Date Range, Simple Value, Numeric Range, Multi-value
+- Contrato técnico: [step-types-contract.md](step-types-contract.md)
 - Cómo configurar un test por tipo de dispositivo
 - Asignación automática de tests según tipo de device
 

@@ -14,6 +14,7 @@ com\inspections\repository\BuildingRepository.class
 com\inspections\service\InspectionAssignmentService.class
 com\inspections\dto\UpdateProfileRequest.class
 com\inspections\dto\DeviceTypeResponse.class
+com\inspections\controller\StepController.class
 com\inspections\entity\DeviceType.class
 com\inspections\entity\Inspection.class
 com\inspections\dto\BuildingListResponse.class
@@ -26,6 +27,7 @@ com\inspections\dto\ZoneWithDevicesResponse.class
 com\inspections\entity\User.class
 com\inspections\repository\TestTemplateRepository.class
 com\inspections\dto\TestResponse.class
+com\inspections\dto\UpdateStepRequest.class
 com\inspections\controller\BuildingController.class
 com\inspections\security\JwtAuthFilter.class
 com\inspections\dto\AssignmentRequest.class
@@ -45,6 +47,7 @@ com\inspections\dto\CreateDeviceRequest.class
 com\inspections\dto\MoveDeviceRequest.class
 com\inspections\dto\AuthResponse.class
 com\inspections\entity\Photo.class
+com\inspections\service\StepService.class
 com\inspections\entity\Building.class
 com\inspections\controller\InspectionAssignmentController.class
 com\inspections\entity\DeviceTypeTestTemplateId.class
@@ -59,6 +62,7 @@ com\inspections\dto\AssignmentResponse.class
 com\inspections\repository\ZoneRepository.class
 com\inspections\repository\DeviceTypeTestTemplateRepository.class
 com\inspections\entity\InspectionTemplate.class
+com\inspections\dto\StepResponse.class
 com\inspections\controller\InspectionTemplateController.class
 com\inspections\repository\ObservationRepository.class
 com\inspections\service\AuthService.class

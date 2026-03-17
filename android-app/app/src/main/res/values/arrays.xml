@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Step binary options: position 0 = not selected, 1 = Sí (true), 2 = No (false) -->
+    <string-array name="step_binary_options">
+        <item>Seleccionar…</item>
+        <item>Sí</item>
+        <item>No</item>
+    </string-array>
+</resources>

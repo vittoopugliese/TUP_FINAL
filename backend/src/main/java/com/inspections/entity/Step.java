@@ -6,8 +6,8 @@ import java.time.Instant;
 /**
  * Entidad JPA para Step (Test Step).
  * Elemento individual de un Test que requiere entrada de datos o validación.
- * Tipos: BINARY, RANGE, SIMPLE_VALUE, MULTI_VALUE, AUTOMATIC.
- * Estados: PENDING, SUCCESS, FAILED.
+ * Tipos: BINARY, DATE_RANGE, SIMPLE_VALUE, NUMERIC_RANGE, MULTI_VALUE.
+ * RANGE legacy -> NUMERIC_RANGE. Estados: PENDING, COMPLETED, FAILED.
  */
 @Entity
 @Table(name = "steps", indexes = {
@@ -27,12 +27,12 @@ public class Step {
     @Column(nullable = false)
     private String name;
 
-    /** Tipo: BINARY, RANGE, SIMPLE_VALUE, MULTI_VALUE, AUTOMATIC. */
+    /** Tipo: BINARY, DATE_RANGE, SIMPLE_VALUE, NUMERIC_RANGE, MULTI_VALUE. */
     private String testStepType;
 
     private boolean applicable = true;
 
-    /** Estado: PENDING, SUCCESS, FAILED. */
+    /** Estado: PENDING, COMPLETED, FAILED. */
     @Column(nullable = false)
     private String status = "PENDING";
 
@@ -40,8 +40,8 @@ public class Step {
     private String description;
 
     /**
-     * Valor almacenado como JSON. Estructura según testStepType:
-     * BINARY: {"value": bool}, RANGE: {min/max}, SIMPLE_VALUE, MULTI_VALUE, AUTOMATIC.
+     * Valor almacenado como JSON. Ver docs/step-types-contract.md.
+     * BINARY, DATE_RANGE, SIMPLE_VALUE, NUMERIC_RANGE, MULTI_VALUE.
      */
     @Column(columnDefinition = "TEXT")
     private String valueJson;
