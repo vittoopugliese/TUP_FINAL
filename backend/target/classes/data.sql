@@ -95,6 +95,27 @@ INSERT INTO device_type_test_templates (device_type_id, test_template_id, sort_o
 ('dt-009', 'tt-010', 1),
 ('dt-010', 'tt-013', 1);
 
+-- Test template steps (step definitions per template; cloned when creating tests)
+INSERT INTO test_template_steps (id, test_template_id, name, test_step_type, description, min_value, max_value, sort_order) VALUES
+('tts-001', 'tt-001', 'Lectura de display', 'SIMPLE_VALUE', 'Verificar lectura en display principal', NULL, NULL, 1),
+('tts-002', 'tt-001', 'Alarma en verde', 'BINARY', 'Indicador de alarma en estado normal', NULL, NULL, 2),
+('tts-003', 'tt-002', 'Presión (psi)', 'RANGE', 'Medir presión en salida', 50.0, 120.0, 1),
+('tts-004', 'tt-003', 'Prueba de humo', 'BINARY', 'Simular humo y verificar alarma', NULL, NULL, 1),
+('tts-005', 'tt-004', 'Nivel de carga batería', 'RANGE', 'Verificar carga suficiente', 80.0, 100.0, 1),
+('tts-006', 'tt-004', 'Estado electrodos', 'BINARY', 'Electrodos no vencidos', NULL, NULL, 2),
+('tts-007', 'tt-005', 'Lectura SpO2', 'RANGE', 'Verificar rango SpO2', 95.0, 100.0, 1),
+('tts-008', 'tt-005', 'Lectura ECG', 'SIMPLE_VALUE', 'Verificar trazado ECG', NULL, NULL, 2),
+('tts-009', 'tt-006', 'Sello intacto', 'BINARY', 'Verificar que el sello está intacto', NULL, NULL, 1),
+('tts-010', 'tt-006', 'Manómetro en zona verde', 'BINARY', 'Presión en rango operativo', NULL, NULL, 2),
+('tts-011', 'tt-007', 'Sirena audible', 'BINARY', 'Activar sirena y verificar audibilidad', NULL, NULL, 1),
+('tts-012', 'tt-008', 'Presión nominal (psi)', 'RANGE', 'Verificar presión de descarga', 100.0, 150.0, 1),
+('tts-013', 'tt-008', 'Arranque correcto', 'BINARY', 'Bomba arranca sin fallos', NULL, NULL, 2),
+('tts-014', 'tt-009', 'Válvulas operativas', 'BINARY', 'Válvulas de aislamiento OK', NULL, NULL, 1),
+('tts-015', 'tt-010', 'Respuesta a calor', 'BINARY', 'Detector activa al alcanzar umbral', NULL, NULL, 1),
+('tts-016', 'tt-011', 'Lectura sensor gases', 'RANGE', 'Calibración gases anestésicos', 0.0, 5.0, 1),
+('tts-017', 'tt-012', 'Alineación rociador', 'BINARY', 'Rociador alineado correctamente', NULL, NULL, 1),
+('tts-018', 'tt-013', 'Indicadores OK', 'BINARY', 'Revisión de indicadores y alarmas', NULL, NULL, 1);
+
 -- Zones (FK: location_id -> locations)
 INSERT INTO zones (id, location_id, name, details) VALUES
 ('zone-001', 'loc-001', 'Equipo médico', 'Desfibriladores y equipos de primeros auxilios'),

@@ -50,3 +50,11 @@ Contrato único para serialización/deserialización entre Android Room, backend
 - Persistir como `applicable=false`
 - Excluir de validación y del resultado del test
 - Deshabilitar inputs cuando N/A está activo
+
+## Tipos de Observación (observations.type)
+
+| Tipo | Descripción | Efecto en step/test |
+|------|-------------|---------------------|
+| REMARKS | Observación (texto, foto opcional) | No afecta estado |
+| DEFICIENCIES | Deficiencia (texto + foto requerida) | Step y test pasan a FAILED |
+| DEFICIENCY | Legacy singular | Mapear a DEFICIENCIES al leer |

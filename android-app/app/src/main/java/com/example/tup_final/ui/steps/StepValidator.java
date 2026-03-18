@@ -24,6 +24,31 @@ public final class StepValidator {
     }
 
     /**
+     * Valida valueJson por tipo (para fallback Room/backend alignment).
+     */
+    public static boolean isValueValid(String valueJson, String testStepType, Double minValue, Double maxValue) {
+        if (valueJson == null || valueJson.trim().isEmpty()) return false;
+        String type = testStepType;
+        if (StepConstants.TYPE_RANGE.equals(type)) type = StepConstants.TYPE_NUMERIC_RANGE;
+        if (type == null) type = StepConstants.TYPE_SIMPLE_VALUE;
+        switch (type) {
+            case StepConstants.TYPE_BINARY:
+                return StepValueMapper.parseBinaryValue(valueJson) != null;
+            case StepConstants.TYPE_DATE_RANGE:
+                return isDateRangeValid(valueJson);
+            case StepConstants.TYPE_SIMPLE_VALUE:
+                String sv = StepValueMapper.parseStringValue(valueJson);
+                return sv != null && !sv.trim().isEmpty();
+            case StepConstants.TYPE_NUMERIC_RANGE:
+                return isNumericRangeValid(valueJson, minValue, maxValue);
+            case StepConstants.TYPE_MULTI_VALUE:
+                return isMultiValueValid(valueJson);
+            default:
+                return true;
+        }
+    }
+
+    /**
      * Indica si un step aplicable tiene valor válido.
      */
     public static boolean isStepValid(StepUiModel step) {

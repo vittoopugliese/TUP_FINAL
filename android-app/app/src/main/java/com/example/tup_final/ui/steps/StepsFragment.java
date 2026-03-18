@@ -70,7 +70,11 @@ public class StepsFragment extends Fragment {
         inspectionId = getArguments() != null ? getArguments().getString(ARG_INSPECTION_ID, "") : "";
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
+        toolbar.setNavigationOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager()
+                    .setFragmentResult(InspectionTestsFragment.RESULT_KEY_STEPS_COMPLETED, new Bundle());
+            NavHostFragment.findNavController(this).popBackStack();
+        });
 
         progress = view.findViewById(R.id.progress_steps);
         textEmpty = view.findViewById(R.id.text_steps_empty);
@@ -182,6 +186,9 @@ public class StepsFragment extends Fragment {
             if (resource.getStatus() == SUCCESS && resource.getData() != null) {
                 ObservationEntity saved = resource.getData();
                 viewModel.appendObservationLocally(saved);
+                if ("DEFICIENCIES".equals(saved.type)) {
+                    viewModel.refreshSteps();
+                }
                 viewModel.clearSaveObsResult();
 
                 AddObservationBottomSheet sheet = findObsSheet();

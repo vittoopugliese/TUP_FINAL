@@ -34,6 +34,8 @@ public class InspectionService {
     private final DeviceTypeTestTemplateRepository deviceTypeTestTemplateRepository;
     private final TestTemplateRepository testTemplateRepository;
     private final TestRepository testRepository;
+    private final TestTemplateStepRepository testTemplateStepRepository;
+    private final StepRepository stepRepository;
     private final InspectionAssignmentRepository assignmentRepository;
 
     public InspectionService(InspectionRepository inspectionRepository,
@@ -45,6 +47,8 @@ public class InspectionService {
                             DeviceTypeTestTemplateRepository deviceTypeTestTemplateRepository,
                             TestTemplateRepository testTemplateRepository,
                             TestRepository testRepository,
+                            TestTemplateStepRepository testTemplateStepRepository,
+                            StepRepository stepRepository,
                             InspectionAssignmentRepository assignmentRepository) {
         this.inspectionRepository = inspectionRepository;
         this.buildingRepository = buildingRepository;
@@ -55,6 +59,8 @@ public class InspectionService {
         this.deviceTypeTestTemplateRepository = deviceTypeTestTemplateRepository;
         this.testTemplateRepository = testTemplateRepository;
         this.testRepository = testRepository;
+        this.testTemplateStepRepository = testTemplateStepRepository;
+        this.stepRepository = stepRepository;
         this.assignmentRepository = assignmentRepository;
     }
 
@@ -191,10 +197,31 @@ public class InspectionService {
                 test.setCreatedAt(now);
                 test.setUpdatedAt(now);
                 testRepository.save(test);
+                cloneTemplateStepsToTest(test.getId(), template.getId(), now);
                 count++;
             }
         }
         return count;
+    }
+
+    private void cloneTemplateStepsToTest(String testId, String templateId, Instant now) {
+        List<TestTemplateStep> templateSteps = testTemplateStepRepository.findByTestTemplateIdOrderBySortOrderAsc(templateId);
+        for (TestTemplateStep tts : templateSteps) {
+            Step step = new Step();
+            step.setId(UUID.randomUUID().toString());
+            step.setTestId(testId);
+            step.setName(tts.getName());
+            step.setTestStepType(tts.getTestStepType());
+            step.setApplicable(true);
+            step.setStatus("PENDING");
+            step.setDescription(tts.getDescription());
+            step.setValueJson(null);
+            step.setMinValue(tts.getMinValue());
+            step.setMaxValue(tts.getMaxValue());
+            step.setCreatedAt(now);
+            step.setUpdatedAt(now);
+            stepRepository.save(step);
+        }
     }
 
     private void createAssignments(String inspectionId, List<AssignmentRequest> assignments, Instant now) {

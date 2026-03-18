@@ -4,6 +4,7 @@ import com.inspections.dto.StepResponse;
 import com.inspections.dto.UpdateStepRequest;
 import com.inspections.entity.InspectionTest;
 import com.inspections.entity.Step;
+import com.inspections.util.StepValueValidator;
 import com.inspections.repository.StepRepository;
 import com.inspections.repository.TestRepository;
 import org.springframework.http.HttpStatus;
@@ -66,7 +67,7 @@ public class StepService {
     }
 
     /**
-     * Calcula el estado del step según valor y applicable.
+     * Calcula el estado del step según valor, applicable y validación por tipo.
      */
     private String calculateStepStatus(Step step) {
         if (!step.isApplicable()) {
@@ -75,9 +76,14 @@ public class StepService {
         if (step.getValueJson() == null || step.getValueJson().isBlank()) {
             return STATUS_PENDING;
         }
-        // Validación básica: si tiene valor y no hay error explícito, COMPLETED
-        // La validación de rangos se hace en cliente; aquí asumimos que si guardó, pasó
-        return STATUS_COMPLETED;
+        String type = step.getTestStepType();
+        if (type == null) type = "SIMPLE_VALUE";
+        if ("RANGE".equals(type) && (step.getMinValue() != null || step.getMaxValue() != null)) {
+            type = "NUMERIC_RANGE";
+        }
+        boolean valid = StepValueValidator.isValid(
+                step.getValueJson(), type, step.getMinValue(), step.getMaxValue());
+        return valid ? STATUS_COMPLETED : STATUS_FAILED;
     }
 
     /**

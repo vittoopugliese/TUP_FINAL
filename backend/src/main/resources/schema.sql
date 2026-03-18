@@ -121,6 +121,20 @@ CREATE TABLE IF NOT EXISTS test_templates (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_test_template_code ON test_templates(code);
 CREATE INDEX IF NOT EXISTS idx_test_template_enabled ON test_templates(enabled);
 
+-- Test template steps (step definitions per template, cloned when creating tests)
+CREATE TABLE IF NOT EXISTS test_template_steps (
+    id VARCHAR(36) PRIMARY KEY NOT NULL,
+    test_template_id VARCHAR(36) NOT NULL,
+    name VARCHAR(255),
+    test_step_type VARCHAR(50),
+    description TEXT,
+    min_value DOUBLE,
+    max_value DOUBLE,
+    sort_order INT NOT NULL DEFAULT 0,
+    CONSTRAINT fk_tts_template FOREIGN KEY (test_template_id) REFERENCES test_templates(id)
+);
+CREATE INDEX IF NOT EXISTS idx_tts_template ON test_template_steps(test_template_id);
+
 -- Device type -> test template mapping (which tests each device type inherits)
 CREATE TABLE IF NOT EXISTS device_type_test_templates (
     device_type_id VARCHAR(36) NOT NULL,

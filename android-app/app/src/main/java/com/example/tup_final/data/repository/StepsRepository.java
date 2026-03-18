@@ -14,6 +14,7 @@ import com.example.tup_final.data.remote.StepsApi;
 import com.example.tup_final.data.remote.dto.StepResponse;
 import com.example.tup_final.data.remote.dto.UpdateStepRequest;
 import com.example.tup_final.ui.steps.StepUiModel;
+import com.example.tup_final.ui.steps.StepValidator;
 import com.example.tup_final.util.Resource;
 import com.example.tup_final.util.StepConstants;
 
@@ -99,7 +100,10 @@ public class StepsRepository {
                         if (valueJson != null) entity.valueJson = valueJson;
                         if (applicable != null) entity.applicable = applicable;
                         entity.status = entity.applicable
-                                ? (valueJson != null && !valueJson.isEmpty() ? StepConstants.STATUS_COMPLETED : StepConstants.STATUS_PENDING)
+                                ? (valueJson != null && !valueJson.isEmpty()
+                                        ? (StepValidator.isValueValid(valueJson, entity.testStepType, entity.minValue, entity.maxValue)
+                                                ? StepConstants.STATUS_COMPLETED : StepConstants.STATUS_FAILED)
+                                        : StepConstants.STATUS_PENDING)
                                 : StepConstants.STATUS_COMPLETED;
                         stepDao.update(entity);
                         updateTestStatusInRoom(entity.testId);
@@ -117,7 +121,10 @@ public class StepsRepository {
                         if (valueJson != null) entity.valueJson = valueJson;
                         if (applicable != null) entity.applicable = applicable;
                         entity.status = entity.applicable
-                                ? (valueJson != null && !valueJson.isEmpty() ? StepConstants.STATUS_COMPLETED : StepConstants.STATUS_PENDING)
+                                ? (valueJson != null && !valueJson.isEmpty()
+                                        ? (StepValidator.isValueValid(valueJson, entity.testStepType, entity.minValue, entity.maxValue)
+                                                ? StepConstants.STATUS_COMPLETED : StepConstants.STATUS_FAILED)
+                                        : StepConstants.STATUS_PENDING)
                                 : StepConstants.STATUS_COMPLETED;
                         stepDao.update(entity);
                         updateTestStatusInRoom(entity.testId);

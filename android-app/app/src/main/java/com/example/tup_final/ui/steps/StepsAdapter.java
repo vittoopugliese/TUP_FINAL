@@ -233,7 +233,7 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
                 TextView textDesc = itemView.findViewById(R.id.text_obs_description);
                 ImageView imageThumb = itemView.findViewById(R.id.image_obs_thumb);
 
-                boolean isDeficiency = "DEFICIENCIES".equals(obs.type);
+                boolean isDeficiency = "DEFICIENCIES".equals(obs.type) || "DEFICIENCY".equals(obs.type);
 
                 if (isDeficiency) {
                     iconType.setImageResource(android.R.drawable.ic_dialog_alert);

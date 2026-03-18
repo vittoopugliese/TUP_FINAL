@@ -10,15 +10,19 @@ import com.inspections.entity.DeviceType;
 import com.inspections.entity.Inspection;
 import com.inspections.entity.InspectionTest;
 import com.inspections.entity.Location;
+import com.inspections.entity.Step;
 import com.inspections.entity.TestTemplate;
+import com.inspections.entity.TestTemplateStep;
 import com.inspections.entity.Zone;
 import com.inspections.repository.DeviceRepository;
 import com.inspections.repository.DeviceTypeTestTemplateRepository;
 import com.inspections.repository.DeviceTypeRepository;
 import com.inspections.repository.InspectionRepository;
 import com.inspections.repository.LocationRepository;
+import com.inspections.repository.StepRepository;
 import com.inspections.repository.TestRepository;
 import com.inspections.repository.TestTemplateRepository;
+import com.inspections.repository.TestTemplateStepRepository;
 import com.inspections.repository.ZoneRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -43,6 +47,8 @@ public class DeviceService {
     private final DeviceTypeTestTemplateRepository deviceTypeTestTemplateRepository;
     private final TestTemplateRepository testTemplateRepository;
     private final TestRepository testRepository;
+    private final TestTemplateStepRepository testTemplateStepRepository;
+    private final StepRepository stepRepository;
     private final InspectionRepository inspectionRepository;
     private final ZoneRepository zoneRepository;
     private final LocationRepository locationRepository;
@@ -52,6 +58,8 @@ public class DeviceService {
                          DeviceTypeTestTemplateRepository deviceTypeTestTemplateRepository,
                          TestTemplateRepository testTemplateRepository,
                          TestRepository testRepository,
+                         TestTemplateStepRepository testTemplateStepRepository,
+                         StepRepository stepRepository,
                          InspectionRepository inspectionRepository,
                          ZoneRepository zoneRepository,
                          LocationRepository locationRepository) {
@@ -60,6 +68,8 @@ public class DeviceService {
         this.deviceTypeTestTemplateRepository = deviceTypeTestTemplateRepository;
         this.testTemplateRepository = testTemplateRepository;
         this.testRepository = testRepository;
+        this.testTemplateStepRepository = testTemplateStepRepository;
+        this.stepRepository = stepRepository;
         this.inspectionRepository = inspectionRepository;
         this.zoneRepository = zoneRepository;
         this.locationRepository = locationRepository;
@@ -175,6 +185,7 @@ public class DeviceService {
             test.setCreatedAt(now);
             test.setUpdatedAt(now);
             testRepository.save(test);
+            cloneTemplateStepsToTest(test.getId(), template.getId(), now);
 
             created.add(new TestResponse(
                     test.getId(), test.getDeviceId(), test.getInspectionId(),
@@ -182,6 +193,26 @@ public class DeviceService {
         }
 
         return created;
+    }
+
+    private void cloneTemplateStepsToTest(String testId, String templateId, Instant now) {
+        List<TestTemplateStep> templateSteps = testTemplateStepRepository.findByTestTemplateIdOrderBySortOrderAsc(templateId);
+        for (TestTemplateStep tts : templateSteps) {
+            Step step = new Step();
+            step.setId(UUID.randomUUID().toString());
+            step.setTestId(testId);
+            step.setName(tts.getName());
+            step.setTestStepType(tts.getTestStepType());
+            step.setApplicable(true);
+            step.setStatus("PENDING");
+            step.setDescription(tts.getDescription());
+            step.setValueJson(null);
+            step.setMinValue(tts.getMinValue());
+            step.setMaxValue(tts.getMaxValue());
+            step.setCreatedAt(now);
+            step.setUpdatedAt(now);
+            stepRepository.save(step);
+        }
     }
 
     /**

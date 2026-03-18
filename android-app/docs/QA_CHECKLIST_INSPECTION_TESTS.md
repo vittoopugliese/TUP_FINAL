@@ -29,8 +29,9 @@
 - [ ] Tap en test navega a StepsFragment
 - [ ] Argumentos inspectionId, testId, deviceId se pasan correctamente
 - [ ] StepsFragment carga steps por testId (loading -> lista o error)
-- [ ] Back desde Steps vuelve a la vista de tests con estado de expansión preservado
-- [ ] Al completar test y volver, el estado del test se actualiza en la lista (refresh)
+- [ ] Back desde Steps (toolbar o Complete) vuelve a la vista de tests con estado de expansión preservado
+- [ ] Al volver (back o Complete), el estado del test se actualiza en la lista (refresh)
+- [ ] Tests generados por device type tienen steps predefinidos (template steps)
 
 ## Vista Steps (T5.1.2 / T5.1.3 / T5.1.4)
 - [ ] Header "Pasos del Test" y toolbar con back
@@ -46,6 +47,9 @@
 - [ ] Botón Completar habilitado cuando todos los steps aplicables son válidos
 - [ ] Al cambiar cualquier step se recalcula estado del test
 - [ ] Fallback a Room si backend falla o no responde
+- [ ] Agregar observación REMARKS: se guarda, no afecta estado
+- [ ] Agregar deficiencia DEFICIENCIES: step y test pasan a FAILED, lista se actualiza
+- [ ] Step inválido (ej. numérico fuera de rango) persiste como FAILED en backend/Room
 
 ## Accesibilidad
 - [ ] Content descriptions en íconos expand/collapse
