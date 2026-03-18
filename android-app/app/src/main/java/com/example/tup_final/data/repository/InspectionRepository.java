@@ -171,7 +171,7 @@ public class InspectionRepository {
      */
     public LiveData<Resource<InspectionEntity>> startInspection(String inspectionId) {
         MutableLiveData<Resource<InspectionEntity>> result = new MutableLiveData<>();
-        result.setValue(Resource.loading());
+        result.postValue(Resource.loading());
 
         executor.execute(() -> {
             InspectionEntity inspection = inspectionDao.getById(inspectionId);

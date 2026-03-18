@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -16,20 +18,32 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.tup_final.R;
+import com.example.tup_final.data.entity.ObservationEntity;
 import com.example.tup_final.util.StepConstants;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Adapter para la lista de steps.
  * Usa view types por tipo de step (BINARY, DATE_RANGE, etc.).
+ *
+ * Fix de bucle infinito:
+ *  - El Spinner ignora el primer onItemSelected (disparo inicial de Android).
+ *  - El checkbox limpia su listener antes del setChecked programático.
+ *  - updateObservations() usa notifyItemChanged con payload (no notifyDataSetChanged).
  */
 public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHolder> {
 
@@ -40,53 +54,73 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
     private static final int VIEW_TYPE_MULTI_VALUE = 4;
     private static final int VIEW_TYPE_UNKNOWN = 5;
 
+    /** Payload used for observation-only partial rebind (avoids full item rebind). */
+    static final String PAYLOAD_OBS = "obs";
+
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final long DEBOUNCE_MS = 400;
 
     private OnStepValueChangeListener onStepValueChangeListener;
+    private OnAddObservationListener onAddObservationListener;
+    private Map<String, List<ObservationEntity>> observationsMap = new HashMap<>();
 
     public interface OnStepValueChangeListener {
         void onStepValueChange(StepUiModel step, String valueJson, Boolean applicable);
     }
 
-    public StepsAdapter() {
-        super(new DiffUtil.ItemCallback<StepUiModel>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull StepUiModel oldItem, @NonNull StepUiModel newItem) {
-                return oldItem.id.equals(newItem.id);
-            }
-
-            @Override
-            public boolean areContentsTheSame(@NonNull StepUiModel oldItem, @NonNull StepUiModel newItem) {
-                return oldItem.valueJson == null ? newItem.valueJson == null
-                        : oldItem.valueJson.equals(newItem.valueJson)
-                        && oldItem.applicable == newItem.applicable
-                        && oldItem.status.equals(newItem.status);
-            }
-        });
+    public interface OnAddObservationListener {
+        void onAddObservation(StepUiModel step);
     }
 
     public void setOnStepValueChangeListener(OnStepValueChangeListener listener) {
         this.onStepValueChangeListener = listener;
     }
 
+    public void setOnAddObservationListener(OnAddObservationListener listener) {
+        this.onAddObservationListener = listener;
+    }
+
+    /**
+     * Actualiza el mapa de observaciones y notifica SOLO los items afectados,
+     * sin forzar un rebind completo de todos los items (evita el bucle con el Spinner).
+     */
+    public void updateObservations(Map<String, List<ObservationEntity>> map) {
+        if (map == null) return;
+        this.observationsMap = new HashMap<>(map);
+        List<StepUiModel> list = getCurrentList();
+        for (int i = 0; i < list.size(); i++) {
+            if (map.containsKey(list.get(i).id)) {
+                notifyItemChanged(i, PAYLOAD_OBS);
+            }
+        }
+    }
+
+    public StepsAdapter() {
+        super(new DiffUtil.ItemCallback<StepUiModel>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull StepUiModel o, @NonNull StepUiModel n) {
+                return o.id.equals(n.id);
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull StepUiModel o, @NonNull StepUiModel n) {
+                return (o.valueJson == null ? n.valueJson == null : o.valueJson.equals(n.valueJson))
+                        && o.applicable == n.applicable
+                        && o.status.equals(n.status);
+            }
+        });
+    }
+
     @Override
     public int getItemViewType(int position) {
-        StepUiModel item = getItem(position);
-        switch (item.testStepType) {
-            case StepConstants.TYPE_BINARY:
-                return VIEW_TYPE_BINARY;
-            case StepConstants.TYPE_DATE_RANGE:
-                return VIEW_TYPE_DATE_RANGE;
-            case StepConstants.TYPE_SIMPLE_VALUE:
-                return VIEW_TYPE_SIMPLE_VALUE;
+        switch (getItem(position).testStepType) {
+            case StepConstants.TYPE_BINARY:       return VIEW_TYPE_BINARY;
+            case StepConstants.TYPE_DATE_RANGE:   return VIEW_TYPE_DATE_RANGE;
+            case StepConstants.TYPE_SIMPLE_VALUE: return VIEW_TYPE_SIMPLE_VALUE;
             case StepConstants.TYPE_NUMERIC_RANGE:
-            case StepConstants.TYPE_RANGE:
-                return VIEW_TYPE_NUMERIC_RANGE;
-            case StepConstants.TYPE_MULTI_VALUE:
-                return VIEW_TYPE_MULTI_VALUE;
-            default:
-                return VIEW_TYPE_UNKNOWN;
+            case StepConstants.TYPE_RANGE:        return VIEW_TYPE_NUMERIC_RANGE;
+            case StepConstants.TYPE_MULTI_VALUE:  return VIEW_TYPE_MULTI_VALUE;
+            default:                              return VIEW_TYPE_UNKNOWN;
         }
     }
 
@@ -100,8 +134,27 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         StepUiModel step = getItem(position);
-        ((StepViewHolder) holder).bind(step, onStepValueChangeListener);
+        List<ObservationEntity> obs = observationsMap.getOrDefault(step.id, Collections.emptyList());
+        ((StepViewHolder) holder).bind(step, obs, onStepValueChangeListener, onAddObservationListener);
     }
+
+    /**
+     * Partial bind: if the payload is PAYLOAD_OBS, only update the observations section
+     * without touching the input views (avoids retriggering Spinner / Checkbox listeners).
+     */
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position,
+                                 @NonNull List<Object> payloads) {
+        if (!payloads.isEmpty() && PAYLOAD_OBS.equals(payloads.get(0))) {
+            StepUiModel step = getItem(position);
+            List<ObservationEntity> obs = observationsMap.getOrDefault(step.id, Collections.emptyList());
+            ((StepViewHolder) holder).bindObservations(obs);
+        } else {
+            super.onBindViewHolder(holder, position, payloads);
+        }
+    }
+
+    // ── ViewHolder ────────────────────────────────────────────────────────────
 
     static class StepViewHolder extends RecyclerView.ViewHolder {
         final TextView textStepIndex;
@@ -109,6 +162,9 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
         final MaterialCheckBox checkNa;
         final ViewGroup containerInput;
         final LayoutInflater inflater;
+        final LinearLayout containerObservations;
+        final View dividerObservations;
+        final MaterialButton btnAddObservation;
 
         StepViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -116,12 +172,22 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
             textStepName = itemView.findViewById(R.id.text_step_name);
             checkNa = itemView.findViewById(R.id.check_step_na);
             containerInput = itemView.findViewById(R.id.container_step_input);
+            containerObservations = itemView.findViewById(R.id.container_observations);
+            dividerObservations = itemView.findViewById(R.id.divider_observations);
+            btnAddObservation = itemView.findViewById(R.id.btn_add_observation);
             inflater = LayoutInflater.from(itemView.getContext());
         }
 
-        void bind(StepUiModel step, OnStepValueChangeListener listener) {
+        void bind(StepUiModel step, List<ObservationEntity> observations,
+                  OnStepValueChangeListener listener,
+                  OnAddObservationListener obsListener) {
+
             textStepIndex.setText("#" + step.index);
             textStepName.setText(step.name);
+
+            // FIX: clear listener BEFORE setChecked to avoid firing the callback
+            // with the programmatic value (would trigger updateStep unnecessarily).
+            checkNa.setOnCheckedChangeListener(null);
             checkNa.setChecked(!step.applicable);
             checkNa.setOnCheckedChangeListener((btn, checked) -> {
                 boolean applicable = !checked;
@@ -130,6 +196,7 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
                     listener.onStepValueChange(step, step.valueJson, applicable);
                 }
             });
+
             containerInput.setEnabled(step.applicable);
             containerInput.removeAllViews();
 
@@ -138,7 +205,69 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
                 containerInput.addView(inputView);
                 bindInput(step, inputView, listener);
             }
+
+            bindObservations(observations);
+
+            btnAddObservation.setOnClickListener(v -> {
+                if (obsListener != null) obsListener.onAddObservation(step);
+            });
         }
+
+        // Called for partial updates (PAYLOAD_OBS) — does NOT touch input views.
+        void bindObservations(List<ObservationEntity> observations) {
+            containerObservations.removeAllViews();
+            if (observations == null || observations.isEmpty()) {
+                containerObservations.setVisibility(View.GONE);
+                dividerObservations.setVisibility(View.GONE);
+                return;
+            }
+
+            containerObservations.setVisibility(View.VISIBLE);
+            dividerObservations.setVisibility(View.VISIBLE);
+
+            for (ObservationEntity obs : observations) {
+                View itemView = inflater.inflate(R.layout.item_observation, containerObservations, false);
+
+                ImageView iconType = itemView.findViewById(R.id.icon_obs_type);
+                TextView textType = itemView.findViewById(R.id.text_obs_type_badge);
+                TextView textDesc = itemView.findViewById(R.id.text_obs_description);
+                ImageView imageThumb = itemView.findViewById(R.id.image_obs_thumb);
+
+                boolean isDeficiency = "DEFICIENCIES".equals(obs.type);
+
+                if (isDeficiency) {
+                    iconType.setImageResource(android.R.drawable.ic_dialog_alert);
+                    iconType.setColorFilter(
+                            itemView.getContext().getResources().getColor(R.color.obs_deficiency_color, null));
+                    textType.setText("DEFICIENCIA");
+                    textType.setTextColor(
+                            itemView.getContext().getResources().getColor(R.color.obs_deficiency_color, null));
+                } else {
+                    iconType.setImageResource(android.R.drawable.ic_dialog_info);
+                    iconType.setColorFilter(
+                            itemView.getContext().getResources().getColor(R.color.obs_remark_color, null));
+                    textType.setText("OBSERVACIÓN");
+                    textType.setTextColor(
+                            itemView.getContext().getResources().getColor(R.color.obs_remark_color, null));
+                }
+
+                textDesc.setText(obs.description != null ? obs.description : "");
+
+                if (obs.mediaId != null && !obs.mediaId.isEmpty()) {
+                    imageThumb.setVisibility(View.VISIBLE);
+                    Glide.with(itemView.getContext())
+                            .load(obs.mediaId)
+                            .centerCrop()
+                            .into(imageThumb);
+                } else {
+                    imageThumb.setVisibility(View.GONE);
+                }
+
+                containerObservations.addView(itemView);
+            }
+        }
+
+        // ── Input inflaters ───────────────────────────────────────────────────
 
         private View inflateInputForType(String type) {
             switch (type) {
@@ -181,10 +310,20 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
             }
         }
 
+        /**
+         * Binds the binary (Yes/No) spinner.
+         *
+         * FIX: Android's Spinner always fires onItemSelected once after its first layout,
+         * even when the selection was set programmatically before the listener was attached.
+         * We use an 'isFirstCall' flag to silently skip that initial callback so it does
+         * NOT trigger updateStep() unnecessarily and cause an infinite refresh loop.
+         */
         private void bindBinary(StepUiModel step, View v, OnStepValueChangeListener listener) {
             Spinner spinner = v.findViewById(R.id.spinner_binary);
             TextView errorText = v.findViewById(R.id.text_binary_error);
-            String[] options = itemView.getContext().getResources().getStringArray(R.array.step_binary_options);
+
+            String[] options = itemView.getContext().getResources()
+                    .getStringArray(R.array.step_binary_options);
             ArrayAdapter<String> adapter = new ArrayAdapter<>(itemView.getContext(),
                     android.R.layout.simple_spinner_item, options);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -194,9 +333,26 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
             int pos = current == null ? 0 : (current ? 1 : 2);
             spinner.setSelection(pos);
 
+            // Show/hide error for the initial state without triggering the listener.
+            if (current != null) {
+                errorText.setVisibility(View.GONE);
+            } else if (step.applicable) {
+                errorText.setVisibility(View.VISIBLE);
+                errorText.setText(itemView.getContext().getString(R.string.step_error_required));
+            }
+
+            final boolean[] isFirstCall = {true};
+
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    // Skip the very first call: Android fires this after layout even
+                    // though the selection was already set programmatically above.
+                    if (isFirstCall[0]) {
+                        isFirstCall[0] = false;
+                        return;
+                    }
+
                     if (position == 0) {
                         errorText.setVisibility(View.VISIBLE);
                         errorText.setText(itemView.getContext().getString(R.string.step_error_required));
@@ -208,12 +364,10 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
                         if (listener != null) listener.onStepValueChange(step, json, step.applicable);
                     }
                 }
+
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {}
             });
-
-            if (current != null) errorText.setVisibility(View.GONE);
-            else if (step.applicable) errorText.setVisibility(View.VISIBLE);
         }
 
         private void bindDateRange(StepUiModel step, View v, OnStepValueChangeListener listener) {
@@ -234,7 +388,8 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
             toInput.setOnClickListener(v1 -> pickTo.run());
 
             updateDateRangeError(fromInput, toInput, errorText);
-            notifyDateRangeIfValid(fromInput.getText().toString(), toInput.getText().toString(), step, listener, errorText);
+            notifyDateRangeIfValid(fromInput.getText().toString(), toInput.getText().toString(),
+                    step, listener, errorText);
         }
 
         private void showDatePicker(TextInputEditText fromInput, TextInputEditText toInput,
@@ -244,30 +399,24 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.US);
                 String str = isFrom ? fromInput.getText().toString() : toInput.getText().toString();
-                if (str != null && !str.isEmpty()) {
-                    cal.setTime(sdf.parse(str));
-                }
+                if (str != null && !str.isEmpty()) cal.setTime(sdf.parse(str));
             } catch (Exception ignored) {}
-            DatePickerDialog dlg = new DatePickerDialog(itemView.getContext(),
-                    (view, year, month, dayOfMonth) -> {
-                        cal.set(year, month, dayOfMonth);
-                        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-                        String dateStr = sdf.format(cal.getTime());
-                        if (isFrom) {
-                            fromInput.setText(dateStr);
-                        } else {
-                            toInput.setText(dateStr);
-                        }
+            new DatePickerDialog(itemView.getContext(),
+                    (view, year, month, day) -> {
+                        cal.set(year, month, day);
+                        String dateStr = new SimpleDateFormat(DATE_FORMAT, Locale.US).format(cal.getTime());
+                        if (isFrom) fromInput.setText(dateStr);
+                        else toInput.setText(dateStr);
                         updateDateRangeError(fromInput, toInput, errorText);
-                        String from = fromInput.getText().toString();
-                        String to = toInput.getText().toString();
-                        notifyDateRangeIfValid(from, to, step, listener, errorText);
+                        notifyDateRangeIfValid(fromInput.getText().toString(),
+                                toInput.getText().toString(), step, listener, errorText);
                     },
-                    cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
-            dlg.show();
+                    cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
+            ).show();
         }
 
-        private void updateDateRangeError(TextInputEditText from, TextInputEditText to, TextView errorText) {
+        private void updateDateRangeError(TextInputEditText from, TextInputEditText to,
+                                          TextView errorText) {
             String fromStr = from.getText().toString().trim();
             String toStr = to.getText().toString().trim();
             if (fromStr.isEmpty() || toStr.isEmpty()) {
@@ -296,7 +445,8 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
                 return;
             }
             if (from.isEmpty() || to.isEmpty()) {
-                if (listener != null) listener.onStepValueChange(step, StepValueMapper.toDateRangeJson(from, to), step.applicable);
+                if (listener != null) listener.onStepValueChange(step,
+                        StepValueMapper.toDateRangeJson(from, to), step.applicable);
                 return;
             }
             try {
@@ -304,7 +454,8 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
                 Date dFrom = sdf.parse(from);
                 Date dTo = sdf.parse(to);
                 if (dFrom != null && dTo != null && !dFrom.after(dTo) && listener != null) {
-                    listener.onStepValueChange(step, StepValueMapper.toDateRangeJson(from, to), step.applicable);
+                    listener.onStepValueChange(step, StepValueMapper.toDateRangeJson(from, to),
+                            step.applicable);
                 }
             } catch (Exception ignored) {}
         }
@@ -322,26 +473,21 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
             }
 
             android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
-            Runnable pending = new Runnable() {
-                @Override
-                public void run() {
-                    String val = input.getText().toString().trim();
-                    if (step.applicable && val.isEmpty()) {
-                        errorText.setVisibility(View.VISIBLE);
-                        errorText.setText(itemView.getContext().getString(R.string.step_error_required));
-                        if (listener != null) listener.onStepValueChange(step, null, step.applicable);
-                    } else {
-                        errorText.setVisibility(View.GONE);
-                        String json = StepValueMapper.toStringJson(val);
-                        if (listener != null) listener.onStepValueChange(step, json, step.applicable);
-                    }
+            Runnable pending = () -> {
+                String val = input.getText().toString().trim();
+                if (step.applicable && val.isEmpty()) {
+                    errorText.setVisibility(View.VISIBLE);
+                    errorText.setText(itemView.getContext().getString(R.string.step_error_required));
+                    if (listener != null) listener.onStepValueChange(step, null, step.applicable);
+                } else {
+                    errorText.setVisibility(View.GONE);
+                    if (listener != null)
+                        listener.onStepValueChange(step, StepValueMapper.toStringJson(val), step.applicable);
                 }
             };
             input.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+                @Override public void onTextChanged(CharSequence s, int i, int b, int c) {}
                 @Override
                 public void afterTextChanged(Editable s) {
                     handler.removeCallbacks(pending);
@@ -357,9 +503,7 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
 
             Double min = step.minValue;
             Double max = step.maxValue;
-            if (min != null && max != null) {
-                til.setSuffixText(" (" + min + "-" + max + ")");
-            }
+            if (min != null && max != null) til.setSuffixText(" (" + min + "-" + max + ")");
 
             Double current = StepValueMapper.parseNumericValue(step.valueJson);
             input.setText(current != null ? String.valueOf(current) : "");
@@ -376,16 +520,21 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
                 try {
                     double val = Double.parseDouble(raw);
                     if (min != null && val < min) {
-                        errorText.setText(itemView.getContext().getString(R.string.step_error_numeric_range, min, max != null ? max : min));
+                        errorText.setText(itemView.getContext().getString(
+                                R.string.step_error_numeric_range, min, max != null ? max : min));
                         errorText.setVisibility(View.VISIBLE);
-                        if (listener != null) listener.onStepValueChange(step, StepValueMapper.toNumericJson(val), step.applicable);
+                        if (listener != null)
+                            listener.onStepValueChange(step, StepValueMapper.toNumericJson(val), step.applicable);
                     } else if (max != null && val > max) {
-                        errorText.setText(itemView.getContext().getString(R.string.step_error_numeric_range, min != null ? min : max, max));
+                        errorText.setText(itemView.getContext().getString(
+                                R.string.step_error_numeric_range, min != null ? min : max, max));
                         errorText.setVisibility(View.VISIBLE);
-                        if (listener != null) listener.onStepValueChange(step, StepValueMapper.toNumericJson(val), step.applicable);
+                        if (listener != null)
+                            listener.onStepValueChange(step, StepValueMapper.toNumericJson(val), step.applicable);
                     } else {
                         errorText.setVisibility(View.GONE);
-                        if (listener != null) listener.onStepValueChange(step, StepValueMapper.toNumericJson(val), step.applicable);
+                        if (listener != null)
+                            listener.onStepValueChange(step, StepValueMapper.toNumericJson(val), step.applicable);
                     }
                 } catch (NumberFormatException e) {
                     errorText.setVisibility(View.VISIBLE);
@@ -394,10 +543,8 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
             };
 
             input.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+                @Override public void onTextChanged(CharSequence s, int i, int b, int c) {}
                 @Override
                 public void afterTextChanged(Editable s) {
                     handler.removeCallbacks(validateAndNotify);
@@ -435,20 +582,18 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
                 } else if (step.applicable && anyEmpty) {
                     errorText.setVisibility(View.VISIBLE);
                     errorText.setText(itemView.getContext().getString(R.string.step_error_multi_incomplete));
-                    String json = StepValueMapper.toMultiValueJson(v1, v2, v3);
-                    if (listener != null) listener.onStepValueChange(step, json, step.applicable);
+                    if (listener != null)
+                        listener.onStepValueChange(step, StepValueMapper.toMultiValueJson(v1, v2, v3), step.applicable);
                 } else {
                     errorText.setVisibility(View.GONE);
-                    String json = StepValueMapper.toMultiValueJson(v1, v2, v3);
-                    if (listener != null) listener.onStepValueChange(step, json, step.applicable);
+                    if (listener != null)
+                        listener.onStepValueChange(step, StepValueMapper.toMultiValueJson(v1, v2, v3), step.applicable);
                 }
             };
 
             TextWatcher watcher = new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+                @Override public void onTextChanged(CharSequence s, int i, int b, int c) {}
                 @Override
                 public void afterTextChanged(Editable s) {
                     if (pendingRef[0] != null) handler.removeCallbacks(pendingRef[0]);

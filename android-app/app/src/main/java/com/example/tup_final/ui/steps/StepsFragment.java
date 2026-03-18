@@ -17,13 +17,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tup_final.R;
+import com.example.tup_final.data.entity.ObservationEntity;
 import com.example.tup_final.ui.inspectiontests.InspectionTestsFragment;
+
+import java.util.Map;
 import com.example.tup_final.util.Resource;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -38,6 +42,8 @@ public class StepsFragment extends Fragment {
     private static final String ARG_TEST_ID = "testId";
     private static final String ARG_DEVICE_ID = "deviceId";
 
+    private static final String TAG_OBS_SHEET = "add_observation_sheet";
+
     private StepsViewModel viewModel;
     private StepsAdapter adapter;
     private ProgressBar progress;
@@ -45,6 +51,9 @@ public class StepsFragment extends Fragment {
     private TextView textError;
     private RecyclerView recyclerSteps;
     private MaterialButton btnComplete;
+
+    private String inspectionId;
+    private String testId;
 
     @Nullable
     @Override
@@ -57,8 +66,8 @@ public class StepsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String testId = getArguments() != null ? getArguments().getString(ARG_TEST_ID, "") : "";
-        String inspectionId = getArguments() != null ? getArguments().getString(ARG_INSPECTION_ID, "") : "";
+        testId = getArguments() != null ? getArguments().getString(ARG_TEST_ID, "") : "";
+        inspectionId = getArguments() != null ? getArguments().getString(ARG_INSPECTION_ID, "") : "";
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
@@ -76,8 +85,11 @@ public class StepsFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(StepsViewModel.class);
         adapter = new StepsAdapter();
+
         adapter.setOnStepValueChangeListener((step, valueJson, applicable) ->
                 viewModel.updateStep(step.id, valueJson, applicable));
+
+        adapter.setOnAddObservationListener(step -> showAddObservationSheet(step));
 
         recyclerSteps.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerSteps.setAdapter(adapter);
@@ -93,7 +105,11 @@ public class StepsFragment extends Fragment {
         observeSteps();
         observeUpdateStep();
         observeCanComplete();
+        observeSaveObservation();
+        observeObservationsByStep();
     }
+
+    // ── Observers ─────────────────────────────────────────────────────────────
 
     private void observeSteps() {
         viewModel.getSteps().observe(getViewLifecycleOwner(), resource -> {
@@ -117,22 +133,32 @@ public class StepsFragment extends Fragment {
                         textEmpty.setVisibility(View.GONE);
                         recyclerSteps.setVisibility(View.VISIBLE);
                         adapter.submitList(new ArrayList<>(steps));
+                        // Only load observations for steps not yet in the map.
+                        // Avoids re-triggering the observation load on every refreshSteps() call.
+                        Map<String, List<ObservationEntity>> currentObs =
+                                viewModel.getObservationsByStep().getValue();
+                        for (StepUiModel step : steps) {
+                            if (currentObs == null || !currentObs.containsKey(step.id)) {
+                                viewModel.loadObservationsForStep(step.id);
+                            }
+                        }
                     }
                     break;
                 case ERROR:
                     progress.setVisibility(View.GONE);
                     textEmpty.setVisibility(View.GONE);
                     recyclerSteps.setVisibility(View.GONE);
-                    showError(resource.getMessage() != null ? resource.getMessage() : getString(R.string.steps_not_available));
+                    showError(resource.getMessage() != null
+                            ? resource.getMessage()
+                            : getString(R.string.steps_not_available));
                     break;
             }
         });
     }
 
     private void observeCanComplete() {
-        viewModel.getCanComplete().observe(getViewLifecycleOwner(), canComplete -> {
-            btnComplete.setEnabled(Boolean.TRUE.equals(canComplete));
-        });
+        viewModel.getCanComplete().observe(getViewLifecycleOwner(), canComplete ->
+                btnComplete.setEnabled(Boolean.TRUE.equals(canComplete)));
     }
 
     private void observeUpdateStep() {
@@ -149,6 +175,61 @@ public class StepsFragment extends Fragment {
             }
         });
     }
+
+    private void observeSaveObservation() {
+        viewModel.getSaveObsResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (resource.getStatus() == SUCCESS && resource.getData() != null) {
+                ObservationEntity saved = resource.getData();
+                viewModel.appendObservationLocally(saved);
+                viewModel.clearSaveObsResult();
+
+                AddObservationBottomSheet sheet = findObsSheet();
+                if (sheet != null) {
+                    sheet.dismiss();
+                }
+                Toast.makeText(requireContext(),
+                        getString(R.string.obs_saved_success), Toast.LENGTH_SHORT).show();
+
+            } else if (resource.getStatus() == ERROR) {
+                AddObservationBottomSheet sheet = findObsSheet();
+                if (sheet != null) sheet.setLoading(false);
+                Toast.makeText(requireContext(),
+                        resource.getMessage() != null ? resource.getMessage()
+                                : getString(R.string.obs_save_error),
+                        Toast.LENGTH_SHORT).show();
+                viewModel.clearSaveObsResult();
+            }
+        });
+    }
+
+    private void observeObservationsByStep() {
+        viewModel.getObservationsByStep().observe(getViewLifecycleOwner(), map -> {
+            if (map != null) {
+                adapter.updateObservations(map);
+            }
+        });
+    }
+
+    // ── Observation Sheet ─────────────────────────────────────────────────────
+
+    private void showAddObservationSheet(StepUiModel step) {
+        AddObservationBottomSheet sheet =
+                AddObservationBottomSheet.newInstance(step.id, "#" + step.index + " · " + step.name);
+
+        sheet.setOnSaveListener((stepId, type, description, photoPath) ->
+                viewModel.saveObservation(stepId, inspectionId, type, description, photoPath));
+
+        sheet.show(getChildFragmentManager(), TAG_OBS_SHEET);
+    }
+
+    @Nullable
+    private AddObservationBottomSheet findObsSheet() {
+        return (AddObservationBottomSheet) getChildFragmentManager()
+                .findFragmentByTag(TAG_OBS_SHEET);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void showError(String message) {
         progress.setVisibility(View.GONE);
