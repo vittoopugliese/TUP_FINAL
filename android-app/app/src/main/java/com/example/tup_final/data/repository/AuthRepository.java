@@ -12,11 +12,14 @@ import androidx.work.WorkManager;
 import com.bumptech.glide.Glide;
 import com.example.tup_final.data.local.AppDatabase;
 import com.example.tup_final.data.local.UserDao;
+import com.example.tup_final.data.entity.UserEntity;
 import com.example.tup_final.data.remote.AuthApi;
 import com.example.tup_final.data.remote.dto.LoginRequest;
 import com.example.tup_final.data.remote.dto.LoginResponse;
+import com.example.tup_final.data.remote.dto.RegisterRequest;
 import com.example.tup_final.ui.forgotpassword.ForgotPasswordViewModel.ResetResult;
 import com.example.tup_final.util.Resource;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -30,6 +33,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
+import okhttp3.ResponseBody;
 import retrofit2.Response;
 
 /**
@@ -191,6 +195,66 @@ public class AuthRepository {
             return ResetResult.SUCCESS_OFFLINE;
         }
         return ResetResult.ERROR_NETWORK;
+    }
+
+    // ──────────────────────────────────────────────
+    // Registration
+    // ──────────────────────────────────────────────
+
+    /**
+     * Registra un nuevo usuario en el backend y guarda el usuario en Room.
+     * No guarda credenciales (el usuario debe iniciar sesión manualmente).
+     */
+    public LiveData<Resource<LoginResponse>> register(String name, String email, String password) {
+        MutableLiveData<Resource<LoginResponse>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                RegisterRequest request = new RegisterRequest(
+                        name != null ? name.trim() : "",
+                        email != null ? email.trim() : "",
+                        password != null ? password : ""
+                );
+                Response<LoginResponse> response = authApi.register(request).execute();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    LoginResponse loginResponse = response.body();
+                    UserEntity user = new UserEntity(
+                            loginResponse.getUserId() != null ? loginResponse.getUserId() : "",
+                            loginResponse.getEmail() != null ? loginResponse.getEmail() : "",
+                            loginResponse.getFullName() != null ? loginResponse.getFullName() : "",
+                            "",
+                            null,
+                            null,
+                            loginResponse.getRole() != null ? loginResponse.getRole() : "INSPECTOR",
+                            null,
+                            null
+                    );
+                    userDao.insert(user);
+                    mainHandler.post(() -> result.setValue(Resource.success(loginResponse)));
+                } else {
+                    String errorMsg = parseRegisterError(response.errorBody());
+                    mainHandler.post(() -> result.setValue(Resource.error(errorMsg)));
+                }
+            } catch (IOException e) {
+                String msg = e.getMessage() != null ? e.getMessage() : "Error de conexión";
+                mainHandler.post(() -> result.setValue(Resource.error(msg)));
+            }
+        });
+
+        return result;
+    }
+
+    private String parseRegisterError(ResponseBody errorBody) {
+        if (errorBody == null) return "Error al registrar";
+        try {
+            JsonObject json = new Gson().fromJson(errorBody.string(), JsonObject.class);
+            if (json != null && json.has("error")) {
+                return json.get("error").getAsString();
+            }
+        } catch (Exception ignored) { }
+        return "Error al registrar";
     }
 
     // ──────────────────────────────────────────────

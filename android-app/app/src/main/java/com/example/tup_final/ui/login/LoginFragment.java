@@ -81,10 +81,14 @@ public class LoginFragment extends Fragment {
             }
         });
 
-        // Added from HEAD: Forgot Password navigation
         binding.textForgotPassword.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(requireView());
             navController.navigate(R.id.action_login_to_forgotPassword);
+        });
+
+        binding.textRegisterLink.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireView());
+            navController.navigate(R.id.action_login_to_registration);
         });
     }
 

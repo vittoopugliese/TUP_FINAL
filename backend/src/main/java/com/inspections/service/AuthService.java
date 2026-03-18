@@ -3,6 +3,7 @@ package com.inspections.service;
 import com.inspections.dto.AuthRequest;
 import com.inspections.dto.AuthResponse;
 import com.inspections.dto.ForgotPasswordRequest;
+import com.inspections.dto.RegisterRequest;
 import com.inspections.entity.User;
 import com.inspections.repository.UserRepository;
 import com.inspections.security.JwtUtil;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Servicio de autenticación.
@@ -50,6 +52,33 @@ public class AuthService {
 
         // Actualizar lastLoginAt
         user.setLastLoginAt(Instant.now());
+        userRepository.save(user);
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        return new AuthResponse(token, user.getEmail(), user.getRole(),
+                user.getId(), user.getFullName());
+    }
+
+    /**
+     * Registro: crea un nuevo usuario y retorna JWT + datos del usuario.
+     *
+     * @throws BadCredentialsException si el email ya está registrado
+     */
+    public AuthResponse register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail().trim())) {
+            throw new BadCredentialsException("El email ya está registrado");
+        }
+
+        User user = new User();
+        user.setId(UUID.randomUUID().toString());
+        user.setEmail(request.getEmail().trim().toLowerCase());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setFirstName(request.getName() != null ? request.getName().trim() : "");
+        user.setLastName("");
+        user.setRole("INSPECTOR");
+        user.setEnabled(true);
+        user.setCreatedAt(Instant.now());
+
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());

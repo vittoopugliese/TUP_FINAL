@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -59,14 +62,41 @@ public class InspectionService {
     }
 
     /**
-     * Obtiene todas las inspecciones para la lista.
+     * Obtiene las inspecciones asignadas al usuario autenticado.
+     * Si no hay usuario autenticado, retorna lista vacía.
      *
      * @return Lista de InspectionListResponse
      */
     public List<InspectionListResponse> getAllInspections() {
-        return inspectionRepository.findAll().stream()
+        String userEmail = getAuthenticatedUserEmail();
+        if (userEmail == null || userEmail.isBlank()) {
+            return List.of();
+        }
+        String emailLower = userEmail.trim().toLowerCase();
+        List<String> inspectionIds = assignmentRepository.findByUserEmailIgnoreCase(emailLower)
+                .stream()
+                .map(InspectionAssignment::getInspectionId)
+                .distinct()
+                .collect(Collectors.toList());
+        if (inspectionIds.isEmpty()) {
+            return List.of();
+        }
+        return inspectionRepository.findAllById(inspectionIds).stream()
                 .map(this::mapToListResponse)
                 .collect(Collectors.toList());
+    }
+
+    private String getAuthenticatedUserEmail() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null) {
+            return null;
+        }
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof String)) {
+            return null;
+        }
+        String email = (String) principal;
+        return "anonymousUser".equals(email) ? null : email;
     }
 
     /**

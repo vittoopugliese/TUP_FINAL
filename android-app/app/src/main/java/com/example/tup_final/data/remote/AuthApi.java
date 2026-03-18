@@ -2,6 +2,7 @@ package com.example.tup_final.data.remote;
 
 import com.example.tup_final.data.remote.dto.LoginRequest;
 import com.example.tup_final.data.remote.dto.LoginResponse;
+import com.example.tup_final.data.remote.dto.RegisterRequest;
 import com.google.gson.JsonObject;
 
 import retrofit2.Call;
@@ -26,6 +27,14 @@ public interface AuthApi {
      */
     @POST("auth/login")
     Call<LoginResponse> login(@Body LoginRequest request);
+
+    /**
+     * POST /api/auth/register
+     * Body: { "name": "...", "email": "...", "password": "..." }
+     * Response: { token, type, email, role, userId, fullName }
+     */
+    @POST("auth/register")
+    Call<LoginResponse> register(@Body RegisterRequest request);
 
     /**
      * POST /api/auth/logout

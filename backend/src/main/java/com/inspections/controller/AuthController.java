@@ -3,13 +3,16 @@ package com.inspections.controller;
 import com.inspections.dto.AuthRequest;
 import com.inspections.dto.AuthResponse;
 import com.inspections.dto.ForgotPasswordRequest;
+import com.inspections.dto.RegisterRequest;
 import com.inspections.dto.ResetPasswordRequest;
 import com.inspections.service.AuthService;
 import com.inspections.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -42,6 +45,18 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "Registro", description = "Registra un nuevo usuario con nombre, email y contraseña")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        try {
+            AuthResponse response = authService.register(request);
+            return ResponseEntity.ok(response);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/logout")

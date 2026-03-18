@@ -17,6 +17,12 @@
     <string name="error_email_invalid">Ingrese un correo electrónico válido</string>
     <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
     <string name="link_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="link_register">¿No tenés cuenta? Registrarse</string>
+
+    <!-- Registration -->
+    <string name="registration_title">Registrarse</string>
+    <string name="hint_name">Nombre</string>
+    <string name="btn_register">Registrarse</string>
 
     <!-- Forgot Password -->
     <string name="forgot_password_title">Recuperar contraseña</string>
