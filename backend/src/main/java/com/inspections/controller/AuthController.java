@@ -3,6 +3,8 @@ package com.inspections.controller;
 import com.inspections.dto.AuthRequest;
 import com.inspections.dto.AuthResponse;
 import com.inspections.dto.ForgotPasswordRequest;
+import com.inspections.dto.RegisterRequest;
+import com.inspections.dto.RegisterResponse;
 import com.inspections.dto.ResetPasswordRequest;
 import com.inspections.service.AuthService;
 import com.inspections.service.PasswordResetService;
@@ -42,6 +44,17 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "Registro", description = "Registra un nuevo usuario con email, nombre, rol y contraseña")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        try {
+            RegisterResponse response = authService.register(request);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/logout")

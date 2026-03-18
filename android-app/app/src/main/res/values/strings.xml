@@ -17,6 +17,20 @@
     <string name="error_email_invalid">Ingrese un correo electrónico válido</string>
     <string name="error_password_short">La contraseña debe tener al menos 6 caracteres</string>
     <string name="link_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="link_register">Registrar nuevo usuario</string>
+
+    <!-- Register -->
+    <string name="register_title">Registrar nuevo usuario</string>
+    <string name="hint_full_name">Nombre</string>
+    <string name="hint_role">Rol</string>
+    <string name="role_inspector">Inspector</string>
+    <string name="role_operator">Operador</string>
+    <string name="hint_confirm_password">Confirmar contraseña</string>
+    <string name="btn_register_accept">Aceptar</string>
+    <string name="register_success">Usuario registrado exitosamente. Ya podés iniciar sesión.</string>
+    <string name="error_register_email_exists">Ya existe una cuenta con ese correo electrónico</string>
+    <string name="error_role_required">Seleccioná un rol</string>
+    <string name="error_password_mismatch">Las contraseñas no coinciden</string>
 
     <!-- Forgot Password -->
     <string name="forgot_password_title">Recuperar contraseña</string>

@@ -15,6 +15,8 @@ import com.example.tup_final.data.local.UserDao;
 import com.example.tup_final.data.remote.AuthApi;
 import com.example.tup_final.data.remote.dto.LoginRequest;
 import com.example.tup_final.data.remote.dto.LoginResponse;
+import com.example.tup_final.data.remote.dto.RegisterRequest;
+import com.example.tup_final.data.remote.dto.RegisterResponse;
 import com.example.tup_final.ui.forgotpassword.ForgotPasswordViewModel.ResetResult;
 import com.example.tup_final.util.Resource;
 import com.google.gson.JsonObject;
@@ -138,6 +140,54 @@ public class AuthRepository {
                     mainHandler.post(() -> result.setValue(
                             Resource.error(e.getMessage() != null ? e.getMessage() : "Login failed")));
                 }
+            }
+        });
+
+        return result;
+    }
+
+    // ──────────────────────────────────────────────
+    // Register
+    // ──────────────────────────────────────────────
+
+    /**
+     * Registra un nuevo usuario en el backend.
+     *
+     * @return LiveData con Resource de RegisterResponse en éxito, o error con mensaje
+     */
+    public LiveData<Resource<RegisterResponse>> register(String email, String fullName, String role, String password) {
+        MutableLiveData<Resource<RegisterResponse>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                RegisterRequest request = new RegisterRequest(
+                        email != null ? email.trim() : "",
+                        fullName != null ? fullName.trim() : "",
+                        role != null ? role : "INSPECTOR",
+                        password
+                );
+                Response<RegisterResponse> response = authApi.register(request).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    mainHandler.post(() -> result.setValue(Resource.success(response.body())));
+                } else {
+                    String errorMsg = "Error al registrar";
+                    if (response.errorBody() != null) {
+                        try {
+                            com.google.gson.Gson gson = new com.google.gson.Gson();
+                            com.google.gson.JsonObject json = gson.fromJson(response.errorBody().string(), com.google.gson.JsonObject.class);
+                            if (json.has("error")) {
+                                errorMsg = json.get("error").getAsString();
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    final String msg = errorMsg;
+                    mainHandler.post(() -> result.setValue(Resource.error(msg)));
+                }
+            } catch (IOException e) {
+                String msg = e.getMessage() != null ? e.getMessage() : "Error de conexión";
+                mainHandler.post(() -> result.setValue(Resource.error(msg)));
             }
         });
 

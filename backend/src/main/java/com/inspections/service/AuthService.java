@@ -3,6 +3,8 @@ package com.inspections.service;
 import com.inspections.dto.AuthRequest;
 import com.inspections.dto.AuthResponse;
 import com.inspections.dto.ForgotPasswordRequest;
+import com.inspections.dto.RegisterRequest;
+import com.inspections.dto.RegisterResponse;
 import com.inspections.entity.User;
 import com.inspections.repository.UserRepository;
 import com.inspections.security.JwtUtil;
@@ -12,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Servicio de autenticación.
@@ -36,7 +39,7 @@ public class AuthService {
      * Login: valida email/contraseña y retorna JWT + datos del usuario.
      */
     public AuthResponse login(AuthRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmailIgnoreCase(request.getEmail().trim())
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "Usuario no encontrado: " + request.getEmail()));
 
@@ -71,12 +74,43 @@ public class AuthService {
         }
 
         String email = jwtUtil.getEmailFromToken(token);
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
 
         String newToken = jwtUtil.generateToken(user.getEmail(), user.getRole());
         return new AuthResponse(newToken, user.getEmail(), user.getRole(),
                 user.getId(), user.getFullName());
+    }
+
+    /**
+     * Registra un nuevo usuario.
+     * Valida email único, hashea la contraseña y persiste en la base de datos.
+     *
+     * @param request datos del usuario (email, fullName, role, password)
+     * @return RegisterResponse con mensaje de éxito y email
+     * @throws IllegalArgumentException si el email ya está registrado
+     */
+    public RegisterResponse register(RegisterRequest request) {
+        if (userRepository.existsByEmailIgnoreCase(request.getEmail().trim())) {
+            throw new IllegalArgumentException("Ya existe una cuenta con ese correo electrónico");
+        }
+
+        User user = new User();
+        user.setId(UUID.randomUUID().toString());
+        user.setEmail(request.getEmail().trim().toLowerCase());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setFirstName(request.getFullName() != null ? request.getFullName().trim() : "");
+        user.setLastName("");
+        user.setRole(request.getRole());
+        user.setEnabled(true);
+        user.setCreatedAt(Instant.now());
+
+        userRepository.save(user);
+
+        return new RegisterResponse(
+                "Usuario registrado exitosamente. Ya podés iniciar sesión.",
+                user.getEmail()
+        );
     }
 
     /**
