@@ -4,9 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -20,14 +17,12 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * Fragment de Registro de usuario.
- * Formulario con email, nombre, rol (dropdown), contraseña y confirmación.
+ * Formulario con email, nombre, contraseña y confirmación.
+ * El rol se asigna automáticamente como INSPECTOR.
  * Tras registro exitoso, vuelve al login.
  */
 @AndroidEntryPoint
 public class RegisterFragment extends Fragment {
-
-    private static final String ROLE_INSPECTOR = "INSPECTOR";
-    private static final String ROLE_OPERATOR = "OPERATOR";
 
     private FragmentRegisterBinding binding;
     private RegisterViewModel viewModel;
@@ -46,8 +41,6 @@ public class RegisterFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
-
-        setupRoleDropdown();
 
         binding.btnRegisterAccept.setOnClickListener(v -> submitRegister());
 
@@ -85,35 +78,13 @@ public class RegisterFragment extends Fragment {
         });
     }
 
-    private void setupRoleDropdown() {
-        String[] roles = {getString(R.string.role_inspector), getString(R.string.role_operator)};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_dropdown_item_1line, roles);
-        AutoCompleteTextView roleField = binding.etRegisterRole;
-        roleField.setAdapter(adapter);
-        roleField.setOnItemClickListener((parent, v, position, id) -> {
-            String selected = (String) parent.getItemAtPosition(position);
-            roleField.setTag(selected.equals(getString(R.string.role_inspector)) ? ROLE_INSPECTOR : ROLE_OPERATOR);
-        });
-    }
-
     private void submitRegister() {
         String email = getText(binding.etRegisterEmail);
         String fullName = getText(binding.etRegisterName);
-        Object roleTag = binding.etRegisterRole.getTag();
-        String role = roleTag != null ? roleTag.toString() : "";
-        if (role.isEmpty()) {
-            String roleDisplay = getText(binding.etRegisterRole);
-            if (getString(R.string.role_inspector).equals(roleDisplay)) {
-                role = ROLE_INSPECTOR;
-            } else if (getString(R.string.role_operator).equals(roleDisplay)) {
-                role = ROLE_OPERATOR;
-            }
-        }
         String password = getText(binding.etRegisterPassword);
         String confirmPassword = getText(binding.etRegisterConfirmPassword);
 
-        viewModel.register(email, fullName, role, password, confirmPassword);
+        viewModel.register(email, fullName, password, confirmPassword);
     }
 
     private String getText(android.widget.EditText et) {
@@ -127,8 +98,6 @@ public class RegisterFragment extends Fragment {
                 return getString(R.string.error_email_invalid);
             case "error_name_required":
                 return getString(R.string.error_name_required);
-            case "error_role_required":
-                return getString(R.string.error_role_required);
             case "error_password_short":
                 return getString(R.string.error_password_short);
             case "error_password_mismatch":
@@ -141,7 +110,6 @@ public class RegisterFragment extends Fragment {
     private void clearFieldErrors() {
         binding.tilRegisterEmail.setError(null);
         binding.tilRegisterName.setError(null);
-        binding.tilRegisterRole.setError(null);
         binding.tilRegisterPassword.setError(null);
         binding.tilRegisterConfirmPassword.setError(null);
     }

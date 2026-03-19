@@ -42,15 +42,12 @@ public class RegisterViewModel extends ViewModel {
      *
      * @return mensaje de error o null si todo es válido
      */
-    public String validate(String email, String fullName, String role, String password, String confirmPassword) {
+    public String validate(String email, String fullName, String password, String confirmPassword) {
         if (email == null || email.trim().isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
             return "error_email_invalid";
         }
         if (fullName == null || fullName.trim().isEmpty()) {
             return "error_name_required";
-        }
-        if (role == null || role.trim().isEmpty()) {
-            return "error_role_required";
         }
         if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
             return "error_password_short";
@@ -63,9 +60,10 @@ public class RegisterViewModel extends ViewModel {
 
     /**
      * Ejecuta el registro. Valida campos antes de llamar al backend.
+     * El rol se asigna automáticamente como INSPECTOR.
      */
-    public void register(String email, String fullName, String role, String password, String confirmPassword) {
-        String validationError = validate(email, fullName, role, password, confirmPassword);
+    public void register(String email, String fullName, String password, String confirmPassword) {
+        String validationError = validate(email, fullName, password, confirmPassword);
         if (validationError != null) {
             registerResult.setValue(Resource.error(validationError));
             return;
@@ -76,7 +74,6 @@ public class RegisterViewModel extends ViewModel {
         LiveData<Resource<RegisterResponse>> source = authRepository.register(
                 email.trim(),
                 fullName.trim(),
-                role.trim(),
                 password
         );
         registerResult.addSource(source, resource -> {

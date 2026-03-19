@@ -5,6 +5,8 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import android.content.SharedPreferences;
+
 import com.example.tup_final.data.entity.DeviceEntity;
 import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.data.entity.InspectionEntity;
@@ -12,6 +14,9 @@ import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.repository.InspectionRepository;
 import com.example.tup_final.data.repository.InspectionTestsRepository;
 import com.example.tup_final.util.Resource;
+
+import android.os.Handler;
+import android.os.Looper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +30,20 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class InspectionDetailViewModel extends ViewModel {
 
+    private static final String PREFS_ROLE = "cached_role";
+
     private final InspectionRepository inspectionRepository;
     private final InspectionTestsRepository inspectionTestsRepository;
+    private final SharedPreferences prefs;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private static final String ROLE_INSPECTOR = "INSPECTOR";
     private static final String ROLE_OPERATOR = "OPERATOR";
+    private static final long ASSIGNMENT_TIMEOUT_MS = 15_000;
+
+    private Runnable addAssignmentTimeoutRunnable;
+    private Runnable removeAssignmentTimeoutRunnable;
 
     private MutableLiveData<Resource<InspectionEntity>> inspection;
     private final MediatorLiveData<Resource<List<DeviceEntity>>> devices = new MediatorLiveData<>();
@@ -46,9 +59,16 @@ public class InspectionDetailViewModel extends ViewModel {
 
     @Inject
     public InspectionDetailViewModel(InspectionRepository inspectionRepository,
-                                    InspectionTestsRepository inspectionTestsRepository) {
+                                    InspectionTestsRepository inspectionTestsRepository,
+                                    SharedPreferences prefs) {
         this.inspectionRepository = inspectionRepository;
         this.inspectionTestsRepository = inspectionTestsRepository;
+        this.prefs = prefs;
+    }
+
+    /** Rol del usuario actual (SUPERVISOR, ADMIN, INSPECTOR). Solo SUPERVISOR/ADMIN pueden remover al inspector. */
+    public String getCurrentUserRole() {
+        return prefs.getString(PREFS_ROLE, "INSPECTOR");
     }
 
     public void loadInspection(String inspectionId) {
@@ -245,13 +265,43 @@ public class InspectionDetailViewModel extends ViewModel {
 
         addAssignmentResult.setValue(Resource.loading());
         LiveData<Resource<AssignmentResponse>> source = inspectionRepository.addAssignment(inspectionId, userEmail, normalizedRole);
-        addAssignmentResult.addSource(source, resource -> {
-            if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
-                addAssignmentResult.removeSource(source);
-                addAssignmentResult.setValue(resource);
-                if (resource.getStatus() == Resource.Status.SUCCESS) {
-                    loadAssignments(inspectionId);
+
+        if (addAssignmentTimeoutRunnable != null) {
+            mainHandler.removeCallbacks(addAssignmentTimeoutRunnable);
+        }
+        addAssignmentTimeoutRunnable = () -> {
+            addAssignmentTimeoutRunnable = null;
+            Resource<AssignmentResponse> current = addAssignmentResult.getValue();
+            if (current != null && current.getStatus() == Resource.Status.LOADING) {
+                try {
+                    addAssignmentResult.removeSource(source);
+                } catch (Exception ignored) {
                 }
+                addAssignmentResult.setValue(Resource.error("Tiempo de espera agotado"));
+            }
+        };
+        mainHandler.postDelayed(addAssignmentTimeoutRunnable, ASSIGNMENT_TIMEOUT_MS);
+
+        addAssignmentResult.addSource(source, resource -> {
+            if (addAssignmentTimeoutRunnable != null) {
+                mainHandler.removeCallbacks(addAssignmentTimeoutRunnable);
+                addAssignmentTimeoutRunnable = null;
+            }
+            try {
+                if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
+                    addAssignmentResult.removeSource(source);
+                    addAssignmentResult.setValue(resource);
+                    if (resource.getStatus() == Resource.Status.SUCCESS) {
+                        loadAssignments(inspectionId);
+                    }
+                }
+            } catch (Exception e) {
+                try {
+                    addAssignmentResult.removeSource(source);
+                } catch (Exception ignored) {
+                }
+                addAssignmentResult.setValue(Resource.error(
+                        e.getMessage() != null ? e.getMessage() : "Error inesperado"));
             }
         });
     }
@@ -261,13 +311,43 @@ public class InspectionDetailViewModel extends ViewModel {
 
         removeAssignmentResult.setValue(Resource.loading());
         LiveData<Resource<Void>> source = inspectionRepository.removeAssignment(inspectionId, userEmail);
-        removeAssignmentResult.addSource(source, resource -> {
-            if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
-                removeAssignmentResult.removeSource(source);
-                removeAssignmentResult.setValue(resource);
-                if (resource.getStatus() == Resource.Status.SUCCESS) {
-                    loadAssignments(inspectionId);
+
+        if (removeAssignmentTimeoutRunnable != null) {
+            mainHandler.removeCallbacks(removeAssignmentTimeoutRunnable);
+        }
+        removeAssignmentTimeoutRunnable = () -> {
+            removeAssignmentTimeoutRunnable = null;
+            Resource<Void> current = removeAssignmentResult.getValue();
+            if (current != null && current.getStatus() == Resource.Status.LOADING) {
+                try {
+                    removeAssignmentResult.removeSource(source);
+                } catch (Exception ignored) {
                 }
+                removeAssignmentResult.setValue(Resource.error("Tiempo de espera agotado"));
+            }
+        };
+        mainHandler.postDelayed(removeAssignmentTimeoutRunnable, ASSIGNMENT_TIMEOUT_MS);
+
+        removeAssignmentResult.addSource(source, resource -> {
+            if (removeAssignmentTimeoutRunnable != null) {
+                mainHandler.removeCallbacks(removeAssignmentTimeoutRunnable);
+                removeAssignmentTimeoutRunnable = null;
+            }
+            try {
+                if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
+                    removeAssignmentResult.removeSource(source);
+                    removeAssignmentResult.setValue(resource);
+                    if (resource.getStatus() == Resource.Status.SUCCESS) {
+                        loadAssignments(inspectionId);
+                    }
+                }
+            } catch (Exception e) {
+                try {
+                    removeAssignmentResult.removeSource(source);
+                } catch (Exception ignored) {
+                }
+                removeAssignmentResult.setValue(Resource.error(
+                        e.getMessage() != null ? e.getMessage() : "Error inesperado"));
             }
         });
     }

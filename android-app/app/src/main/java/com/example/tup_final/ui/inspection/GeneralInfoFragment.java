@@ -68,7 +68,10 @@ public class GeneralInfoFragment extends Fragment {
 
     private void setupInspectorSection() {
         binding.recyclerInspector.setLayoutManager(new LinearLayoutManager(requireContext()));
-        inspectorAdapter = new AssignmentAdapter(this::onRemoveInspectorClicked);
+        String currentRole = viewModel.getCurrentUserRole();
+        inspectorAdapter = new AssignmentAdapter(
+                this::onRemoveInspectorClicked,
+                a -> !ROLE_INSPECTOR.equals(currentRole));
         binding.recyclerInspector.setAdapter(inspectorAdapter);
 
         binding.btnAddInspector.setOnClickListener(v -> addInspector());
@@ -76,7 +79,9 @@ public class GeneralInfoFragment extends Fragment {
 
     private void setupOperatorsSection() {
         binding.recyclerOperators.setLayoutManager(new LinearLayoutManager(requireContext()));
-        operatorAdapter = new AssignmentAdapter(this::onRemoveOperatorClicked);
+        operatorAdapter = new AssignmentAdapter(
+                this::onRemoveOperatorClicked,
+                a -> true);
         binding.recyclerOperators.setAdapter(operatorAdapter);
 
         binding.btnAddOperator.setOnClickListener(v -> addOperator());
@@ -160,13 +165,6 @@ public class GeneralInfoFragment extends Fragment {
     private void onRemoveInspectorClicked(InspectionAssignmentEntity assignment) {
         String inspectionId = viewModel.getCurrentInspectionId();
         if (inspectionId == null) return;
-
-        List<InspectionAssignmentEntity> inspectors = viewModel.getInspectorAssignments();
-        if (inspectors.size() <= 1) {
-            Toast.makeText(requireContext(), R.string.assignment_cannot_remove_inspector, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         showRemoveConfirmation(assignment, inspectionId);
     }
 
@@ -215,18 +213,30 @@ public class GeneralInfoFragment extends Fragment {
 
     private void observeAddResult() {
         viewModel.getAddAssignmentResult().observe(getViewLifecycleOwner(), resource -> {
-            if (resource == null || resource.getStatus() == Resource.Status.LOADING) return;
-            if (resource.getStatus() == Resource.Status.ERROR && resource.getMessage() != null) {
-                Toast.makeText(requireContext(), resource.getMessage(), Toast.LENGTH_SHORT).show();
+            if (resource == null) return;
+            if (resource.getStatus() == Resource.Status.LOADING) {
+                Toast.makeText(requireContext(), R.string.assignment_adding, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (resource.getStatus() == Resource.Status.SUCCESS) {
+                Toast.makeText(requireContext(), R.string.assignment_added_success, Toast.LENGTH_SHORT).show();
+            } else if (resource.getStatus() == Resource.Status.ERROR && resource.getMessage() != null) {
+                Toast.makeText(requireContext(), resource.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void observeRemoveResult() {
         viewModel.getRemoveAssignmentResult().observe(getViewLifecycleOwner(), resource -> {
-            if (resource == null || resource.getStatus() == Resource.Status.LOADING) return;
-            if (resource.getStatus() == Resource.Status.ERROR && resource.getMessage() != null) {
-                Toast.makeText(requireContext(), resource.getMessage(), Toast.LENGTH_SHORT).show();
+            if (resource == null) return;
+            if (resource.getStatus() == Resource.Status.LOADING) {
+                Toast.makeText(requireContext(), R.string.assignment_removing, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (resource.getStatus() == Resource.Status.SUCCESS) {
+                Toast.makeText(requireContext(), R.string.assignment_removed_success, Toast.LENGTH_SHORT).show();
+            } else if (resource.getStatus() == Resource.Status.ERROR && resource.getMessage() != null) {
+                Toast.makeText(requireContext(), resource.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

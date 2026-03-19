@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -36,9 +38,12 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(headers -> headers.frameOptions(frame -> frame.disable())) // H2 console
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/**", // Permitir todo para desarrollo simplificado
                     "/api/auth/**",
                     "/h2-console/**",
                     "/swagger-ui/**",
@@ -46,16 +51,13 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/v3/api-docs"
                 ).permitAll()
+                .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-    // simplificamos la seguridad del backend para permitir todas las peticiones (/**) sin necesidad de un token JWT obligatorio
-    // nos permite desarrollar los controladores y servicios mas rápido sin tener que ocuparnos de los authh headers en cada llamada
-    // y tambien porque nos comentaron desde el foro que no nos ocupemos en la seguridad
 
     @Bean
     public PasswordEncoder passwordEncoder() {

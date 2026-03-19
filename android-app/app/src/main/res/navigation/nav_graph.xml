@@ -11,11 +11,6 @@
         android:label="@string/login_title"
         tools:layout="@layout/fragment_login">
         <action
-            android:id="@+id/action_login_to_home"
-            app:destination="@id/homeFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true" />
-        <action
             android:id="@+id/action_loginFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/loginFragment"
@@ -53,7 +48,16 @@
         <action
             android:id="@+id/action_home_to_createInspection"
             app:destination="@id/createInspectionFragment" />
+        <action
+            android:id="@+id/action_home_to_userManagement"
+            app:destination="@id/userManagementFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/userManagementFragment"
+        android:name="com.example.tup_final.ui.usermanagement.UserManagementFragment"
+        android:label="@string/user_management_title"
+        tools:layout="@layout/fragment_user_management" />
 
     <fragment
         android:id="@+id/createInspectionFragment"

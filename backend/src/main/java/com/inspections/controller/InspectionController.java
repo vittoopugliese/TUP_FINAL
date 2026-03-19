@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +19,7 @@ import java.util.List;
 /**
  * Endpoints de inspecciones.
  *
- * GET /api/inspections – Lista todas las inspecciones
+ * GET /api/inspections – Lista inspecciones (filtradas por rol: SUPERVISOR=todas, INSPECTOR=solo asignadas)
  * POST /api/inspections – Crea una inspección building-wide
  */
 @RestController
@@ -32,9 +35,21 @@ public class InspectionController {
 
     @GetMapping
     @Operation(summary = "Listar inspecciones",
-               description = "Retorna todas las inspecciones con datos para las tarjetas")
-    public ResponseEntity<List<InspectionListResponse>> getInspections() {
-        List<InspectionListResponse> inspections = inspectionService.getAllInspections();
+               description = "SUPERVISOR/ADMIN: todas. INSPECTOR: solo asignadas. Requiere autenticación.")
+    public ResponseEntity<?> getInspections() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null
+                || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = auth.getPrincipal().toString();
+        String role = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> a.startsWith("ROLE_"))
+                .map(a -> a.substring(5))
+                .findFirst()
+                .orElse("INSPECTOR");
+        List<InspectionListResponse> inspections = inspectionService.getInspectionsForCurrentUser(email, role);
         return ResponseEntity.ok(inspections);
     }
 

@@ -65,12 +65,34 @@ public class InspectionService {
     }
 
     /**
-     * Obtiene todas las inspecciones para la lista.
+     * Obtiene las inspecciones según el rol del usuario autenticado.
+     * - ADMIN, SUPERVISOR: ven todas las inspecciones.
+     * - INSPECTOR: solo las inspecciones donde está asignado.
      *
-     * @return Lista de InspectionListResponse
+     * @param userEmail Email del usuario autenticado (no null para INSPECTOR)
+     * @param userRole  Rol del usuario: ADMIN, SUPERVISOR o INSPECTOR
+     * @return Lista filtrada de InspectionListResponse
      */
-    public List<InspectionListResponse> getAllInspections() {
-        return inspectionRepository.findAll().stream()
+    public List<InspectionListResponse> getInspectionsForCurrentUser(String userEmail, String userRole) {
+        String role = (userRole != null ? userRole : "").toUpperCase();
+        if ("ADMIN".equals(role) || "SUPERVISOR".equals(role)) {
+            return inspectionRepository.findAll().stream()
+                    .map(this::mapToListResponse)
+                    .collect(Collectors.toList());
+        }
+        // INSPECTOR (o rol desconocido): solo inspecciones asignadas
+        String email = (userEmail != null ? userEmail : "").trim().toLowerCase();
+        if (email.isEmpty()) {
+            return List.of();
+        }
+        List<InspectionAssignment> assignments = assignmentRepository.findByUserEmailIgnoreCase(email);
+        if (assignments.isEmpty()) {
+            return List.of();
+        }
+        java.util.Set<String> inspectionIds = assignments.stream()
+                .map(InspectionAssignment::getInspectionId)
+                .collect(Collectors.toSet());
+        return inspectionRepository.findAllById(inspectionIds).stream()
                 .map(this::mapToListResponse)
                 .collect(Collectors.toList());
     }

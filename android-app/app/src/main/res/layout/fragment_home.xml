@@ -200,4 +200,14 @@
         android:layout_margin="16dp"
         android:contentDescription="@string/fab_create_inspection"
         app:srcCompat="@android:drawable/ic_input_add" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_manage_users"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        android:text="@string/btn_manage_users" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

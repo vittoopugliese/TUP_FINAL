@@ -11,11 +11,13 @@ import com.example.tup_final.data.local.UserDao;
 import com.example.tup_final.data.remote.UserApi;
 import com.example.tup_final.data.remote.dto.AvatarUploadResponse;
 import com.example.tup_final.data.remote.dto.UpdateProfileRequest;
+import com.example.tup_final.data.remote.dto.UpdateRoleRequest;
 import com.example.tup_final.data.remote.dto.UserProfileResponse;
 import com.example.tup_final.util.Resource;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,6 +27,7 @@ import javax.inject.Singleton;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Response;
 
 /**
@@ -181,6 +184,72 @@ public class UserRepository {
         });
 
         return result;
+    }
+
+    /**
+     * Lista todos los usuarios del sistema (para admin).
+     */
+    public LiveData<Resource<List<UserProfileResponse>>> getAllUsers() {
+        MutableLiveData<Resource<List<UserProfileResponse>>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<List<UserProfileResponse>> response = userApi.getAllUsers().execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    mainHandler.post(() -> result.setValue(Resource.success(response.body())));
+                } else {
+                    String msg = parseErrorMessage(response.errorBody());
+                    mainHandler.post(() -> result.setValue(Resource.error(msg)));
+                }
+            } catch (IOException e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error("Error de conexión. Verificá tu internet.")));
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Actualiza el rol de un usuario (solo INSPECTOR o SUPERVISOR).
+     */
+    public LiveData<Resource<UserProfileResponse>> updateUserRole(String userId, String newRole) {
+        MutableLiveData<Resource<UserProfileResponse>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<UserProfileResponse> response = userApi.updateUserRole(userId, new UpdateRoleRequest(newRole)).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    UserProfileResponse updated = response.body();
+                    // Actualizar Room si el usuario está cacheado
+                    UserEntity cached = userDao.getById(userId);
+                    if (cached != null) {
+                        cached.role = updated.getRole();
+                        userDao.update(cached);
+                    }
+                    mainHandler.post(() -> result.setValue(Resource.success(updated)));
+                } else {
+                    String msg = parseErrorMessage(response.errorBody());
+                    mainHandler.post(() -> result.setValue(Resource.error(msg)));
+                }
+            } catch (IOException e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error("Error de conexión. Verificá tu internet.")));
+            }
+        });
+
+        return result;
+    }
+
+    private String parseErrorMessage(ResponseBody errorBody) {
+        if (errorBody == null) return "Error desconocido";
+        try {
+            return errorBody.string();
+        } catch (IOException e) {
+            return "Error desconocido";
+        }
     }
 
     private UserProfileResponse fetchOnline(String userId) throws IOException {

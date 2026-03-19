@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.example.tup_final.data.remote.ApiService;
 import com.example.tup_final.data.remote.AuthApi;
+import com.example.tup_final.data.remote.AuthInterceptor;
 import com.example.tup_final.data.remote.BuildingApi;
 import com.example.tup_final.data.remote.InspectionApi;
 import com.example.tup_final.data.remote.InspectionTemplateApi;
@@ -45,8 +46,11 @@ public final class AppModule {
 
     @Provides
     @Singleton
-    public OkHttpClient provideOkHttpClient(HttpLoggingInterceptor loggingInterceptor) {
+    public OkHttpClient provideOkHttpClient(
+            HttpLoggingInterceptor loggingInterceptor,
+            AuthInterceptor authInterceptor) {
         return new OkHttpClient.Builder()
+                .addInterceptor(authInterceptor)
                 .addInterceptor(loggingInterceptor)
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
@@ -133,5 +137,11 @@ public final class AppModule {
     @Singleton
     public SharedPreferences provideAuthSharedPreferences(@ApplicationContext Context context) {
         return context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
+    }
+
+    @Provides
+    @Singleton
+    public AuthInterceptor provideAuthInterceptor(SharedPreferences authPrefs) {
+        return new AuthInterceptor(authPrefs);
     }
 }

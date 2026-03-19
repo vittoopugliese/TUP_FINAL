@@ -252,6 +252,7 @@ public class InspectionRepository {
 
     /**
      * Agrega una asignacion. POST al backend y cache local.
+     * La red y Room se ejecutan en executor (background), el resultado se postea al main thread.
      */
     public LiveData<Resource<AssignmentResponse>> addAssignment(String inspectionId, String userEmail, String role) {
         MutableLiveData<Resource<AssignmentResponse>> result = new MutableLiveData<>();

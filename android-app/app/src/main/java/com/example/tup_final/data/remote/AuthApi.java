@@ -31,7 +31,8 @@ public interface AuthApi {
 
     /**
      * POST /api/auth/register
-     * Body: { "email": "...", "fullName": "...", "role": "INSPECTOR|OPERATOR", "password": "..." }
+     * Body: { "email": "...", "fullName": "...", "password": "..." }
+     * Backend asigna rol INSPECTOR por defecto.
      * Response: { message, email }
      */
     @POST("auth/register")

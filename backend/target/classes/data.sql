@@ -114,7 +114,9 @@ INSERT INTO test_template_steps (id, test_template_id, name, test_step_type, des
 ('tts-015', 'tt-010', 'Respuesta a calor', 'BINARY', 'Detector activa al alcanzar umbral', NULL, NULL, 1),
 ('tts-016', 'tt-011', 'Lectura sensor gases', 'RANGE', 'Calibración gases anestésicos', 0.0, 5.0, 1),
 ('tts-017', 'tt-012', 'Alineación rociador', 'BINARY', 'Rociador alineado correctamente', NULL, NULL, 1),
-('tts-018', 'tt-013', 'Indicadores OK', 'BINARY', 'Revisión de indicadores y alarmas', NULL, NULL, 1);
+('tts-018', 'tt-013', 'Indicadores OK', 'BINARY', 'Revisión de indicadores y alarmas', NULL, NULL, 1),
+('tts-019', 'tt-005', 'Período calibración', 'DATE_RANGE', 'Rango de fechas de última calibración', NULL, NULL, 3),
+('tts-020', 'tt-006', 'Verificación múltiple', 'MULTI_VALUE', 'Sello, manómetro y fecha vencimiento', NULL, NULL, 3);
 
 -- Zones (FK: location_id -> locations)
 INSERT INTO zones (id, location_id, name, details) VALUES

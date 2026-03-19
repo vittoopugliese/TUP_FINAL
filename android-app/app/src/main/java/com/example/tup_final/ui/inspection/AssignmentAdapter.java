@@ -1,6 +1,7 @@
 package com.example.tup_final.ui.inspection;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.databinding.ItemAssignmentBinding;
 
+import java.util.function.Predicate;
+
 public class AssignmentAdapter extends ListAdapter<InspectionAssignmentEntity, AssignmentAdapter.ViewHolder> {
 
     public interface OnRemoveClickListener {
@@ -18,6 +21,7 @@ public class AssignmentAdapter extends ListAdapter<InspectionAssignmentEntity, A
     }
 
     private final OnRemoveClickListener onRemoveClickListener;
+    private final Predicate<InspectionAssignmentEntity> canRemovePredicate;
 
     private static final DiffUtil.ItemCallback<InspectionAssignmentEntity> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<InspectionAssignmentEntity>() {
@@ -36,9 +40,11 @@ public class AssignmentAdapter extends ListAdapter<InspectionAssignmentEntity, A
                 }
             };
 
-    public AssignmentAdapter(OnRemoveClickListener onRemoveClickListener) {
+    public AssignmentAdapter(OnRemoveClickListener onRemoveClickListener,
+                             Predicate<InspectionAssignmentEntity> canRemovePredicate) {
         super(DIFF_CALLBACK);
         this.onRemoveClickListener = onRemoveClickListener;
+        this.canRemovePredicate = canRemovePredicate != null ? canRemovePredicate : a -> true;
     }
 
     @NonNull
@@ -64,8 +70,10 @@ public class AssignmentAdapter extends ListAdapter<InspectionAssignmentEntity, A
 
         void bind(InspectionAssignmentEntity assignment) {
             binding.textEmail.setText(assignment.userEmail != null ? assignment.userEmail : "");
+            boolean canRemove = canRemovePredicate.test(assignment);
+            binding.btnRemove.setVisibility(canRemove ? View.VISIBLE : View.GONE);
             binding.btnRemove.setOnClickListener(v -> {
-                if (onRemoveClickListener != null) {
+                if (canRemove && onRemoveClickListener != null) {
                     onRemoveClickListener.onRemove(assignment);
                 }
             });

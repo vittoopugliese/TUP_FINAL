@@ -12,6 +12,7 @@
     <string name="error_invalid_credentials">Credenciales inválidas. Verificá tu email y contraseña.</string>
     <string name="error_forbidden">Cuenta deshabilitada o sin permisos de acceso.</string>
     <string name="error_timeout">Tiempo de conexión agotado. Verificá tu conexión a internet.</string>
+    <string name="error_timeout_assignment">Tiempo de espera agotado</string>
     <string name="error_invalid_format">Error de formato en la respuesta del servidor.</string>
     <string name="error_unknown">Error inesperado. Intentá más tarde.</string>
     <string name="error_email_invalid">Ingrese un correo electrónico válido</string>
@@ -72,6 +73,15 @@
     <string name="error_lastname_required">El apellido es obligatorio</string>
     <string name="error_phone_invalid">Formato de teléfono inválido</string>
     <string name="profile_sync_pending">Guardado. Se sincronizará cuando haya conexión.</string>
+
+    <!-- User Management (Admin) -->
+    <string name="user_management_title">Gestionar usuarios</string>
+    <string name="user_management_role_hint">Rol</string>
+    <string name="user_management_empty">No hay usuarios.</string>
+    <string name="user_management_role_updated">Rol actualizado.</string>
+    <string name="btn_manage_users">Gestionar usuarios</string>
+    <string name="role_supervisor">Supervisor</string>
+    <string name="role_admin">Administrador</string>
 
     <!-- Inspections filter -->
     <string name="filter_title">Filtros</string>
@@ -184,7 +194,7 @@
 
     <!-- Assignment (Inspector/Operators) -->
     <string name="assignment_inspector_title">Inspector</string>
-    <string name="assignment_operators_title">Operadores</string>
+    <string name="assignment_operators_title">Inspectores</string>
     <string name="assignment_email_hint">Email del usuario</string>
     <string name="assignment_add">Agregar</string>
     <string name="assignment_remove_title">Remover asignación</string>
@@ -193,6 +203,11 @@
     <string name="assignment_cannot_remove_inspector">No se puede remover al único Inspector</string>
     <string name="assignment_invalid_email">Ingrese un email válido</string>
     <string name="assignment_duplicate">Este email ya está asignado</string>
+    <string name="assignment_only_supervisor_can_remove">Solo el supervisor puede remover al inspector asignado</string>
+    <string name="assignment_adding">Agregando inspector…</string>
+    <string name="assignment_added_success">Inspector agregado correctamente</string>
+    <string name="assignment_removing">Removiendo asignación…</string>
+    <string name="assignment_removed_success">Asignación removida</string>
 
     <!-- General Info -->
     <string name="info_building">Edificio</string>

@@ -21,4 +21,6 @@ public interface InspectionAssignmentRepository extends JpaRepository<Inspection
     long countByInspectionIdAndRole(String inspectionId, String role);
 
     boolean existsByInspectionIdAndUserEmail(String inspectionId, String userEmail);
+
+    List<InspectionAssignment> findByUserEmailIgnoreCase(String userEmail);
 }
