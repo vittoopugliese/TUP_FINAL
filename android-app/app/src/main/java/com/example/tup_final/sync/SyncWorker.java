@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -55,7 +56,7 @@ public class SyncWorker extends Worker {
             pushPayload.add("changes", new com.google.gson.JsonArray());
             pushPayload.addProperty("lastSyncAt", "");
 
-            var pushResponse = syncApi.pushChanges(pushPayload).execute();
+            Response<JsonObject> pushResponse = syncApi.pushChanges(pushPayload).execute();
             if (!pushResponse.isSuccessful()) {
                 Log.w(TAG, "Push falló: " + pushResponse.code());
                 return Result.retry();
@@ -63,7 +64,7 @@ public class SyncWorker extends Worker {
 
             JsonObject pullPayload = new JsonObject();
             pullPayload.addProperty("lastSyncAt", "");
-            var pullResponse = syncApi.pullChanges(pullPayload).execute();
+            Response<JsonObject> pullResponse = syncApi.pullChanges(pullPayload).execute();
             if (!pullResponse.isSuccessful()) {
                 Log.w(TAG, "Pull falló: " + pullResponse.code());
                 return Result.retry();

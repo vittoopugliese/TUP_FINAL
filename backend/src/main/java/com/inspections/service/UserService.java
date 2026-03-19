@@ -15,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Servicio para operaciones de usuario (perfil).
@@ -46,6 +48,44 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "Usuario no encontrado con ID: " + id));
 
+        return mapToProfileResponse(user);
+    }
+
+    /**
+     * Lista todos los usuarios del sistema.
+     *
+     * @return Lista de UserProfileResponse
+     */
+    public List<UserProfileResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::mapToProfileResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Actualiza el rol de un usuario.
+     * Solo permite INSPECTOR o SUPERVISOR. No se puede asignar ADMIN.
+     *
+     * @param userId  UUID del usuario
+     * @param newRole Nuevo rol (INSPECTOR o SUPERVISOR)
+     * @return UserProfileResponse con el perfil actualizado
+     */
+    public UserProfileResponse updateUserRole(String userId, String newRole) {
+        if ("ADMIN".equalsIgnoreCase(newRole)) {
+            throw new IllegalArgumentException("No se puede asignar rol ADMIN");
+        }
+        String normalized = newRole != null ? newRole.toUpperCase() : null;
+        if (!"INSPECTOR".equals(normalized) && !"SUPERVISOR".equals(normalized)) {
+            throw new IllegalArgumentException("Rol inválido. Solo INSPECTOR o SUPERVISOR.");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Usuario no encontrado con ID: " + userId));
+        user.setRole(normalized);
+        return mapToProfileResponse(userRepository.save(user));
+    }
+
+    private UserProfileResponse mapToProfileResponse(User user) {
         return new UserProfileResponse(
                 user.getId(),
                 user.getEmail(),
@@ -84,16 +124,7 @@ public class UserService {
         }
 
         userRepository.save(user);
-
-        return new UserProfileResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getPhoneNumber(),
-                user.getAvatarImage(),
-                user.getRole()
-        );
+        return mapToProfileResponse(user);
     }
 
     /**

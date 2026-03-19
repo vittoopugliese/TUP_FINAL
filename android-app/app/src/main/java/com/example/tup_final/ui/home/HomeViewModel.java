@@ -1,5 +1,7 @@
 package com.example.tup_final.ui.home;
 
+import android.content.SharedPreferences;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -7,6 +9,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.data.repository.InspectionRepository;
+import com.example.tup_final.data.repository.UserRepository;
 import com.example.tup_final.util.Resource;
 
 import java.time.Instant;
@@ -33,7 +36,11 @@ public class HomeViewModel extends ViewModel {
     };
 
     private final InspectionRepository inspectionRepository;
+    private final UserRepository userRepository;
+    private final SharedPreferences prefs;
 
+    private final MutableLiveData<String> currentUserRole = new MutableLiveData<>(null);
+    private final MediatorLiveData<Resource<com.example.tup_final.data.entity.UserEntity>> profileMediator = new MediatorLiveData<>();
     private final MutableLiveData<List<InspectionEntity>> allInspections = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<InspectionEntity>> filteredInspections = new MutableLiveData<>(new ArrayList<>());
     private final MediatorLiveData<Resource<List<InspectionEntity>>> inspectionsResult = new MediatorLiveData<>();
@@ -48,10 +55,49 @@ public class HomeViewModel extends ViewModel {
     private volatile boolean pendingReloadAfterCurrentLoad = false;
 
     @Inject
-    public HomeViewModel(InspectionRepository inspectionRepository) {
+    public HomeViewModel(InspectionRepository inspectionRepository,
+                         UserRepository userRepository,
+                         SharedPreferences prefs) {
         this.inspectionRepository = inspectionRepository;
+        this.userRepository = userRepository;
+        this.prefs = prefs;
         loadInspections();
         loadBuildingIds();
+        loadCurrentUserRole();
+    }
+
+    /**
+     * Carga el rol del usuario actual desde Room (para mostrar botón admin si es ADMIN).
+     */
+    private void loadCurrentUserRole() {
+        String userId = prefs.getString("cached_user_id", null);
+        if (userId == null || userId.isEmpty()) {
+            currentUserRole.setValue(null);
+            return;
+        }
+        LiveData<Resource<com.example.tup_final.data.entity.UserEntity>> source = userRepository.getUserProfile(userId);
+        profileMediator.addSource(source, resource -> {
+            if (resource != null && resource.getStatus() == Resource.Status.SUCCESS && resource.getData() != null) {
+                currentUserRole.setValue(resource.getData().role);
+            } else if (resource != null && resource.getStatus() == Resource.Status.ERROR) {
+                currentUserRole.setValue(null);
+            }
+            if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
+                profileMediator.removeSource(source);
+            }
+        });
+    }
+
+    public LiveData<String> getCurrentUserRole() {
+        return currentUserRole;
+    }
+
+    /**
+     * Observar para activar la carga del perfil (y así obtener el rol).
+     * El Fragment debe observar esto para que la cadena de carga funcione.
+     */
+    public LiveData<Resource<com.example.tup_final.data.entity.UserEntity>> getProfileForRole() {
+        return profileMediator;
     }
 
     /**

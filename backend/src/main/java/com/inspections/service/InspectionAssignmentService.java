@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * Servicio para asignaciones de inspectores y operadores a inspecciones.
  * Reglas: max 1 INSPECTOR por inspeccion, operadores ilimitados.
- * No se puede remover al unico inspector.
+ * Se permite remover al unico inspector para que el supervisor pueda reasignar.
  */
 @Service
 public class InspectionAssignmentService {
@@ -73,25 +73,22 @@ public class InspectionAssignmentService {
     }
 
     @Transactional
-    public void removeAssignment(String inspectionId, String userEmail) {
+    public void removeAssignment(String inspectionId, String userEmail, String currentUserRole) {
         if (inspectionId == null || userEmail == null) {
             throw new IllegalArgumentException("inspectionId and userEmail are required");
         }
 
         String normalizedEmail = userEmail.trim().toLowerCase();
+        String role = (currentUserRole != null ? currentUserRole : "").toUpperCase();
 
         InspectionAssignment toRemove = assignmentRepository.findByInspectionIdAndUserEmail(inspectionId, normalizedEmail)
                 .orElse(null);
         if (toRemove == null) {
             return;
         }
-        if (ROLE_INSPECTOR.equals(toRemove.getRole())) {
-            long inspectorCount = assignmentRepository.countByInspectionIdAndRole(inspectionId, ROLE_INSPECTOR);
-            if (inspectorCount <= 1) {
-                throw new IllegalArgumentException("Cannot remove the only Inspector from the inspection");
-            }
+        if (ROLE_INSPECTOR.equals(toRemove.getRole()) && "INSPECTOR".equals(role)) {
+            throw new IllegalArgumentException("Solo el supervisor puede remover al inspector asignado");
         }
-
         assignmentRepository.delete(toRemove);
     }
 }

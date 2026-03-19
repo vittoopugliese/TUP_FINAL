@@ -8,9 +8,6 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.tup_final.data.repository.AuthRepository;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -31,7 +28,6 @@ public class ForgotPasswordViewModel extends ViewModel {
     }
 
     private final AuthRepository authRepository;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private final MutableLiveData<String> emailError = new MutableLiveData<>();
     private final MutableLiveData<ResetResult> resetResult = new MutableLiveData<>();
@@ -79,16 +75,9 @@ public class ForgotPasswordViewModel extends ViewModel {
         }
 
         loading.setValue(true);
-        executor.execute(() -> {
-            ResetResult result = authRepository.requestPasswordReset(email.trim());
+        authRepository.requestPasswordReset(email.trim(), result -> {
             loading.postValue(false);
             resetResult.postValue(result);
         });
-    }
-
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        executor.shutdown();
     }
 }

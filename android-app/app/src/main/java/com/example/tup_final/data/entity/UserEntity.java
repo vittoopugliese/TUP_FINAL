@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey;
 /**
  * Entidad Room para User.
  * Representa un usuario con credenciales de autenticación y perfil.
- * Puede participar en inspecciones como Inspector o Operator.
+ * Roles de usuario: ADMIN, SUPERVISOR, INSPECTOR.
  */
 
 @Entity(
@@ -29,7 +29,7 @@ public class UserEntity {
     /** Número de teléfono. */
     public String phoneNumber;
 
-    /** Rol: INSPECTOR o OPERATOR. */
+    /** Rol: ADMIN, SUPERVISOR o INSPECTOR. */
     public String role;
 
     /** Marca de tiempo de último login (ISO string). */

@@ -17,6 +17,10 @@ import com.example.tup_final.databinding.FragmentLoginBinding;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+import static com.example.tup_final.util.Resource.Status.ERROR;
+import static com.example.tup_final.util.Resource.Status.LOADING;
+import static com.example.tup_final.util.Resource.Status.SUCCESS;
+
 /**
  * Fragment de Login.
  * Muestra formulario email/password, observa el resultado del ViewModel,
@@ -53,6 +57,15 @@ public class LoginFragment extends Fragment {
                     : "";
 
             viewModel.login(email, password);
+        });
+
+        // Observar errores de validación en los campos
+        viewModel.getEmailError().observe(getViewLifecycleOwner(), key -> {
+            binding.tilEmail.setError(key != null ? getString(R.string.error_email_invalid) : null);
+        });
+
+        viewModel.getPasswordError().observe(getViewLifecycleOwner(), key -> {
+            binding.tilPassword.setError(key != null ? getString(R.string.error_password_short) : null);
         });
 
         // Observar resultado del login

@@ -83,8 +83,10 @@ public class HomeFragment extends Fragment {
         setupFilterPanel(view);
         setupFilterCollapse(view);
         setupFab(view);
+        setupManageUsersButton(view);
         observeData();
         observeActiveFilters();
+        observeCurrentUserRole();
         setupFragmentResultListener();
     }
 
@@ -92,6 +94,23 @@ public class HomeFragment extends Fragment {
         view.findViewById(R.id.fab_create_inspection).setOnClickListener(v ->
                 NavHostFragment.findNavController(HomeFragment.this)
                         .navigate(R.id.action_home_to_createInspection));
+    }
+
+    private void setupManageUsersButton(View view) {
+        View btnManageUsers = view.findViewById(R.id.btn_manage_users);
+        btnManageUsers.setOnClickListener(v ->
+                NavHostFragment.findNavController(HomeFragment.this)
+                        .navigate(R.id.action_home_to_userManagement));
+    }
+
+    private void observeCurrentUserRole() {
+        viewModel.getProfileForRole().observe(getViewLifecycleOwner(), r -> {});
+        viewModel.getCurrentUserRole().observe(getViewLifecycleOwner(), role -> {
+            View btn = getView() != null ? getView().findViewById(R.id.btn_manage_users) : null;
+            if (btn != null) {
+                btn.setVisibility("ADMIN".equalsIgnoreCase(role) ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     private void setupFragmentResultListener() {

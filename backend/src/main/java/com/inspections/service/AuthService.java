@@ -8,6 +8,8 @@ import com.inspections.dto.RegisterResponse;
 import com.inspections.entity.User;
 import com.inspections.repository.UserRepository;
 import com.inspections.security.JwtUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +24,8 @@ import java.util.UUID;
  */
 @Service
 public class AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -101,11 +105,13 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFullName() != null ? request.getFullName().trim() : "");
         user.setLastName("");
-        user.setRole(request.getRole());
+        user.setRole("INSPECTOR");
         user.setEnabled(true);
         user.setCreatedAt(Instant.now());
 
         userRepository.save(user);
+
+        log.info("✅ Usuario registrado: {} (rol: {})", user.getEmail(), user.getRole());
 
         return new RegisterResponse(
                 "Usuario registrado exitosamente. Ya podés iniciar sesión.",

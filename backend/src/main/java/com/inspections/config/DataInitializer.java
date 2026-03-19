@@ -13,39 +13,59 @@ import java.time.Instant;
 
 /**
  * Inicializador de datos para desarrollo.
- * Crea el usuario admin de prueba (admin@inspections.com).
- * Las inspecciones y demás datos vienen de data.sql (database/data-ejemplo.sql).
+ * Crea usuarios de prueba por rol (admin, supervisor, inspector).
+ * Las inspecciones y demás datos vienen de data.sql.
  *
- * Credenciales:  admin@inspections.com / Admin1234!
+ * Credenciales de prueba:
+ * - ADMIN:      admin@inspections.com     / Admin1234!
+ * - SUPERVISOR: supervisor@inspections.com / Supervisor123
+ * - INSPECTOR:  inspector@example.com    / Inspector123 (asignado a todas las inspecciones)
+ * - INSPECTOR:  inspector2@example.com   / Inspector123 (sin asignaciones)
  */
 @Configuration
 public class DataInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
-    /** ID fijo para que audit_logs en data.sql puedan referenciarlo */
     public static final String ADMIN_USER_ID = "admin-001";
+    public static final String SUPERVISOR_USER_ID = "supervisor-001";
+    public static final String INSPECTOR_USER_ID = "inspector-001";
+    public static final String INSPECTOR2_USER_ID = "inspector-002";
 
     @Bean
     public CommandLineRunner seedData(UserRepository userRepository,
                                      PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userRepository.count() == 0) {
-                User admin = new User();
-                admin.setId(ADMIN_USER_ID);
-                admin.setEmail("admin@inspections.com");
-                admin.setPasswordHash(passwordEncoder.encode("Admin1234!"));
-                admin.setFirstName("Admin");
-                admin.setLastName("Inspector");
-                admin.setRole("INSPECTOR");
-                admin.setEnabled(true);
-                admin.setCreatedAt(Instant.now());
-
-                userRepository.save(admin);
-                log.info("✅ Usuario admin creado: admin@inspections.com / Admin1234!");
-            } else {
-                log.info("✅ Base de datos ya inicializada.");
-            }
+            createUserIfNotExists(userRepository, passwordEncoder,
+                    ADMIN_USER_ID, "admin@inspections.com", "Admin1234!",
+                    "Admin", "Inspector", "ADMIN");
+            createUserIfNotExists(userRepository, passwordEncoder,
+                    SUPERVISOR_USER_ID, "supervisor@inspections.com", "Supervisor123",
+                    "Supervisor", "Sistema", "SUPERVISOR");
+            createUserIfNotExists(userRepository, passwordEncoder,
+                    INSPECTOR_USER_ID, "inspector@example.com", "Inspector123",
+                    "María", "García", "INSPECTOR");
+            createUserIfNotExists(userRepository, passwordEncoder,
+                    INSPECTOR2_USER_ID, "inspector2@example.com", "Inspector123",
+                    "Juan", "Pérez", "INSPECTOR");
         };
+    }
+
+    private void createUserIfNotExists(UserRepository repo, PasswordEncoder encoder,
+                                      String id, String email, String password,
+                                      String firstName, String lastName, String role) {
+        if (repo.findByEmailIgnoreCase(email).isEmpty()) {
+            User user = new User();
+            user.setId(id);
+            user.setEmail(email);
+            user.setPasswordHash(encoder.encode(password));
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setRole(role);
+            user.setEnabled(true);
+            user.setCreatedAt(Instant.now());
+            repo.save(user);
+            log.info("✅ Usuario creado: {} / {} (rol: {})", email, password, role);
+        }
     }
 }

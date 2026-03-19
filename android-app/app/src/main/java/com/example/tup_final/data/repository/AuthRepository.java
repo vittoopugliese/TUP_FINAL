@@ -27,6 +27,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,6 +46,7 @@ public class AuthRepository {
     private static final String PREFS_PASSWORD_HASH = "cached_password_hash";
     private static final String PREFS_TOKEN = "cached_token";
     private static final String PREFS_USER_ID = "cached_user_id";
+    private static final String PREFS_ROLE = "cached_role";
 
     private final AuthApi authApi;
     private final SharedPreferences prefs;
@@ -155,7 +157,7 @@ public class AuthRepository {
      *
      * @return LiveData con Resource de RegisterResponse en éxito, o error con mensaje
      */
-    public LiveData<Resource<RegisterResponse>> register(String email, String fullName, String role, String password) {
+    public LiveData<Resource<RegisterResponse>> register(String email, String fullName, String password) {
         MutableLiveData<Resource<RegisterResponse>> result = new MutableLiveData<>();
         result.setValue(Resource.loading());
 
@@ -164,7 +166,7 @@ public class AuthRepository {
                 RegisterRequest request = new RegisterRequest(
                         email != null ? email.trim() : "",
                         fullName != null ? fullName.trim() : "",
-                        role != null ? role : "INSPECTOR",
+                        "INSPECTOR",
                         password
                 );
                 Response<RegisterResponse> response = authApi.register(request).execute();
@@ -201,16 +203,21 @@ public class AuthRepository {
     /**
      * Solicita recuperación de contraseña.
      * Intenta online primero; si falla por red, verifica offline en la BD local.
+     * Todas las llamadas a Room (userDao) se ejecutan en executor para evitar crash en main thread.
      *
-     * @param email correo electrónico del usuario
-     * @return ResetResult indicando el resultado
+     * @param email    correo electrónico del usuario
+     * @param callback recibe el ResetResult cuando termina (se invoca en main thread)
      */
-    public ResetResult requestPasswordReset(String email) {
-        try {
-            return requestPasswordResetOnline(email);
-        } catch (IOException e) {
-            return checkEmailExistsOffline(email);
-        }
+    public void requestPasswordReset(String email, Consumer<ResetResult> callback) {
+        executor.execute(() -> {
+            try {
+                ResetResult result = requestPasswordResetOnline(email);
+                mainHandler.post(() -> callback.accept(result));
+            } catch (IOException e) {
+                ResetResult result = checkEmailExistsOffline(email);
+                mainHandler.post(() -> callback.accept(result));
+            }
+        });
     }
 
     /**
@@ -252,11 +259,13 @@ public class AuthRepository {
         String token = response != null && response.getToken() != null ? response.getToken() : "";
         String userId = response != null && response.getUserId() != null ? response.getUserId() : "";
 
+        String role = response != null && response.getRole() != null ? response.getRole() : "INSPECTOR";
         prefs.edit()
                 .putString(PREFS_EMAIL, email != null ? email.trim() : "")
                 .putString(PREFS_PASSWORD_HASH, hash)
                 .putString(PREFS_TOKEN, token)
                 .putString(PREFS_USER_ID, userId)
+                .putString(PREFS_ROLE, role)
                 .apply();
     }
 
@@ -265,7 +274,7 @@ public class AuthRepository {
                 prefs.getString(PREFS_TOKEN, ""),
                 "Bearer",
                 prefs.getString(PREFS_EMAIL, ""),
-                null,
+                prefs.getString(PREFS_ROLE, "INSPECTOR"),
                 prefs.getString(PREFS_USER_ID, ""),
                 null
         );

@@ -7,6 +7,9 @@ import com.inspections.service.InspectionAssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLDecoder;
@@ -54,15 +57,27 @@ public class InspectionAssignmentController {
     }
 
     @DeleteMapping("/{inspectionId}/assignments/{email}")
-    @Operation(summary = "Remover asignacion", description = "Remueve un usuario de la inspeccion. No se puede remover al unico inspector.")
+    @Operation(summary = "Remover asignacion", description = "Solo SUPERVISOR/ADMIN pueden remover al inspector. INSPECTOR no puede remover asignaciones de inspector.")
     public ResponseEntity<?> removeAssignment(@PathVariable String inspectionId, @PathVariable String email) {
         try {
             String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);
-            assignmentService.removeAssignment(inspectionId, decodedEmail);
+            String currentUserRole = extractRoleFromAuth();
+            assignmentService.removeAssignment(inspectionId, decodedEmail, currentUserRole);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    private String extractRoleFromAuth() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getAuthorities() == null) return "INSPECTOR";
+        return auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> a.startsWith("ROLE_"))
+                .map(a -> a.substring(5))
+                .findFirst()
+                .orElse("INSPECTOR");
     }
 
     private AssignmentResponse toResponse(InspectionAssignment a) {
