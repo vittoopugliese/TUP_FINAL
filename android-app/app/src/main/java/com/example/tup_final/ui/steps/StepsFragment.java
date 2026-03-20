@@ -227,8 +227,9 @@ public class StepsFragment extends Fragment {
         AddObservationBottomSheet sheet =
                 AddObservationBottomSheet.newInstance(step.id, "#" + step.index + " · " + step.name);
 
-        sheet.setOnSaveListener((stepId, type, description, photo) ->
-                viewModel.saveObservation(stepId, inspectionId, type, description, photo));
+        sheet.setOnSaveListener((stepId, type, description, photo, deficiencyTypeId) ->
+                viewModel.saveObservation(stepId, inspectionId, type, description,
+                        photo, deficiencyTypeId));
 
         sheet.show(getChildFragmentManager(), TAG_OBS_SHEET);
     }

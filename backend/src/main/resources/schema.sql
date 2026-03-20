@@ -248,6 +248,19 @@ CREATE INDEX IF NOT EXISTS idx_audit_entity_type ON audit_logs(entity_type);
 CREATE INDEX IF NOT EXISTS idx_audit_entity_id ON audit_logs(entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
 
+-- Deficiency type catalog (global read-only catalog)
+CREATE TABLE IF NOT EXISTS deficiency_types (
+    id         VARCHAR(36)  PRIMARY KEY NOT NULL,
+    code       VARCHAR(50)  NOT NULL UNIQUE,
+    name       VARCHAR(255) NOT NULL,
+    description TEXT,
+    category   VARCHAR(100) NOT NULL,
+    enabled    BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INT NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_def_type_category ON deficiency_types(category);
+CREATE INDEX IF NOT EXISTS idx_def_type_enabled  ON deficiency_types(enabled);
+
 -- Inspection assignments (FK: inspection_id -> inspections)
 CREATE TABLE IF NOT EXISTS inspection_assignments (
     id VARCHAR(36) PRIMARY KEY NOT NULL,

@@ -4,6 +4,7 @@ import androidx.room.Database;
 import androidx.room.RoomDatabase;
 
 import com.example.tup_final.data.entity.AuditLogEntity;
+import com.example.tup_final.data.entity.DeficiencyTypeEntity;
 import com.example.tup_final.data.entity.DeviceEntity;
 import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.data.entity.InspectionEntity;
@@ -17,9 +18,12 @@ import com.example.tup_final.data.entity.ZoneEntity;
 
 /**
  * Room database for Inspections app.
- * Contains all entities: User, Inspection, Location, Zone, Device, Test, Step, Observation, Photo, AuditLog.
+ * Contains all entities: User, Inspection, Location, Zone, Device, Test, Step,
+ * Observation, Photo, AuditLog, DeficiencyType.
  *
- * @see T1.1.1-Plan-Entidades.md
+ * Version history:
+ *  5 → 6: PhotoEntity new columns (gpsLatitude, gpsLongitude, inspectorName)
+ *  6 → 7: DeficiencyTypeEntity new table
  */
 @Database(
     entities = {
@@ -33,9 +37,10 @@ import com.example.tup_final.data.entity.ZoneEntity;
         StepEntity.class,
         ObservationEntity.class,
         PhotoEntity.class,
-        AuditLogEntity.class
+        AuditLogEntity.class,
+        DeficiencyTypeEntity.class
     },
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -51,4 +56,5 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ObservationDao observationDao();
     public abstract PhotoDao photoDao();
     public abstract AuditLogDao auditLogDao();
+    public abstract DeficiencyTypeDao deficiencyTypeDao();
 }

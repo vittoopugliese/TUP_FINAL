@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,8 +15,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,26 +29,33 @@ import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
 import com.example.tup_final.R;
-import com.example.tup_final.data.local.UserDao;
+import com.example.tup_final.data.entity.DeficiencyTypeEntity;
 import com.example.tup_final.data.entity.UserEntity;
+import com.example.tup_final.data.local.UserDao;
+import com.example.tup_final.data.repository.DeficiencyTypeRepository;
 import com.example.tup_final.util.PhotoMetadata;
+import com.example.tup_final.util.Resource;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import android.widget.ImageView;
 
 import javax.inject.Inject;
 
@@ -60,14 +65,9 @@ import dagger.hilt.android.AndroidEntryPoint;
  * Bottom Sheet para agregar una Observación o Deficiencia a un Step.
  *
  * Observación (REMARKS):      texto obligatorio, foto opcional.
- * Deficiencia (DEFICIENCIES): texto obligatorio, foto obligatoria.
+ * Deficiencia (DEFICIENCIES): texto obligatorio, tipo de deficiencia obligatorio, foto obligatoria.
  *
- * Al capturar la foto, registra automáticamente:
- *   - Timestamp ISO del momento de captura.
- *   - Coordenadas GPS (si el permiso está concedido).
- *   - Nombre e ID del inspector activo (de SharedPreferences + Room).
- *
- * Al confirmar, llama a {@link OnSaveListener#onSave(String, String, String, PhotoMetadata)}.
+ * Al confirmar, llama a {@link OnSaveListener#onSave}.
  */
 @AndroidEntryPoint
 public class AddObservationBottomSheet extends BottomSheetDialogFragment {
@@ -79,21 +79,22 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
 
     public interface OnSaveListener {
         /**
-         * @param stepId      ID del step.
-         * @param type        "REMARKS" o "DEFICIENCIES".
-         * @param description Texto de la observación/deficiencia.
-         * @param photo       Metadatos completos de la foto; null si no se adjuntó foto.
+         * @param stepId           ID del step.
+         * @param type             "REMARKS" o "DEFICIENCIES".
+         * @param description      Texto de la observación/deficiencia.
+         * @param photo            Metadatos de la foto; null si no se adjuntó.
+         * @param deficiencyTypeId ID del tipo de deficiencia; null para REMARKS.
          */
-        void onSave(String stepId, String type, String description, @Nullable PhotoMetadata photo);
+        void onSave(String stepId, String type, String description,
+                    @Nullable PhotoMetadata photo,
+                    @Nullable String deficiencyTypeId);
     }
 
     // ── Hilt injections ───────────────────────────────────────────────────────
 
-    @Inject
-    SharedPreferences authPrefs;
-
-    @Inject
-    UserDao userDao;
+    @Inject SharedPreferences authPrefs;
+    @Inject UserDao userDao;
+    @Inject DeficiencyTypeRepository deficiencyTypeRepository;
 
     // ── State ─────────────────────────────────────────────────────────────────
 
@@ -103,15 +104,14 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
 
     /** URI creada para la foto de cámara (necesaria para el launcher TakePicture). */
     private Uri cameraPhotoUri;
-    /** Archivo físico donde la cámara guardará la foto (evita re-copia posterior). */
     private File cameraImageFile;
 
-    /**
-     * Metadatos de la foto seleccionada/capturada (incluyendo GPS, timestamp, inspector).
-     * null hasta que el usuario selecciona una foto.
-     */
-    @Nullable
-    private PhotoMetadata currentMetadata;
+    @Nullable private PhotoMetadata currentMetadata;
+
+    /** Catálogo cargado desde Room/API. */
+    private List<DeficiencyTypeEntity> deficiencyTypes = new ArrayList<>();
+    /** Índice seleccionado en el dropdown (0 = "Seleccionar…"). */
+    @Nullable private DeficiencyTypeEntity selectedDeficiencyType;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -120,6 +120,8 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
 
     private RadioGroup radioGroupType;
     private Chip chipDeficiencyWarning;
+    private TextInputLayout tilDeficiencyType;
+    private MaterialAutoCompleteTextView spinnerDeficiencyType;
     private TextInputLayout tilDescription;
     private TextInputEditText etDescription;
     private TextView textPhotoLabel;
@@ -147,26 +149,19 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
 
     private final ActivityResultLauncher<Uri> cameraLauncher =
             registerForActivityResult(new ActivityResultContracts.TakePicture(), success -> {
-                if (Boolean.TRUE.equals(success) && cameraPhotoUri != null) {
-                    handlePhotoSelected(cameraPhotoUri, true);
-                }
+                if (Boolean.TRUE.equals(success) && cameraImageFile != null)
+                    handlePhotoSelected(Uri.fromFile(cameraImageFile), true);
             });
 
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (Boolean.TRUE.equals(granted)) {
-                    launchCamera();
-                } else {
-                    Toast.makeText(requireContext(),
-                            getString(R.string.obs_camera_permission_denied),
-                            Toast.LENGTH_SHORT).show();
-                }
+                if (Boolean.TRUE.equals(granted)) launchCamera();
+                else Toast.makeText(requireContext(),
+                        getString(R.string.obs_camera_permission_denied), Toast.LENGTH_SHORT).show();
             });
 
     private final ActivityResultLauncher<String[]> locationPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                // Permissions were already requested; retry metadata capture if pending
-            });
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), r -> {});
 
     // ── Factory ──────────────────────────────────────────────────────────────
 
@@ -179,9 +174,7 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
         return sheet;
     }
 
-    public void setOnSaveListener(OnSaveListener listener) {
-        this.saveListener = listener;
-    }
+    public void setOnSaveListener(OnSaveListener listener) { this.saveListener = listener; }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -196,8 +189,7 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.bottom_sheet_add_observation, container, false);
     }
@@ -210,6 +202,7 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
         setupTypeSelector();
         setupPhotoButtons();
         setupSaveCancel();
+        loadDeficiencyTypes();
     }
 
     @Override
@@ -223,6 +216,8 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
     private void bindViews(View root) {
         radioGroupType        = root.findViewById(R.id.radio_group_type);
         chipDeficiencyWarning = root.findViewById(R.id.chip_deficiency_warning);
+        tilDeficiencyType     = root.findViewById(R.id.til_deficiency_type);
+        spinnerDeficiencyType = root.findViewById(R.id.spinner_deficiency_type);
         tilDescription        = root.findViewById(R.id.til_obs_description);
         etDescription         = root.findViewById(R.id.et_obs_description);
         textPhotoLabel        = root.findViewById(R.id.text_photo_label);
@@ -255,21 +250,21 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
         radioGroupType.setOnCheckedChangeListener((group, checkedId) -> {
             boolean isDeficiency = checkedId == R.id.radio_deficiency;
             chipDeficiencyWarning.setVisibility(isDeficiency ? View.VISIBLE : View.GONE);
+            tilDeficiencyType.setVisibility(isDeficiency ? View.VISIBLE : View.GONE);
             textPhotoLabel.setText(isDeficiency
                     ? getString(R.string.obs_photo_label_required)
                     : getString(R.string.obs_photo_label_optional));
             textPhotoError.setVisibility(View.GONE);
+            tilDeficiencyType.setError(null);
+            if (!isDeficiency) selectedDeficiencyType = null;
         });
     }
 
     private void setupPhotoButtons() {
         btnTakePhoto.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
-                    == PackageManager.PERMISSION_GRANTED) {
-                launchCamera();
-            } else {
-                cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
-            }
+                    == PackageManager.PERMISSION_GRANTED) launchCamera();
+            else cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
         });
         btnPickGallery.setOnClickListener(v -> galleryLauncher.launch("image/*"));
         btnRemovePhoto.setOnClickListener(v -> clearPhoto());
@@ -278,6 +273,53 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
     private void setupSaveCancel() {
         btnCancel.setOnClickListener(v -> dismiss());
         btnSave.setOnClickListener(v -> trySubmit());
+    }
+
+    // ── Deficiency type catalog ────────────────────────────────────────────────
+
+    private void loadDeficiencyTypes() {
+        spinnerDeficiencyType.setText(getString(R.string.obs_deficiency_type_loading));
+        spinnerDeficiencyType.setEnabled(false);
+
+        androidx.lifecycle.MutableLiveData<Resource<List<DeficiencyTypeEntity>>> liveData =
+                new androidx.lifecycle.MutableLiveData<>();
+
+        liveData.observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null || resource.getStatus() == Resource.Status.LOADING) return;
+            liveData.removeObservers(getViewLifecycleOwner());
+
+            List<DeficiencyTypeEntity> types = resource.getData();
+            if (types != null && !types.isEmpty()) {
+                deficiencyTypes = types;
+            }
+            populateDeficiencyTypeDropdown();
+        });
+
+        deficiencyTypeRepository.loadDeficiencyTypes(liveData);
+    }
+
+    private void populateDeficiencyTypeDropdown() {
+        List<String> names = new ArrayList<>();
+        names.add(getString(R.string.obs_deficiency_type_hint));   // placeholder at [0]
+        for (DeficiencyTypeEntity t : deficiencyTypes) {
+            names.add(t.name);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(), android.R.layout.simple_dropdown_item_1line, names);
+
+        spinnerDeficiencyType.setAdapter(adapter);
+        spinnerDeficiencyType.setText(names.get(0), false);
+        spinnerDeficiencyType.setEnabled(true);
+
+        spinnerDeficiencyType.setOnItemClickListener((parent, view, position, id) -> {
+            tilDeficiencyType.setError(null);
+            if (position == 0) {
+                selectedDeficiencyType = null;
+            } else {
+                selectedDeficiencyType = deficiencyTypes.get(position - 1);
+            }
+        });
     }
 
     // ── Photo handling ────────────────────────────────────────────────────────
@@ -297,41 +339,23 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
 
     private File createImageFile() throws IOException {
         String ts = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile("OBS_" + ts + "_", ".jpg", storageDir);
+        File dir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile("OBS_" + ts + "_", ".jpg", dir);
     }
 
-    /**
-     * Called once a photo is captured (camera) or selected (gallery).
-     * For camera photos, reuses the existing temp file path directly.
-     * For gallery photos, copies the content URI to a local file first.
-     *
-     * @param uri         The photo URI (content:// or file://).
-     * @param fromCamera  True if taken with camera (file already saved); false if from gallery.
-     */
     private void handlePhotoSelected(Uri uri, boolean fromCamera) {
         try {
-            String localPath;
-            if (fromCamera && cameraImageFile != null) {
-                // Camera already wrote to cameraImageFile; reuse path directly
-                localPath = cameraImageFile.getAbsolutePath();
-            } else {
-                localPath = copyUriToLocalFile(uri);
-            }
+            String localPath = fromCamera && cameraImageFile != null
+                    ? cameraImageFile.getAbsolutePath()
+                    : copyUriToLocalFile(uri);
 
-            // Show photo preview immediately
             imagePhotoPreview.setVisibility(View.VISIBLE);
             btnRemovePhoto.setVisibility(View.VISIBLE);
             Glide.with(this).load(uri).centerCrop().into(imagePhotoPreview);
             textPhotoError.setVisibility(View.GONE);
 
-            // Show metadata card with loading state while we resolve GPS + user info
             showMetadataLoading();
-
-            // Capture all metadata asynchronously
-            final String capturedPath = localPath;
-            final String capturedTimestamp = Instant.now().toString();
-            captureMetadataAsync(capturedPath, capturedTimestamp);
+            captureMetadataAsync(localPath, Instant.now().toString());
 
         } catch (Exception e) {
             Toast.makeText(requireContext(), getString(R.string.obs_photo_process_error), Toast.LENGTH_SHORT).show();
@@ -340,17 +364,16 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
 
     private String copyUriToLocalFile(Uri uri) throws IOException {
         String ts = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        File destFile = new File(
-                requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+        File dest = new File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                 "OBS_" + ts + ".jpg");
         try (java.io.InputStream in  = requireContext().getContentResolver().openInputStream(uri);
-             java.io.OutputStream out = new java.io.FileOutputStream(destFile)) {
+             java.io.OutputStream out = new java.io.FileOutputStream(dest)) {
             if (in == null) throw new IOException("Cannot open input stream");
             byte[] buf = new byte[4096];
             int len;
             while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
         }
-        return destFile.getAbsolutePath();
+        return dest.getAbsolutePath();
     }
 
     private void clearPhoto() {
@@ -365,7 +388,6 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
 
     // ── Metadata capture ──────────────────────────────────────────────────────
 
-    /** Shows metadata card in "loading" state while GPS + user are resolved. */
     private void showMetadataLoading() {
         cardPhotoMetadata.setVisibility(View.VISIBLE);
         textMetaTimestamp.setText(R.string.meta_loading);
@@ -374,17 +396,10 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
         progressGps.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Fetches GPS location and inspector info on a background thread, then
-     * constructs PhotoMetadata and updates the metadata card on the main thread.
-     */
     private void captureMetadataAsync(String localPath, String timestamp) {
         executor.execute(() -> {
-            // 1. Get inspector info from SharedPrefs + Room
             String inspectorId   = authPrefs.getString("cached_user_id", "");
             String inspectorName = resolveInspectorName(inspectorId);
-
-            // 2. Get GPS location (last known - fast and works offline)
             Location gpsLocation = getLastKnownLocation();
 
             Double lat = gpsLocation != null ? gpsLocation.getLatitude()  : null;
@@ -400,96 +415,68 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
         });
     }
 
-    /** Queries UserEntity from Room by ID; falls back to cached email if not found. */
     private String resolveInspectorName(String inspectorId) {
         if (inspectorId != null && !inspectorId.isEmpty()) {
             try {
                 UserEntity user = userDao.getById(inspectorId);
                 if (user != null) {
-                    String fullName = user.getFullName();
-                    if (fullName != null && !fullName.trim().isEmpty()) {
-                        return fullName.trim();
-                    }
+                    String full = user.getFullName();
+                    if (full != null && !full.trim().isEmpty()) return full.trim();
                 }
             } catch (Exception ignored) {}
         }
-        // Fallback: use cached email
         return authPrefs.getString("cached_email", getString(R.string.meta_inspector_unknown));
     }
 
-    /**
-     * Tries to get the last known location from GPS, NETWORK, and PASSIVE providers.
-     * This is synchronous and returns immediately (no new fix requested).
-     */
     @SuppressLint("MissingPermission")
     @Nullable
     private Location getLastKnownLocation() {
-        boolean hasFine = ContextCompat.checkSelfPermission(requireContext(),
+        boolean hasFine   = ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         boolean hasCoarse = ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
         if (!hasFine && !hasCoarse) {
-            // Request permissions for next time; GPS will be null this round
             mainHandler.post(() -> locationPermissionLauncher.launch(new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-            }));
+                    Manifest.permission.ACCESS_COARSE_LOCATION}));
             return null;
         }
-
         try {
             LocationManager lm = (LocationManager)
                     requireContext().getSystemService(Context.LOCATION_SERVICE);
             if (lm == null) return null;
-
-            List<String> providers = Arrays.asList(
-                    LocationManager.GPS_PROVIDER,
-                    LocationManager.NETWORK_PROVIDER,
-                    LocationManager.PASSIVE_PROVIDER);
-
-            for (String provider : providers) {
-                if (lm.isProviderEnabled(provider)) {
-                    Location loc = lm.getLastKnownLocation(provider);
+            for (String p : Arrays.asList(LocationManager.GPS_PROVIDER,
+                    LocationManager.NETWORK_PROVIDER, LocationManager.PASSIVE_PROVIDER)) {
+                if (lm.isProviderEnabled(p)) {
+                    Location loc = lm.getLastKnownLocation(p);
                     if (loc != null) return loc;
                 }
             }
         } catch (Exception ignored) {}
-
         return null;
     }
 
-    /** Populates the metadata card with resolved values. */
     private void updateMetadataCard(PhotoMetadata meta, String isoTimestamp) {
         progressGps.setVisibility(View.GONE);
-
-        // Format timestamp for display
         try {
             java.time.ZonedDateTime zdt = java.time.ZonedDateTime.parse(isoTimestamp)
                     .withZoneSameInstant(java.time.ZoneId.systemDefault());
-            String formatted = zdt.format(java.time.format.DateTimeFormatter
-                    .ofPattern("dd/MM/yyyy HH:mm:ss", Locale.getDefault()));
-            textMetaTimestamp.setText(formatted);
+            textMetaTimestamp.setText(zdt.format(java.time.format.DateTimeFormatter
+                    .ofPattern("dd/MM/yyyy HH:mm:ss", Locale.getDefault())));
         } catch (Exception e) {
             textMetaTimestamp.setText(isoTimestamp);
         }
-
-        // GPS
-        String gpsText = meta.hasGps()
-                ? meta.formatGps()
-                : getString(R.string.meta_gps_unavailable);
-        textMetaGps.setText(gpsText);
-
-        // Inspector
+        textMetaGps.setText(meta.hasGps() ? meta.formatGps() : getString(R.string.meta_gps_unavailable));
         textMetaInspector.setText(meta.inspectorName != null && !meta.inspectorName.isEmpty()
-                ? meta.inspectorName
-                : getString(R.string.meta_inspector_unknown));
+                ? meta.inspectorName : getString(R.string.meta_inspector_unknown));
     }
 
     // ── Submit ────────────────────────────────────────────────────────────────
 
     private void trySubmit() {
         tilDescription.setError(null);
+        tilDeficiencyType.setError(null);
         textPhotoError.setVisibility(View.GONE);
 
         String description = etDescription.getText() != null
@@ -502,14 +489,21 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
         boolean isDeficiency = radioGroupType.getCheckedRadioButtonId() == R.id.radio_deficiency;
         String type = isDeficiency ? "DEFICIENCIES" : "REMARKS";
 
-        if (isDeficiency && currentMetadata == null) {
-            textPhotoError.setVisibility(View.VISIBLE);
-            return;
+        if (isDeficiency) {
+            if (selectedDeficiencyType == null) {
+                tilDeficiencyType.setError(getString(R.string.obs_deficiency_type_required_error));
+                return;
+            }
+            if (currentMetadata == null) {
+                textPhotoError.setVisibility(View.VISIBLE);
+                return;
+            }
         }
 
         setLoading(true);
         if (saveListener != null) {
-            saveListener.onSave(stepId, type, description, currentMetadata);
+            saveListener.onSave(stepId, type, description, currentMetadata,
+                    selectedDeficiencyType != null ? selectedDeficiencyType.id : null);
         }
     }
 
@@ -520,6 +514,7 @@ public class AddObservationBottomSheet extends BottomSheetDialogFragment {
         btnPickGallery.setEnabled(!loading);
         etDescription.setEnabled(!loading);
         radioGroupType.setEnabled(!loading);
+        spinnerDeficiencyType.setEnabled(!loading);
         progressObs.setVisibility(loading ? View.VISIBLE : View.GONE);
     }
 }

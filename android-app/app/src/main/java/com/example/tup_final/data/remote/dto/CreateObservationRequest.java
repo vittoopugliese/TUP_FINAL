@@ -27,10 +27,12 @@ public class CreateObservationRequest {
     public CreateObservationRequest() {}
 
     public CreateObservationRequest(String type, String description,
-                                    String inspectionId, String mediaId) {
-        this.type = type;
-        this.description = description;
-        this.inspectionId = inspectionId;
-        this.mediaId = mediaId;
+                                    String inspectionId, String mediaId,
+                                    String deficiencyTypeId) {
+        this.type             = type;
+        this.description      = description;
+        this.inspectionId     = inspectionId;
+        this.mediaId          = mediaId;
+        this.deficiencyTypeId = deficiencyTypeId;
     }
 }
