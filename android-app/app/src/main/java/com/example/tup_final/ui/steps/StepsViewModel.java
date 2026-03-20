@@ -69,6 +69,15 @@ public class StepsViewModel extends ViewModel {
     }
 
     /**
+     * Marca un step como FAILED en Room de forma inmediata y republica la lista
+     * de steps al LiveData para que la UI se refresque sin esperar a la API.
+     * Debe llamarse cuando se guarda una observación de tipo DEFICIENCIES.
+     */
+    public void markStepFailed(String stepId) {
+        repository.markStepFailed(stepId, stepsData);
+    }
+
+    /**
      * Carga las observaciones de un step desde Room y actualiza el mapa.
      * Usa un MutableLiveData temporal sin observeForever (evita memory leak).
      */

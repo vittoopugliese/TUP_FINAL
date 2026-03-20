@@ -142,6 +142,29 @@ public class StepsRepository {
         });
     }
 
+    /**
+     * Marca un step como FAILED en Room de forma inmediata (offline-safe).
+     * Usado cuando se guarda una observación de tipo DEFICIENCIES antes de que
+     * la sincronización con la API confirme el cambio de estado.
+     * También recomputa el estado del Test y emite la lista actualizada.
+     */
+    public void markStepFailed(String stepId,
+                               MutableLiveData<Resource<List<StepUiModel>>> result) {
+        executor.execute(() -> {
+            try {
+                StepEntity step = stepDao.getById(stepId);
+                if (step == null) return;
+                step.status = StepConstants.STATUS_FAILED;
+                stepDao.update(step);
+                updateTestStatusInRoom(step.testId);
+                List<StepUiModel> updated = loadFromRoom(step.testId);
+                mainHandler.post(() -> result.setValue(Resource.success(updated)));
+            } catch (Exception ignored) {
+                // best-effort: si falla, refreshSteps() lo corregirá luego
+            }
+        });
+    }
+
     private void persistToRoom(List<StepResponse> steps, String testId) {
         for (StepResponse sr : steps) {
             persistStepToRoom(sr);
