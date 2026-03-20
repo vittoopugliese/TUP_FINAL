@@ -46,4 +46,7 @@ public interface InspectionApi {
     @POST("inspections/{id}/sign")
     Call<InspectionListResponse> signInspection(@Path("id") String inspectionId,
                                                  @Body SignInspectionRequest request);
+
+    @GET("inspections/{id}/status")
+    Call<InspectionListResponse> getInspectionStatus(@Path("id") String inspectionId);
 }

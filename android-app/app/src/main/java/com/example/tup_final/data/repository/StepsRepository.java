@@ -6,8 +6,10 @@ import android.os.Looper;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.tup_final.data.entity.InspectionEntity;
 import com.example.tup_final.data.entity.StepEntity;
 import com.example.tup_final.data.entity.TestEntity;
+import com.example.tup_final.data.local.InspectionDao;
 import com.example.tup_final.data.local.StepDao;
 import com.example.tup_final.data.local.TestDao;
 import com.example.tup_final.data.remote.StepsApi;
@@ -18,8 +20,12 @@ import com.example.tup_final.ui.steps.StepValidator;
 import com.example.tup_final.util.Resource;
 import com.example.tup_final.util.StepConstants;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,6 +36,7 @@ import retrofit2.Response;
 
 /**
  * Repository para steps. Carga desde API, fallback a Room.
+ * Propaga status: Step → Test → Inspection.
  */
 @Singleton
 public class StepsRepository {
@@ -37,14 +44,17 @@ public class StepsRepository {
     private final StepsApi stepsApi;
     private final StepDao stepDao;
     private final TestDao testDao;
+    private final InspectionDao inspectionDao;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
-    public StepsRepository(StepsApi stepsApi, StepDao stepDao, TestDao testDao) {
+    public StepsRepository(StepsApi stepsApi, StepDao stepDao, TestDao testDao,
+                           InspectionDao inspectionDao) {
         this.stepsApi = stepsApi;
         this.stepDao = stepDao;
         this.testDao = testDao;
+        this.inspectionDao = inspectionDao;
     }
 
     /**
@@ -195,6 +205,49 @@ public class StepsRepository {
         String newStatus = computeTestStatus(steps);
         test.status = newStatus;
         testDao.update(test);
+
+        if (test.inspectionId != null) {
+            updateInspectionStatusInRoom(test.inspectionId);
+        }
+    }
+
+    /**
+     * Recalcula el estado de la inspección a partir de TODOS sus tests en Room.
+     * Solo actúa si la inspección está IN_PROGRESS.
+     *
+     * - Todos COMPLETED → DONE_COMPLETED (result=SUCCESS)
+     * - Al menos uno FAILED, ninguno PENDING → DONE_FAILED (result=FAILED)
+     * - Alguno PENDING → permanece IN_PROGRESS
+     */
+    private void updateInspectionStatusInRoom(String inspectionId) {
+        InspectionEntity inspection = inspectionDao.getById(inspectionId);
+        if (inspection == null) return;
+        if (!"IN_PROGRESS".equals(inspection.status)) return;
+
+        List<TestEntity> tests = testDao.getByInspectionId(inspectionId);
+        if (tests.isEmpty()) return;
+
+        boolean anyPending = false;
+        boolean anyFailed  = false;
+        for (TestEntity t : tests) {
+            String st = StepConstants.normalizeStepStatus(t.status);
+            if (StepConstants.STATUS_PENDING.equals(st)) {
+                anyPending = true;
+                break;
+            }
+            if (StepConstants.STATUS_FAILED.equals(st)) anyFailed = true;
+        }
+
+        if (anyPending) return;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String now = sdf.format(new Date());
+
+        inspection.status = anyFailed ? "DONE_FAILED" : "DONE_COMPLETED";
+        inspection.result = anyFailed ? "FAILED" : "SUCCESS";
+        inspection.updatedAt = now;
+        inspectionDao.update(inspection);
     }
 
     private String computeTestStatus(List<StepEntity> steps) {

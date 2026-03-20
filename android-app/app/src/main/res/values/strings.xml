@@ -322,6 +322,14 @@ Esta acción no se puede deshacer.\n\n¿Confirmar firma?</string>
     <string name="meta_gps_unavailable">Ubicación GPS no disponible</string>
     <string name="meta_inspector_unknown">Inspector desconocido</string>
 
+    <!-- Final Evaluation -->
+    <string name="final_evaluation_title">EVALUACIÓN FINAL</string>
+    <string name="final_result_approved">APROBADA</string>
+    <string name="final_result_failed">REPROBADA</string>
+    <string name="final_result_detail_approved">Todos los tests fueron completados exitosamente.</string>
+    <string name="final_result_detail_failed">Se encontraron deficiencias en uno o más tests.</string>
+    <string name="final_result_in_progress">Inspección en progreso. Se resolverá al completar todos los tests.</string>
+
     <!-- Create Inspection -->
     <string name="create_inspection_title">Nueva Inspección</string>
     <string name="create_inspection_building_hint">Seleccionar edificio</string>
