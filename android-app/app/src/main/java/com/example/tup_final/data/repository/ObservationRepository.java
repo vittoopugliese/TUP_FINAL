@@ -3,6 +3,7 @@ package com.example.tup_final.data.repository;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.tup_final.data.entity.ObservationEntity;
@@ -10,6 +11,7 @@ import com.example.tup_final.data.local.ObservationDao;
 import com.example.tup_final.data.remote.ObservationApi;
 import com.example.tup_final.data.remote.dto.CreateObservationRequest;
 import com.example.tup_final.data.remote.dto.ObservationResponse;
+import com.example.tup_final.util.PhotoMetadata;
 import com.example.tup_final.util.Resource;
 
 import java.time.Instant;
@@ -26,21 +28,26 @@ import retrofit2.Response;
 
 /**
  * Repositorio de observaciones. Estrategia local-first:
- * 1. Guarda en Room inmediatamente (UUID generado en cliente).
- * 2. Intenta sincronizar con la API en background.
+ * 1. Si hay foto, persiste un PhotoEntity completo con sus metadatos (GPS, timestamp, inspector).
+ * 2. Guarda ObservationEntity en Room con referencia al photoId.
+ * 3. Intenta sincronizar con la API en background.
  */
 @Singleton
 public class ObservationRepository {
 
     private final ObservationDao observationDao;
     private final ObservationApi observationApi;
+    private final PhotoRepository photoRepository;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
-    public ObservationRepository(ObservationDao observationDao, ObservationApi observationApi) {
-        this.observationDao = observationDao;
-        this.observationApi = observationApi;
+    public ObservationRepository(ObservationDao observationDao,
+                                 ObservationApi observationApi,
+                                 PhotoRepository photoRepository) {
+        this.observationDao   = observationDao;
+        this.observationApi   = observationApi;
+        this.photoRepository  = photoRepository;
     }
 
     /**
@@ -50,29 +57,36 @@ public class ObservationRepository {
      * @param inspectionId ID de la inspección (para indexar).
      * @param type         "REMARKS" (Observación) o "DEFICIENCIES" (Deficiencia).
      * @param description  Texto obligatorio.
-     * @param photoPath    Ruta local de la foto (null si no aplica).
+     * @param photo        Metadatos de la foto capturada (null si no aplica).
      * @param result       LiveData al que se publica el resultado.
      */
     public void saveObservation(String stepId, String inspectionId,
-                                String type, String description, String photoPath,
+                                String type, String description,
+                                @Nullable PhotoMetadata photo,
                                 MutableLiveData<Resource<ObservationEntity>> result) {
         result.setValue(Resource.loading());
 
         executor.execute(() -> {
             try {
-                String id = UUID.randomUUID().toString();
+                String id  = UUID.randomUUID().toString();
                 String now = Instant.now().toString();
 
+                // Persist photo with full metadata first, get the photo's UUID
+                String mediaId = null;
+                if (photo != null) {
+                    mediaId = photoRepository.savePhotoWithMetadata(photo, stepId);
+                }
+
                 ObservationEntity entity = new ObservationEntity();
-                entity.id = id;
-                entity.testStepId = stepId;
-                entity.inspectionId = inspectionId;
-                entity.type = type;
-                entity.description = description;
-                entity.mediaId = photoPath;
-                entity.name = "DEFICIENCIES".equals(type) ? "Deficiencia" : "Observación";
-                entity.createdAt = now;
-                entity.updatedAt = now;
+                entity.id            = id;
+                entity.testStepId    = stepId;
+                entity.inspectionId  = inspectionId;
+                entity.type          = type;
+                entity.description   = description;
+                entity.mediaId       = mediaId;
+                entity.name          = "DEFICIENCIES".equals(type) ? "Deficiencia" : "Observación";
+                entity.createdAt     = now;
+                entity.updatedAt     = now;
 
                 observationDao.insert(entity);
 
@@ -82,7 +96,9 @@ public class ObservationRepository {
 
             } catch (Exception e) {
                 mainHandler.post(() -> result.setValue(
-                        Resource.error(e.getMessage() != null ? e.getMessage() : "Error al guardar observación")));
+                        Resource.error(e.getMessage() != null
+                                ? e.getMessage()
+                                : "Error al guardar observación")));
             }
         });
     }
@@ -140,16 +156,16 @@ public class ObservationRepository {
 
     private ObservationEntity toEntity(ObservationResponse dto) {
         ObservationEntity e = new ObservationEntity();
-        e.id = dto.id;
-        e.testStepId = dto.testStepId;
-        e.inspectionId = dto.inspectionId;
-        e.name = dto.name;
-        e.type = dto.type;
-        e.description = dto.description;
+        e.id             = dto.id;
+        e.testStepId     = dto.testStepId;
+        e.inspectionId   = dto.inspectionId;
+        e.name           = dto.name;
+        e.type           = dto.type;
+        e.description    = dto.description;
         e.deficiencyTypeId = dto.deficiencyTypeId;
-        e.mediaId = dto.mediaId;
-        e.createdAt = dto.createdAt;
-        e.updatedAt = dto.updatedAt;
+        e.mediaId        = dto.mediaId;
+        e.createdAt      = dto.createdAt;
+        e.updatedAt      = dto.updatedAt;
         return e;
     }
 }

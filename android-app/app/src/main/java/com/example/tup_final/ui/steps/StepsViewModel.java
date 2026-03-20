@@ -5,9 +5,12 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import androidx.annotation.Nullable;
+
 import com.example.tup_final.data.entity.ObservationEntity;
 import com.example.tup_final.data.repository.ObservationRepository;
 import com.example.tup_final.data.repository.StepsRepository;
+import com.example.tup_final.util.PhotoMetadata;
 import com.example.tup_final.util.Resource;
 
 import java.util.HashMap;
@@ -60,12 +63,12 @@ public class StepsViewModel extends ViewModel {
      * @param inspectionId  ID de la inspección (para indexar).
      * @param type          "REMARKS" (Observación) o "DEFICIENCIES" (Deficiencia).
      * @param description   Texto obligatorio.
-     * @param photoPath     Ruta local de la foto (null si no aplica).
+     * @param photo         Metadatos de la foto (null si no aplica).
      */
     public void saveObservation(String stepId, String inspectionId,
-                                String type, String description, String photoPath) {
+                                String type, String description, @Nullable PhotoMetadata photo) {
         observationRepository.saveObservation(
-                stepId, inspectionId, type, description, photoPath, saveObsResult);
+                stepId, inspectionId, type, description, photo, saveObsResult);
     }
 
     /**
