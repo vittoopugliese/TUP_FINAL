@@ -192,6 +192,20 @@
     <string name="inspection_validation_title">Validación</string>
     <string name="inspection_no_inspections">No hay inspecciones disponibles.</string>
 
+    <!-- Firma de inspección -->
+    <string name="btn_sign_inspection">Firmar</string>
+    <string name="sign_dialog_title">Firmar Inspección</string>
+    <string name="sign_dialog_message">Al firmar, confirmás que la inspección ha sido completada.
+Esta acción no se puede deshacer.\n\n¿Confirmar firma?</string>
+    <string name="sign_dialog_confirm">Firmar</string>
+    <string name="sign_success">Inspección firmada correctamente</string>
+    <string name="sign_error_generic">No se pudo firmar la inspección</string>
+    <string name="sign_signed_label">✓ Inspección firmada</string>
+    <string name="sign_signed_by">Firmada por: %1$s</string>
+    <string name="sign_signed_date">Fecha: %1$s</string>
+    <string name="sign_error_not_inspector">Solo el Inspector asignado puede firmar esta inspección</string>
+    <string name="sign_error_tests_pending">No se puede firmar: hay tests pendientes de completar</string>
+
     <!-- Assignment (Inspector/Operators) -->
     <string name="assignment_inspector_title">Inspector</string>
     <string name="assignment_operators_title">Inspectores</string>

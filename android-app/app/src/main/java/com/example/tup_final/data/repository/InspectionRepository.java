@@ -16,6 +16,7 @@ import com.example.tup_final.data.remote.InspectionApi;
 import com.example.tup_final.data.remote.dto.AssignmentRequest;
 import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.remote.dto.InspectionListResponse;
+import com.example.tup_final.data.remote.dto.SignInspectionRequest;
 import com.example.tup_final.util.Resource;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -150,9 +151,9 @@ public class InspectionRepository {
             entity.approvalDate = null;
             entity.result = null;
             entity.notes = null;
-            entity.signer = null;
-            entity.signed = false;
-            entity.signDate = null;
+            entity.signer = dto.getSigner();
+            entity.signed = dto.isSigned();
+            entity.signDate = dto.getSignDate();
             entity.startedAt = null;
             entity.inspectionReportId = null;
             entity.inspectionTemplateId = null;
@@ -299,6 +300,66 @@ public class InspectionRepository {
             } catch (Exception e) {
                 mainHandler.post(() -> result.setValue(
                         Resource.error(e.getMessage() != null ? e.getMessage() : "Error de conexión")));
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Firma una inspección: envía el nombre del firmante al backend y
+     * actualiza la entidad local con el resultado (status DONE_*, signed, signer, signDate).
+     * Si la red falla, se aplica la firma localmente en Room como fallback offline.
+     */
+    public LiveData<Resource<InspectionEntity>> signInspection(String inspectionId, String signerName) {
+        MutableLiveData<Resource<InspectionEntity>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                SignInspectionRequest req = new SignInspectionRequest(signerName);
+                Response<InspectionListResponse> response =
+                        inspectionApi.signInspection(inspectionId, req).execute();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    InspectionListResponse dto = response.body();
+                    InspectionEntity entity = inspectionDao.getById(inspectionId);
+                    if (entity != null) {
+                        entity.status   = dto.getStatus();
+                        entity.signer   = dto.getSigner();
+                        entity.signed   = dto.isSigned();
+                        entity.signDate = dto.getSignDate();
+                        entity.updatedAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+                                .format(new Date());
+                        inspectionDao.update(entity);
+                        mainHandler.post(() -> result.setValue(Resource.success(entity)));
+                    } else {
+                        mainHandler.post(() -> result.setValue(
+                                Resource.error("No se encontró la inspección local")));
+                    }
+                } else {
+                    String errorMsg = "Error al firmar la inspección";
+                    if (response.errorBody() != null) {
+                        try {
+                            String body = response.errorBody().string();
+                            if (body.contains("message")) {
+                                int idx = body.indexOf("message");
+                                int start = body.indexOf("\"", idx + 9) + 1;
+                                int end = body.indexOf("\"", start);
+                                if (start > 0 && end > start) {
+                                    errorMsg = body.substring(start, end);
+                                }
+                            } else if (!body.isEmpty()) {
+                                errorMsg = body;
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                    final String msg = errorMsg;
+                    mainHandler.post(() -> result.setValue(Resource.error(msg)));
+                }
+            } catch (Exception e) {
+                String msg = e.getMessage() != null ? e.getMessage() : "Error de conexión al firmar";
+                mainHandler.post(() -> result.setValue(Resource.error(msg)));
             }
         });
 

@@ -162,6 +162,92 @@ public class InspectionService {
         );
     }
 
+    /**
+     * Firma digitalmente una inspección.
+     *
+     * Validaciones:
+     * 1. La inspección debe existir.
+     * 2. La inspección no puede estar ya firmada.
+     * 3. La inspección debe estar IN_PROGRESS (no PENDING ni ya DONE).
+     * 4. El usuario que firma debe ser el INSPECTOR asignado a esta inspección.
+     * 5. Todos los tests de la inspección deben tener status COMPLETED o FAILED
+     *    (ninguno puede quedar PENDING).
+     *
+     * Al firmar:
+     * - signer = nombre del firmante (signerName del request).
+     * - signed = true
+     * - signDate = ahora
+     * - status = DONE_COMPLETED si todos los tests son COMPLETED;
+     *            DONE_FAILED si al menos uno es FAILED.
+     * - result = SUCCESS o FAILED (según tests).
+     */
+    @Transactional
+    public InspectionListResponse signInspection(String inspectionId,
+                                                  String signerName,
+                                                  String userEmail) {
+        Inspection inspection = inspectionRepository.findById(inspectionId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Inspección no encontrada: " + inspectionId));
+
+        if (inspection.isSigned()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "La inspección ya fue firmada por " + inspection.getSigner());
+        }
+
+        if (!"IN_PROGRESS".equals(inspection.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Solo se pueden firmar inspecciones en estado IN_PROGRESS. Estado actual: "
+                            + inspection.getStatus());
+        }
+
+        // Verificar que el usuario es el INSPECTOR asignado
+        List<InspectionAssignment> inspectorAssignments =
+                assignmentRepository.findByInspectionIdAndRole(inspectionId, ROLE_INSPECTOR);
+        boolean isAssignedInspector = inspectorAssignments.stream()
+                .anyMatch(a -> a.getUserEmail().equalsIgnoreCase(userEmail));
+        if (!isAssignedInspector) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Solo el Inspector asignado puede firmar esta inspección.");
+        }
+
+        // Verificar que todos los tests estén COMPLETED o FAILED
+        List<InspectionTest> tests = testRepository.findByInspectionId(inspectionId);
+        if (tests.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La inspección no tiene tests. No se puede firmar.");
+        }
+
+        boolean anyPending = false;
+        boolean anyFailed  = false;
+        for (InspectionTest test : tests) {
+            String st = test.getStatus();
+            if ("PENDING".equals(st)) {
+                anyPending = true;
+            } else if ("FAILED".equals(st)) {
+                anyFailed = true;
+            }
+        }
+        if (anyPending) {
+            long pendingCount = tests.stream()
+                    .filter(t -> "PENDING".equals(t.getStatus())).count();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No se puede firmar: " + pendingCount + " test(s) aún están PENDIENTES. "
+                            + "Todos los tests deben estar COMPLETED o FAILED.");
+        }
+
+        // Aplicar firma
+        Instant now = Instant.now();
+        inspection.setSigner(signerName);
+        inspection.setSigned(true);
+        inspection.setSignDate(now);
+        inspection.setStatus(anyFailed ? "DONE_FAILED" : "DONE_COMPLETED");
+        inspection.setResult(anyFailed ? "FAILED" : "SUCCESS");
+        inspection.setUpdatedAt(now);
+        inspectionRepository.save(inspection);
+
+        return mapToListResponse(inspection);
+    }
+
     private void validateAssignments(List<AssignmentRequest> assignments) {
         if (assignments == null || assignments.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one INSPECTOR is required");
@@ -267,7 +353,7 @@ public class InspectionService {
                     .map(Building::getName)
                     .orElse(null);
         }
-        return new InspectionListResponse(
+        InspectionListResponse dto = new InspectionListResponse(
                 inspection.getId(),
                 inspection.getBuildingId(),
                 buildingName,
@@ -276,5 +362,9 @@ public class InspectionService {
                 inspection.getScheduledDate(),
                 inspection.getType()
         );
+        dto.setSigner(inspection.getSigner());
+        dto.setSigned(inspection.isSigned());
+        dto.setSignDate(inspection.getSignDate());
+        return dto;
     }
 }

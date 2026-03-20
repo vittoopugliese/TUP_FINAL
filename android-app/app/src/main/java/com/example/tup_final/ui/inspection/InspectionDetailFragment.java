@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -67,9 +68,12 @@ public class InspectionDetailFragment extends Fragment {
         observeInspection();
         observeAssignments();
         observeStartResult();
+        observeSignResult();
 
         binding.btnStartInspection.setOnClickListener(v ->
                 viewModel.startOrContinueInspection());
+
+        binding.btnSignInspection.setOnClickListener(v -> onSignClicked());
     }
 
     private void setupTabs() {
@@ -86,6 +90,8 @@ public class InspectionDetailFragment extends Fragment {
                 (tab, position) -> tab.setText(tabTitles[position])
         ).attach();
     }
+
+    // ── Observers ─────────────────────────────────────────────────────────────
 
     private void observeInspection() {
         viewModel.getInspection().observe(getViewLifecycleOwner(), resource -> {
@@ -122,26 +128,10 @@ public class InspectionDetailFragment extends Fragment {
                 if (inspRes != null && inspRes.getData() != null) {
                     List<InspectionAssignmentEntity> inspectors = filterInspectors(resource.getData());
                     updateStartButton(inspRes.getData(), inspectors);
+                    updateSignButton(inspRes.getData());
                 }
             }
         });
-    }
-
-    private List<InspectionAssignmentEntity> filterInspectors(List<InspectionAssignmentEntity> assignments) {
-        List<InspectionAssignmentEntity> result = new ArrayList<>();
-        if (assignments == null) return result;
-        for (InspectionAssignmentEntity a : assignments) {
-            if ("INSPECTOR".equals(a.role)) result.add(a);
-        }
-        return result;
-    }
-
-    private void updateStartButton(InspectionEntity inspection, List<InspectionAssignmentEntity> inspectors) {
-        if (inspection == null) return;
-        binding.btnStartInspection.setVisibility(View.VISIBLE);
-        boolean showStart = viewModel.shouldShowStartLabel(inspection, inspectors);
-        binding.btnStartInspection.setText(showStart ? R.string.btn_start_inspection : R.string.btn_continue_inspection);
-        binding.btnStartInspection.setEnabled(viewModel.isStartButtonEnabled(inspection, inspectors));
     }
 
     private void observeStartResult() {
@@ -170,6 +160,69 @@ public class InspectionDetailFragment extends Fragment {
         });
     }
 
+    private void observeSignResult() {
+        viewModel.getSignResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null || binding == null) return;
+            switch (resource.getStatus()) {
+                case LOADING:
+                    binding.btnSignInspection.setEnabled(false);
+                    binding.btnStartInspection.setEnabled(false);
+                    break;
+
+                case SUCCESS:
+                    binding.btnSignInspection.setEnabled(true);
+                    binding.btnStartInspection.setEnabled(true);
+                    if (resource.getData() != null) {
+                        bindHeader(resource.getData());
+                        Toast.makeText(requireContext(),
+                                getString(R.string.sign_success), Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+
+                case ERROR:
+                    binding.btnSignInspection.setEnabled(true);
+                    binding.btnStartInspection.setEnabled(true);
+                    showValidationError(resource.getMessage() != null
+                            ? resource.getMessage()
+                            : getString(R.string.sign_error_generic));
+                    break;
+            }
+        });
+    }
+
+    // ── Signing ──────────────────────────────────────────────────────────────
+
+    private void onSignClicked() {
+        String inspectionId = viewModel.getCurrentInspectionId();
+        if (inspectionId == null) return;
+
+        viewModel.validateAllTestsDone(inspectionId, allDone -> {
+            if (!isAdded() || binding == null) return;
+            if (!allDone) {
+                showValidationError(getString(R.string.sign_error_tests_pending));
+                return;
+            }
+            showSignConfirmationDialog();
+        });
+    }
+
+    private void showSignConfirmationDialog() {
+        if (!isAdded()) return;
+
+        viewModel.resolveSignerName(signerName -> {
+            if (!isAdded()) return;
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.sign_dialog_title)
+                    .setMessage(getString(R.string.sign_dialog_message))
+                    .setNegativeButton(R.string.btn_cancel, null)
+                    .setPositiveButton(R.string.sign_dialog_confirm, (dialog, which) ->
+                            viewModel.signInspection(signerName))
+                    .show();
+        });
+    }
+
+    // ── Bind UI ──────────────────────────────────────────────────────────────
+
     private void bindHeader(InspectionEntity inspection) {
         binding.chipStatus.setText(inspection.status != null ? inspection.status : "—");
         setStatusChipColor(inspection.status);
@@ -179,6 +232,56 @@ public class InspectionDetailFragment extends Fragment {
 
         List<InspectionAssignmentEntity> inspectors = viewModel.getInspectorAssignments();
         updateStartButton(inspection, inspectors);
+        updateSignButton(inspection);
+        updateSignedInfo(inspection);
+    }
+
+    private List<InspectionAssignmentEntity> filterInspectors(List<InspectionAssignmentEntity> assignments) {
+        List<InspectionAssignmentEntity> result = new ArrayList<>();
+        if (assignments == null) return result;
+        for (InspectionAssignmentEntity a : assignments) {
+            if ("INSPECTOR".equals(a.role)) result.add(a);
+        }
+        return result;
+    }
+
+    private void updateStartButton(InspectionEntity inspection, List<InspectionAssignmentEntity> inspectors) {
+        if (inspection == null) return;
+
+        boolean isSigned = inspection.signed;
+        if (isSigned) {
+            binding.btnStartInspection.setText(R.string.btn_continue_inspection);
+            binding.btnStartInspection.setEnabled(true);
+            binding.btnStartInspection.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        binding.btnStartInspection.setVisibility(View.VISIBLE);
+        boolean showStart = viewModel.shouldShowStartLabel(inspection, inspectors);
+        binding.btnStartInspection.setText(showStart
+                ? R.string.btn_start_inspection : R.string.btn_continue_inspection);
+        binding.btnStartInspection.setEnabled(viewModel.isStartButtonEnabled(inspection, inspectors));
+    }
+
+    private void updateSignButton(InspectionEntity inspection) {
+        if (inspection == null) {
+            binding.btnSignInspection.setVisibility(View.GONE);
+            return;
+        }
+        boolean show = viewModel.shouldShowSignButton(inspection);
+        binding.btnSignInspection.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateSignedInfo(InspectionEntity inspection) {
+        if (inspection == null || !inspection.signed) {
+            binding.cardSignedInfo.setVisibility(View.GONE);
+            return;
+        }
+        binding.cardSignedInfo.setVisibility(View.VISIBLE);
+        binding.textSignedBy.setText(getString(R.string.sign_signed_by,
+                inspection.signer != null ? inspection.signer : "—"));
+        binding.textSignedDate.setText(getString(R.string.sign_signed_date,
+                inspection.signDate != null ? inspection.signDate : "—"));
     }
 
     private void setStatusChipColor(String status) {

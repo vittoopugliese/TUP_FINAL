@@ -3,6 +3,7 @@ package com.inspections.controller;
 import com.inspections.dto.CreateInspectionRequest;
 import com.inspections.dto.CreateInspectionResponse;
 import com.inspections.dto.InspectionListResponse;
+import com.inspections.dto.SignInspectionRequest;
 import com.inspections.service.InspectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,5 +61,25 @@ public class InspectionController {
             @Valid @RequestBody CreateInspectionRequest request) {
         CreateInspectionResponse created = inspectionService.createInspection(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PostMapping("/{id}/sign")
+    @Operation(summary = "Firmar inspección",
+               description = "Firma digital: valida que todos los tests estén COMPLETED o FAILED "
+                       + "y que el firmante sea el Inspector asignado. Transiciona la inspección a DONE_*.")
+    public ResponseEntity<?> signInspection(
+            @PathVariable String id,
+            @Valid @RequestBody SignInspectionRequest request) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null
+                || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = auth.getPrincipal().toString();
+
+        InspectionListResponse signed = inspectionService.signInspection(
+                id, request.getSignerName(), email);
+        return ResponseEntity.ok(signed);
     }
 }
