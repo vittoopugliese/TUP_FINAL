@@ -106,9 +106,16 @@ public class HomeFragment extends Fragment {
     private void observeCurrentUserRole() {
         viewModel.getProfileForRole().observe(getViewLifecycleOwner(), r -> {});
         viewModel.getCurrentUserRole().observe(getViewLifecycleOwner(), role -> {
-            View btn = getView() != null ? getView().findViewById(R.id.btn_manage_users) : null;
-            if (btn != null) {
-                btn.setVisibility("ADMIN".equalsIgnoreCase(role) ? View.VISIBLE : View.GONE);
+            View root = getView();
+            if (root == null) return;
+            View btnManage = root.findViewById(R.id.btn_manage_users);
+            View fabCreate = root.findViewById(R.id.fab_create_inspection);
+            if (btnManage != null) {
+                btnManage.setVisibility("ADMIN".equalsIgnoreCase(role) ? View.VISIBLE : View.GONE);
+            }
+            if (fabCreate != null) {
+                boolean canCreate = "ADMIN".equalsIgnoreCase(role) || "INSPECTOR".equalsIgnoreCase(role);
+                fabCreate.setVisibility(canCreate ? View.VISIBLE : View.GONE);
             }
         });
     }

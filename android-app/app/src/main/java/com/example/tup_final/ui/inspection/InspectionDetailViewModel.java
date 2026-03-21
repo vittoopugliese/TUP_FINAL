@@ -60,6 +60,7 @@ public class InspectionDetailViewModel extends ViewModel {
     private final MediatorLiveData<Resource<AssignmentResponse>> addAssignmentResult = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<Void>> removeAssignmentResult = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<InspectionEntity>> signResult = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<java.io.File>> reportDownloadResult = new MediatorLiveData<>();
 
     private String currentInspectionId;
     /** Evita re-navegar a Locations cuando el usuario vuelve con back. */
@@ -429,6 +430,28 @@ public class InspectionDetailViewModel extends ViewModel {
     }
 
     /**
+     * Verifica si el botón "Generar reporte" debe mostrarse:
+     * - La inspección está firmada y en DONE_COMPLETED o DONE_FAILED.
+     * - El usuario actual es INSPECTOR u OPERATOR asignado.
+     */
+    public boolean shouldShowReportButton(InspectionEntity inv) {
+        if (inv == null || !inv.signed) return false;
+        if (inv.status == null || (!inv.status.equals("DONE_COMPLETED") && !inv.status.equals("DONE_FAILED"))) {
+            return false;
+        }
+        String currentEmail = prefs.getString("cached_email", "");
+        List<InspectionAssignmentEntity> inspectors = getInspectorAssignments();
+        List<InspectionAssignmentEntity> operators = getOperatorAssignments();
+        for (InspectionAssignmentEntity a : inspectors) {
+            if (a.userEmail != null && a.userEmail.equalsIgnoreCase(currentEmail)) return true;
+        }
+        for (InspectionAssignmentEntity a : operators) {
+            if (a.userEmail != null && a.userEmail.equalsIgnoreCase(currentEmail)) return true;
+        }
+        return false;
+    }
+
+    /**
      * Verifica si el botón de firma debe mostrarse:
      * - La inspección está IN_PROGRESS y NO está firmada.
      * - El usuario actual es un INSPECTOR asignado.
@@ -458,6 +481,7 @@ public class InspectionDetailViewModel extends ViewModel {
             boolean allDone = !tests.isEmpty();
             for (TestEntity t : tests) {
                 String st = t.status != null ? t.status.toUpperCase() : "PENDING";
+                if ("SUCCESS".equals(st)) st = "COMPLETED";  // normalizar legacy
                 if (!"COMPLETED".equals(st) && !"FAILED".equals(st)) {
                     allDone = false;
                     break;
@@ -517,5 +541,26 @@ public class InspectionDetailViewModel extends ViewModel {
     /** Nombre para mostrar del usuario actual (síncrono fallback). */
     public String getCurrentUserDisplayName() {
         return prefs.getString("cached_email", "Inspector");
+    }
+
+    public LiveData<Resource<java.io.File>> getReportDownloadResult() {
+        return reportDownloadResult;
+    }
+
+    public void downloadInspectionReport() {
+        if (currentInspectionId == null) {
+            reportDownloadResult.setValue(Resource.error("No se encontró la inspección."));
+            return;
+        }
+        reportDownloadResult.setValue(Resource.loading());
+        LiveData<Resource<java.io.File>> source =
+                inspectionRepository.downloadInspectionReport(currentInspectionId);
+        reportDownloadResult.addSource(source, resource -> {
+            if (resource == null) return;
+            reportDownloadResult.setValue(resource);
+            if (resource.getStatus() != Resource.Status.LOADING) {
+                reportDownloadResult.removeSource(source);
+            }
+        });
     }
 }

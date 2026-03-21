@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -55,8 +56,9 @@ public class InspectionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','INSPECTOR')")
     @Operation(summary = "Crear inspección",
-               description = "Crea una inspección building-wide con snapshot de locations, zones, devices y tests")
+               description = "Crea una inspección building-wide con snapshot de locations, zones, devices y tests. Solo ADMIN e INSPECTOR.")
     public ResponseEntity<CreateInspectionResponse> createInspection(
             @Valid @RequestBody CreateInspectionRequest request) {
         CreateInspectionResponse created = inspectionService.createInspection(request);

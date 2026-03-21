@@ -1,5 +1,7 @@
 package com.example.tup_final.ui.createinspection;
 
+import android.content.SharedPreferences;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -32,6 +34,7 @@ public class CreateInspectionViewModel extends ViewModel {
     public static final String[] TYPE_OPTIONS = {"Daily", "Weekly", "Monthly", "Annually"};
 
     private final CreateInspectionRepository repository;
+    private final SharedPreferences prefs;
 
     private final MediatorLiveData<Resource<List<BuildingListResponse>>> buildingsResult = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<BuildingSummaryResponse>> buildingSummaryResult = new MediatorLiveData<>();
@@ -46,10 +49,24 @@ public class CreateInspectionViewModel extends ViewModel {
     private final MutableLiveData<String> inspectorEmail = new MutableLiveData<>("");
 
     @Inject
-    public CreateInspectionViewModel(CreateInspectionRepository repository) {
+    public CreateInspectionViewModel(CreateInspectionRepository repository,
+                                     SharedPreferences prefs) {
         this.repository = repository;
+        this.prefs = prefs;
         loadBuildings();
         loadTemplates();
+        prefillInspectorWithCurrentUser();
+    }
+
+    /**
+     * Pre-llena el email del inspector con el usuario actual para que,
+     * al crear su inspección, quede asignado y la vea en la lista.
+     */
+    private void prefillInspectorWithCurrentUser() {
+        String email = prefs.getString("cached_email", "");
+        if (email != null && !email.trim().isEmpty()) {
+            inspectorEmail.setValue(email.trim());
+        }
     }
 
     public void loadBuildings() {

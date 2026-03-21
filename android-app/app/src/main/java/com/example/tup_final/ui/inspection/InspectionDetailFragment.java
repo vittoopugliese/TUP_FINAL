@@ -1,5 +1,7 @@
 package com.example.tup_final.ui.inspection;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -22,11 +25,14 @@ import com.example.tup_final.util.Resource;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+import static com.example.tup_final.util.Resource.Status.ERROR;
+import static com.example.tup_final.util.Resource.Status.LOADING;
 import static com.example.tup_final.util.Resource.Status.SUCCESS;
 
 @AndroidEntryPoint
@@ -70,12 +76,15 @@ public class InspectionDetailFragment extends Fragment {
         observeAssignments();
         observeStartResult();
         observeSignResult();
+        observeReportDownloadResult();
         observeStatusRefresh();
 
         binding.btnStartInspection.setOnClickListener(v ->
                 viewModel.startOrContinueInspection());
 
         binding.btnSignInspection.setOnClickListener(v -> onSignClicked());
+
+        binding.btnGenerateReport.setOnClickListener(v -> viewModel.downloadInspectionReport());
     }
 
     @Override
@@ -139,6 +148,7 @@ public class InspectionDetailFragment extends Fragment {
                     List<InspectionAssignmentEntity> inspectors = filterInspectors(resource.getData());
                     updateStartButton(inspRes.getData(), inspectors);
                     updateSignButton(inspRes.getData());
+                    updateReportButton(inspRes.getData());
                 }
             }
         });
@@ -253,6 +263,7 @@ public class InspectionDetailFragment extends Fragment {
         updateSignButton(inspection);
         updateSignedInfo(inspection);
         updateFinalResultCard(inspection);
+        updateReportButton(inspection);
     }
 
     private List<InspectionAssignmentEntity> filterInspectors(List<InspectionAssignmentEntity> assignments) {
@@ -332,6 +343,73 @@ public class InspectionDetailFragment extends Fragment {
         binding.textResultValue.setTextColor(strokeColor);
         binding.cardFinalResult.setStrokeColor(strokeColor);
     }
+
+    private void updateReportButton(InspectionEntity inspection) {
+        if (inspection == null) {
+            binding.btnGenerateReport.setVisibility(View.GONE);
+            return;
+        }
+        boolean show = viewModel.shouldShowReportButton(inspection);
+        binding.btnGenerateReport.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private void observeReportDownloadResult() {
+        viewModel.getReportDownloadResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null || binding == null) return;
+            switch (resource.getStatus()) {
+                case LOADING:
+                    binding.btnGenerateReport.setEnabled(false);
+                    Toast.makeText(requireContext(),
+                            getString(R.string.report_download_loading),
+                            Toast.LENGTH_SHORT).show();
+                    break;
+
+                case SUCCESS:
+                    binding.btnGenerateReport.setEnabled(true);
+                    File file = resource.getData();
+                    if (file != null && file.exists()) {
+                        openOrSharePdf(file);
+                        Toast.makeText(requireContext(),
+                                getString(R.string.report_download_success),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+
+                case ERROR:
+                    binding.btnGenerateReport.setEnabled(true);
+                    showValidationError(resource.getMessage() != null
+                            ? resource.getMessage()
+                            : getString(R.string.report_download_error));
+                    break;
+            }
+        });
+    }
+
+    private void openOrSharePdf(File pdfFile) {
+        if (!isAdded() || pdfFile == null || !pdfFile.exists()) return;
+        try {
+            Uri uri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider",
+                    pdfFile);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "application/pdf");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                intent.setAction(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                intent.setType("application/pdf");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(intent, getString(R.string.report_open_error)));
+            }
+        } catch (Exception e) {
+            Toast.makeText(requireContext(),
+                    getString(R.string.report_open_error),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void setStatusChipColor(String status) {
         int colorRes;
         if (status == null) {

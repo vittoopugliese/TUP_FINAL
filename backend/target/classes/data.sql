@@ -252,6 +252,29 @@ INSERT INTO observations (id, test_step_id, inspection_id, name, type, descripti
 ('obs-001', 'step-008', 'insp-002', 'Evidencia visual', 'REMARKS', 'Rociador alineado correctamente', NULL, 'photo-001', '2025-03-18 09:15:00', '2025-03-18 09:15:00'),
 ('obs-002', 'step-009', 'insp-002', 'Deficiencia detectada', 'DEFICIENCY', 'Presión baja - requiere revisión de bomba', 'def-001', 'photo-002', '2025-03-18 10:00:00', '2025-03-18 10:00:00');
 
+-- Deficiency type catalog (catálogo de tipos de deficiencia)
+INSERT INTO deficiency_types (id, code, name, description, category, enabled, sort_order) VALUES
+('dft-001', 'EXT_VENCIDO',     'Extintor vencido',                'El extintor superó su fecha de vencimiento o de mantenimiento',           'EXTINCIÓN',      TRUE, 1),
+('dft-002', 'EXT_DANADO',      'Extintor dañado o inutilizable',  'El extintor presenta daños físicos, corrosión o sello violado',            'EXTINCIÓN',      TRUE, 2),
+('dft-003', 'EXT_FALTANTE',    'Extintor faltante',               'No se encontró el extintor en el punto asignado',                          'EXTINCIÓN',      TRUE, 3),
+('dft-004', 'EXT_INCORRECTO',  'Tipo de extintor incorrecto',     'El agente extintor no corresponde al riesgo del área',                     'EXTINCIÓN',      TRUE, 4),
+('dft-005', 'SEN_FALTANTE',    'Señalización faltante',           'Falta cartel de salida, extintor, hidrante u otro elemento obligatorio',   'SEÑALIZACIÓN',   TRUE, 5),
+('dft-006', 'SEN_ILEGIBLE',    'Señalización ilegible o dañada',  'El cartel o señal está deteriorado y no cumple su función',                'SEÑALIZACIÓN',   TRUE, 6),
+('dft-007', 'SAL_OBSTRUIDA',   'Salida obstruida',                'La vía de evacuación o puerta de emergencia está bloqueada',               'EVACUACIÓN',     TRUE, 7),
+('dft-008', 'SAL_SIN_LUZ',     'Iluminación de emergencia falla', 'La luz de emergencia no enciende o tiene batería agotada',                 'EVACUACIÓN',     TRUE, 8),
+('dft-009', 'HID_DANADO',      'Hidrante dañado o sin presión',   'El hidrante presenta falla mecánica o la presión es insuficiente',         'HIDRANTES',      TRUE, 9),
+('dft-010', 'HID_OBSTRUIDO',   'Hidrante obstruido o inaccesible','El acceso al hidrante está bloqueado por objetos o construcciones',        'HIDRANTES',      TRUE, 10),
+('dft-011', 'ROC_OBSTRUIDO',   'Rociador obstruido',              'El rociador está cubierto por pintura, objetos colgantes u otros',         'ROCIADORES',     TRUE, 11),
+('dft-012', 'ROC_DANADO',      'Rociador dañado',                 'El rociador presenta corrosión, daño físico o activación previa',          'ROCIADORES',     TRUE, 12),
+('dft-013', 'ELECT_DEFECTO',   'Instalación eléctrica defectuosa','Cables expuestos, tablero sin tapa, cortocircuito potencial',              'ELÉCTRICO',      TRUE, 13),
+('dft-014', 'ELECT_SOBRE',     'Sobrecarga eléctrica',            'Exceso de equipos conectados o protecciones inadecuadas',                  'ELÉCTRICO',      TRUE, 14),
+('dft-015', 'DET_NO_FUNC',     'Detector no funciona',            'El detector de humo, calor o gas no responde a la prueba funcional',       'DETECCIÓN',      TRUE, 15),
+('dft-016', 'DET_FALTANTE',    'Detector faltante',               'Falta detector en zona reglamentaria',                                     'DETECCIÓN',      TRUE, 16),
+('dft-017', 'DOC_FALTANTE',    'Documentación faltante',          'Falta registro de mantenimiento, habilitación o plan de evacuación',       'DOCUMENTACIÓN',  TRUE, 17),
+('dft-018', 'DOC_VENCIDA',     'Documentación vencida',           'Los certificados o habilitaciones están fuera de vigencia',                'DOCUMENTACIÓN',  TRUE, 18),
+('dft-019', 'MANT_PENDIENTE',  'Mantenimiento pendiente',         'El equipo requiere servicio técnico sin haberse realizado en plazo',       'MANTENIMIENTO',  TRUE, 19),
+('dft-020', 'OTRO',            'Otro',                            'Deficiencia no clasificada en las categorías anteriores',                  'GENERAL',        TRUE, 20);
+
 -- Audit logs (user_id referencia admin creado en DataInitializer)
 INSERT INTO audit_logs (id, user_id, entity_type, entity_id, action, metadata_json, created_at) VALUES
 ('log-001', 'admin-001', 'Inspection', 'insp-001', 'CREATE', '{"ip": "192.168.1.10"}', '2025-03-10 09:00:00'),

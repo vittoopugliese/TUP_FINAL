@@ -203,6 +203,13 @@ Esta acción no se puede deshacer.\n\n¿Confirmar firma?</string>
     <string name="sign_signed_label">✓ Inspección firmada</string>
     <string name="sign_signed_by">Firmada por: %1$s</string>
     <string name="sign_signed_date">Fecha: %1$s</string>
+
+    <!-- Reporte PDF -->
+    <string name="btn_generate_report">Generar reporte</string>
+    <string name="report_download_loading">Generando reporte…</string>
+    <string name="report_download_success">Reporte descargado correctamente</string>
+    <string name="report_download_error">No se pudo descargar el reporte</string>
+    <string name="report_open_error">No hay aplicación para abrir PDFs</string>
     <string name="sign_error_not_inspector">Solo el Inspector asignado puede firmar esta inspección</string>
     <string name="sign_error_tests_pending">No se puede firmar: hay tests pendientes de completar</string>
 

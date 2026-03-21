@@ -9,6 +9,7 @@ import com.example.tup_final.data.remote.dto.SignInspectionRequest;
 
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -49,4 +50,7 @@ public interface InspectionApi {
 
     @GET("inspections/{id}/status")
     Call<InspectionListResponse> getInspectionStatus(@Path("id") String inspectionId);
+
+    @GET("inspections/{id}/report/pdf")
+    Call<ResponseBody> getInspectionReportPdf(@Path("id") String inspectionId);
 }

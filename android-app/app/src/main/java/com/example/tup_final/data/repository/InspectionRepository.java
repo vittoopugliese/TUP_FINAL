@@ -1,10 +1,14 @@
 package com.example.tup_final.data.repository;
 
+import android.content.Context;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
 import com.example.tup_final.data.entity.DeviceEntity;
 import com.example.tup_final.data.entity.InspectionAssignmentEntity;
@@ -18,6 +22,9 @@ import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.remote.dto.InspectionListResponse;
 import com.example.tup_final.data.remote.dto.SignInspectionRequest;
 import com.example.tup_final.util.Resource;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +37,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import okhttp3.ResponseBody;
 import retrofit2.Response;
 
 /**
@@ -43,16 +51,19 @@ public class InspectionRepository {
     private final InspectionDao inspectionDao;
     private final InspectionAssignmentDao assignmentDao;
     private final DeviceDao deviceDao;
+    private final Context appContext;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
     public InspectionRepository(InspectionApi inspectionApi, InspectionDao inspectionDao,
-                                InspectionAssignmentDao assignmentDao, DeviceDao deviceDao) {
+                                InspectionAssignmentDao assignmentDao, DeviceDao deviceDao,
+                                @ApplicationContext Context appContext) {
         this.inspectionApi = inspectionApi;
         this.inspectionDao = inspectionDao;
         this.assignmentDao = assignmentDao;
         this.deviceDao = deviceDao;
+        this.appContext = appContext;
     }
 
     /**
@@ -352,6 +363,43 @@ public class InspectionRepository {
             } catch (Exception e) {
                 mainHandler.post(() -> result.setValue(
                         Resource.error(e.getMessage() != null ? e.getMessage() : "Error de conexión")));
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Descarga el reporte PDF de la inspección y lo guarda localmente.
+     * Requiere inspección firmada y usuario asignado como inspector u operador.
+     */
+    public LiveData<Resource<File>> downloadInspectionReport(String inspectionId) {
+        MutableLiveData<Resource<File>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<ResponseBody> response = inspectionApi.getInspectionReportPdf(inspectionId).execute();
+                if (!response.isSuccessful() || response.body() == null) {
+                    String err = response.errorBody() != null ? response.errorBody().string() : "Error al descargar";
+                    mainHandler.post(() -> result.setValue(Resource.error(err != null ? err : "Error al descargar reporte")));
+                    return;
+                }
+                File dir = appContext.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+                if (dir == null) dir = appContext.getCacheDir();
+                File pdfFile = new File(dir, "inspection-" + inspectionId + ".pdf");
+                try (InputStream in = response.body().byteStream();
+                     FileOutputStream out = new FileOutputStream(pdfFile)) {
+                    byte[] buf = new byte[8192];
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                }
+                mainHandler.post(() -> result.setValue(Resource.success(pdfFile)));
+            } catch (Exception e) {
+                String msg = e.getMessage() != null ? e.getMessage() : "Error al descargar el reporte";
+                mainHandler.post(() -> result.setValue(Resource.error(msg)));
             }
         });
 

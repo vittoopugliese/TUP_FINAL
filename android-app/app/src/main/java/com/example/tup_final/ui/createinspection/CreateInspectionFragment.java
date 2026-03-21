@@ -79,6 +79,16 @@ public class CreateInspectionFragment extends Fragment {
         setupInspectorInput();
         setupButtons(view);
         observeData();
+        observeInspectorPrefill();
+    }
+
+    private void observeInspectorPrefill() {
+        viewModel.getInspectorEmail().observe(getViewLifecycleOwner(), email -> {
+            if (email != null && !email.isEmpty() && inputInspector != null
+                    && (inputInspector.getText() == null || inputInspector.getText().toString().isEmpty())) {
+                inputInspector.setText(email);
+            }
+        });
     }
 
     private void setupBuildingDropdown() {

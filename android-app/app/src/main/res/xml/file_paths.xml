@@ -4,4 +4,11 @@
     <external-files-path
         name="camera_photos"
         path="Pictures/" />
+    <!-- Reportes PDF descargados -->
+    <external-files-path
+        name="reports"
+        path="Documents/" />
+    <cache-path
+        name="report_cache"
+        path="." />
 </paths>
