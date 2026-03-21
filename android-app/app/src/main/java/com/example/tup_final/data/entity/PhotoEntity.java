@@ -35,6 +35,12 @@ public class PhotoEntity {
     public String timestamp;
     /** ID del inspector que capturó la foto. */
     public String inspectorId;
+    /** Nombre completo del inspector que capturó la foto. */
+    public String inspectorName;
+    /** Latitud GPS al momento de la captura (null si no disponible). */
+    public Double gpsLatitude;
+    /** Longitud GPS al momento de la captura (null si no disponible). */
+    public Double gpsLongitude;
     /** FK para el Step (para enlace automático). */
     public String stepId;
     /** FK para el Device (para enlace automático). */

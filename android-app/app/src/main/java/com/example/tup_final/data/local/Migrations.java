@@ -74,7 +74,17 @@ public final class Migrations {
         }
     };
 
-    public static final Migration[] ALL = { MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5 };
+    /** Adds gpsLatitude, gpsLongitude, and inspectorName columns to photos table. */
+    public static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE photos ADD COLUMN inspectorName TEXT");
+            db.execSQL("ALTER TABLE photos ADD COLUMN gpsLatitude REAL");
+            db.execSQL("ALTER TABLE photos ADD COLUMN gpsLongitude REAL");
+        }
+    };
+
+    public static final Migration[] ALL = { MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6 };
 
     private Migrations() {}
 }
