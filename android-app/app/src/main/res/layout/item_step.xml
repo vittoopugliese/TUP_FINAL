@@ -37,6 +37,22 @@
                 android:textSize="16sp"
                 tools:text="Simple Value Numeric" />
 
+            <TextView
+                android:id="@+id/text_step_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="FALLIDO"
+                tools:textColor="@color/step_status_failed_text" />
+
         </LinearLayout>
 
         <com.google.android.material.checkbox.MaterialCheckBox

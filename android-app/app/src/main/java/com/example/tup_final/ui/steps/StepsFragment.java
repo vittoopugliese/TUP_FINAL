@@ -187,6 +187,9 @@ public class StepsFragment extends Fragment {
                 ObservationEntity saved = resource.getData();
                 viewModel.appendObservationLocally(saved);
                 if ("DEFICIENCIES".equals(saved.type)) {
+                    // Marca el step como FAILED en Room inmediatamente (offline-safe).
+                    // refreshSteps() confirma luego el estado con la API.
+                    viewModel.markStepFailed(saved.testStepId);
                     viewModel.refreshSteps();
                 }
                 viewModel.clearSaveObsResult();
