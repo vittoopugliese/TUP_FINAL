@@ -10,6 +10,10 @@ import android.content.SharedPreferences;
 import com.example.tup_final.data.entity.DeviceEntity;
 import com.example.tup_final.data.entity.InspectionAssignmentEntity;
 import com.example.tup_final.data.entity.InspectionEntity;
+import com.example.tup_final.data.entity.TestEntity;
+import com.example.tup_final.data.entity.UserEntity;
+import com.example.tup_final.data.local.TestDao;
+import com.example.tup_final.data.local.UserDao;
 import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.repository.InspectionRepository;
 import com.example.tup_final.data.repository.InspectionTestsRepository;
@@ -34,6 +38,8 @@ public class InspectionDetailViewModel extends ViewModel {
 
     private final InspectionRepository inspectionRepository;
     private final InspectionTestsRepository inspectionTestsRepository;
+    private final TestDao testDao;
+    private final UserDao userDao;
     private final SharedPreferences prefs;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -52,6 +58,7 @@ public class InspectionDetailViewModel extends ViewModel {
     private final MediatorLiveData<Resource<List<InspectionAssignmentEntity>>> assignments = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<AssignmentResponse>> addAssignmentResult = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<Void>> removeAssignmentResult = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<InspectionEntity>> signResult = new MediatorLiveData<>();
 
     private String currentInspectionId;
     /** Evita re-navegar a Locations cuando el usuario vuelve con back. */
@@ -60,9 +67,13 @@ public class InspectionDetailViewModel extends ViewModel {
     @Inject
     public InspectionDetailViewModel(InspectionRepository inspectionRepository,
                                     InspectionTestsRepository inspectionTestsRepository,
+                                    TestDao testDao,
+                                    UserDao userDao,
                                     SharedPreferences prefs) {
         this.inspectionRepository = inspectionRepository;
         this.inspectionTestsRepository = inspectionTestsRepository;
+        this.testDao = testDao;
+        this.userDao = userDao;
         this.prefs = prefs;
     }
 
@@ -370,5 +381,102 @@ public class InspectionDetailViewModel extends ViewModel {
             if (ROLE_OPERATOR.equals(a.role)) result.add(a);
         }
         return result;
+    }
+
+    // ── Firma ─────────────────────────────────────────────────────────────────
+
+    public LiveData<Resource<InspectionEntity>> getSignResult() {
+        return signResult;
+    }
+
+    /**
+     * Verifica si el botón de firma debe mostrarse:
+     * - La inspección está IN_PROGRESS y NO está firmada.
+     * - El usuario actual es un INSPECTOR asignado.
+     */
+    public boolean shouldShowSignButton(InspectionEntity inv) {
+        if (inv == null || inv.signed) return false;
+        if (!"IN_PROGRESS".equals(inv.status)) return false;
+        String currentEmail = prefs.getString("cached_email", "");
+        List<InspectionAssignmentEntity> inspectors = getInspectorAssignments();
+        for (InspectionAssignmentEntity a : inspectors) {
+            if (a.userEmail != null && a.userEmail.equalsIgnoreCase(currentEmail)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Verifica localmente si todos los tests tienen status COMPLETED o FAILED
+     * (ninguno PENDING). Ejecuta en background y posta el resultado.
+     *
+     * @param callback true = listo para firmar, false = hay tests pendientes.
+     */
+    public void validateAllTestsDone(String inspectionId, java.util.function.Consumer<Boolean> callback) {
+        executor.execute(() -> {
+            List<TestEntity> tests = testDao.getByInspectionId(inspectionId);
+            boolean allDone = !tests.isEmpty();
+            for (TestEntity t : tests) {
+                String st = t.status != null ? t.status.toUpperCase() : "PENDING";
+                if (!"COMPLETED".equals(st) && !"FAILED".equals(st)) {
+                    allDone = false;
+                    break;
+                }
+            }
+            final boolean result = allDone;
+            mainHandler.post(() -> callback.accept(result));
+        });
+    }
+
+    /**
+     * Firma la inspección a través del repositorio (backend + Room).
+     */
+    public void signInspection(String signerName) {
+        if (currentInspectionId == null) {
+            signResult.setValue(Resource.error("No se encontró la inspección."));
+            return;
+        }
+        signResult.setValue(Resource.loading());
+        LiveData<Resource<InspectionEntity>> source =
+                inspectionRepository.signInspection(currentInspectionId, signerName);
+
+        signResult.addSource(source, resource -> {
+            if (resource == null) return;
+            signResult.setValue(resource);
+            if (resource.getStatus() != Resource.Status.LOADING) {
+                signResult.removeSource(source);
+            }
+        });
+    }
+
+    /**
+     * Resuelve el nombre completo del firmante desde UserDao (background).
+     * Primero intenta UserEntity.getFullName(); si no está, usa el email.
+     */
+    public void resolveSignerName(java.util.function.Consumer<String> callback) {
+        executor.execute(() -> {
+            String userId = prefs.getString("cached_user_id", "");
+            String fallback = prefs.getString("cached_email", "Inspector");
+            if (!userId.isEmpty()) {
+                try {
+                    UserEntity user = userDao.getById(userId);
+                    if (user != null) {
+                        String full = user.getFullName();
+                        if (full != null && !full.trim().isEmpty()) {
+                            final String name = full.trim();
+                            mainHandler.post(() -> callback.accept(name));
+                            return;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+            mainHandler.post(() -> callback.accept(fallback));
+        });
+    }
+
+    /** Nombre para mostrar del usuario actual (síncrono fallback). */
+    public String getCurrentUserDisplayName() {
+        return prefs.getString("cached_email", "Inspector");
     }
 }

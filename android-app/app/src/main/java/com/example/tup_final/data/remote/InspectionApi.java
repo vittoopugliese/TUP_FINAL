@@ -5,6 +5,7 @@ import com.example.tup_final.data.remote.dto.AssignmentResponse;
 import com.example.tup_final.data.remote.dto.CreateInspectionRequest;
 import com.example.tup_final.data.remote.dto.CreateInspectionResponse;
 import com.example.tup_final.data.remote.dto.InspectionListResponse;
+import com.example.tup_final.data.remote.dto.SignInspectionRequest;
 
 import java.util.List;
 
@@ -41,4 +42,8 @@ public interface InspectionApi {
 
     @DELETE("inspections/{id}/assignments/{email}")
     Call<Void> removeAssignment(@Path("id") String inspectionId, @Path("email") String email);
+
+    @POST("inspections/{id}/sign")
+    Call<InspectionListResponse> signInspection(@Path("id") String inspectionId,
+                                                 @Body SignInspectionRequest request);
 }

@@ -67,24 +67,93 @@
         android:id="@+id/view_pager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/btn_start_inspection"
+        app:layout_constraintBottom_toTopOf="@id/card_signed_info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tab_layout" />
+
+    <!-- Firma info: se muestra cuando la inspección está firmada -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_signed_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="4dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="1dp"
+        app:cardBackgroundColor="#E8F5E9"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/btn_start_inspection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/text_signed_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sign_signed_label"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#1B5E20" />
+
+            <TextView
+                android:id="@+id/text_signed_by"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/text_signed_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- Start / Continue button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_start_inspection"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/btn_start_inspection"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:cornerRadius="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_sign_inspection"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Sign inspection button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_sign_inspection"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/btn_sign_inspection"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:icon="@android:drawable/ic_menu_edit"
+        app:cornerRadius="12dp"
+        app:backgroundTint="#1B5E20"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_start_inspection" />
 
     <!-- ProgressBar -->
     <ProgressBar
