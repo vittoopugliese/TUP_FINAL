@@ -15,6 +15,7 @@ public class InspectionListResponse {
     private String status;
     private Instant scheduledDate;
     private String type;
+    private String result;
     private String signer;
     private boolean signed;
     private Instant signDate;
@@ -30,6 +31,12 @@ public class InspectionListResponse {
         this.status = status;
         this.scheduledDate = scheduledDate;
         this.type = type;
+    }
+
+    public InspectionListResponse(String id, String buildingId, String buildingName, String locationId,
+                                   String status, Instant scheduledDate, String type, String result) {
+        this(id, buildingId, buildingName, locationId, status, scheduledDate, type);
+        this.result = result;
     }
 
     public String getId() { return id; }
@@ -52,6 +59,9 @@ public class InspectionListResponse {
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
+
+    public String getResult() { return result; }
+    public void setResult(String result) { this.result = result; }
 
     public String getSigner() { return signer; }
     public void setSigner(String signer) { this.signer = signer; }

@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -69,11 +70,20 @@ public class InspectionDetailFragment extends Fragment {
         observeAssignments();
         observeStartResult();
         observeSignResult();
+        observeStatusRefresh();
 
         binding.btnStartInspection.setOnClickListener(v ->
                 viewModel.startOrContinueInspection());
 
         binding.btnSignInspection.setOnClickListener(v -> onSignClicked());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (viewModel != null && viewModel.getCurrentInspectionId() != null) {
+            viewModel.refreshInspectionStatus();
+        }
     }
 
     private void setupTabs() {
@@ -223,6 +233,14 @@ public class InspectionDetailFragment extends Fragment {
 
     // ── Bind UI ──────────────────────────────────────────────────────────────
 
+    private void observeStatusRefresh() {
+        viewModel.getStatusRefreshResult().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null || binding == null) return;
+            if (resource.getStatus() == SUCCESS && resource.getData() != null) {
+                bindHeader(resource.getData());
+            }
+        });
+    }
     private void bindHeader(InspectionEntity inspection) {
         binding.chipStatus.setText(inspection.status != null ? inspection.status : "—");
         setStatusChipColor(inspection.status);
@@ -234,6 +252,7 @@ public class InspectionDetailFragment extends Fragment {
         updateStartButton(inspection, inspectors);
         updateSignButton(inspection);
         updateSignedInfo(inspection);
+        updateFinalResultCard(inspection);
     }
 
     private List<InspectionAssignmentEntity> filterInspectors(List<InspectionAssignmentEntity> assignments) {
@@ -284,6 +303,35 @@ public class InspectionDetailFragment extends Fragment {
                 inspection.signDate != null ? inspection.signDate : "—"));
     }
 
+    private void updateFinalResultCard(InspectionEntity inspection) {
+        if (inspection == null || inspection.status == null) {
+            binding.cardFinalResult.setVisibility(View.GONE);
+            return;
+        }
+
+        boolean isDone = inspection.status.startsWith("DONE");
+        if (!isDone) {
+            binding.cardFinalResult.setVisibility(View.GONE);
+            return;
+        }
+
+        binding.cardFinalResult.setVisibility(View.VISIBLE);
+
+        boolean isApproved = "DONE_COMPLETED".equals(inspection.status);
+
+        binding.textResultValue.setText(
+                isApproved ? R.string.final_result_approved : R.string.final_result_failed);
+        binding.textResultDetail.setText(
+                isApproved ? R.string.final_result_detail_approved : R.string.final_result_detail_failed);
+
+        int colorRes = isApproved
+                ? android.R.color.holo_green_dark
+                : android.R.color.holo_red_dark;
+        int strokeColor = ContextCompat.getColor(requireContext(), colorRes);
+
+        binding.textResultValue.setTextColor(strokeColor);
+        binding.cardFinalResult.setStrokeColor(strokeColor);
+    }
     private void setStatusChipColor(String status) {
         int colorRes;
         if (status == null) {

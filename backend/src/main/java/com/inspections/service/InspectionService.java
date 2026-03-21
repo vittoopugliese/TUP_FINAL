@@ -248,6 +248,55 @@ public class InspectionService {
         return mapToListResponse(inspection);
     }
 
+    /**
+     * Obtiene el status actual de una inspección, recalculándolo desde sus tests.
+     * Devuelve un InspectionListResponse con el estado actualizado.
+     */
+    public InspectionListResponse getInspectionStatus(String inspectionId) {
+        Inspection inspection = inspectionRepository.findById(inspectionId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Inspección no encontrada: " + inspectionId));
+        return mapToListResponse(inspection);
+    }
+
+    /**
+     * Recalcula forzadamente el estado de una inspección a partir de sus tests.
+     * Útil cuando se quiere sincronizar el estado sin pasar por un step update.
+     */
+    @Transactional
+    public InspectionListResponse recalculateAndGetStatus(String inspectionId) {
+        Inspection inspection = inspectionRepository.findById(inspectionId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Inspección no encontrada: " + inspectionId));
+
+        if (!"IN_PROGRESS".equals(inspection.getStatus())) {
+            return mapToListResponse(inspection);
+        }
+
+        List<InspectionTest> tests = testRepository.findByInspectionId(inspectionId);
+        if (tests.isEmpty()) {
+            return mapToListResponse(inspection);
+        }
+
+        boolean anyPending = false;
+        boolean anyFailed  = false;
+        for (InspectionTest t : tests) {
+            String st = t.getStatus() != null ? t.getStatus() : "PENDING";
+            if ("SUCCESS".equals(st)) st = "COMPLETED";
+            if ("PENDING".equals(st)) { anyPending = true; break; }
+            if ("FAILED".equals(st)) anyFailed = true;
+        }
+
+        if (!anyPending) {
+            Instant now = Instant.now();
+            inspection.setStatus(anyFailed ? "DONE_FAILED" : "DONE_COMPLETED");
+            inspection.setResult(anyFailed ? "FAILED" : "SUCCESS");
+            inspection.setUpdatedAt(now);
+            inspectionRepository.save(inspection);
+        }
+
+        return mapToListResponse(inspection);
+    }
     private void validateAssignments(List<AssignmentRequest> assignments) {
         if (assignments == null || assignments.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one INSPECTOR is required");
@@ -360,7 +409,8 @@ public class InspectionService {
                 inspection.getLocationId(),
                 inspection.getStatus(),
                 inspection.getScheduledDate(),
-                inspection.getType()
+                inspection.getType(),
+                inspection.getResult()
         );
         dto.setSigner(inspection.getSigner());
         dto.setSigned(inspection.isSigned());

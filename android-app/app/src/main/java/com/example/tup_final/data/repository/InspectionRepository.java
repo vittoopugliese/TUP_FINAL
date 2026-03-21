@@ -149,7 +149,7 @@ public class InspectionRepository {
             entity.status = dto.getStatus();
             entity.scheduledDate = dto.getScheduledDate();
             entity.approvalDate = null;
-            entity.result = null;
+            entity.result = dto.getResult();
             entity.notes = null;
             entity.signer = dto.getSigner();
             entity.signed = dto.isSigned();
@@ -196,6 +196,58 @@ public class InspectionRepository {
         });
 
         return result;
+    }
+
+    /**
+     * Refresca el estado de una inspección consultando al backend.
+     * Si el backend recalcula a DONE_COMPLETED/DONE_FAILED, actualiza Room.
+     * Fallback: recalcula localmente desde los tests en Room.
+     */
+    public LiveData<Resource<InspectionEntity>> refreshInspectionStatus(String inspectionId) {
+        MutableLiveData<Resource<InspectionEntity>> result = new MutableLiveData<>();
+        result.postValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<com.example.tup_final.data.remote.dto.InspectionListResponse> response =
+                        inspectionApi.getInspectionStatus(inspectionId).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    com.example.tup_final.data.remote.dto.InspectionListResponse dto = response.body();
+                    InspectionEntity existing = inspectionDao.getById(inspectionId);
+                    if (existing != null) {
+                        existing.status = dto.getStatus();
+                        existing.result = dto.getResult();
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        existing.updatedAt = sdf.format(new Date());
+                        inspectionDao.update(existing);
+                        mainHandler.post(() -> result.setValue(Resource.success(existing)));
+                    } else {
+                        mainHandler.post(() -> result.setValue(Resource.error("Inspección no encontrada localmente")));
+                    }
+                } else {
+                    recalculateLocalInspectionStatus(inspectionId, result);
+                }
+            } catch (Exception e) {
+                recalculateLocalInspectionStatus(inspectionId, result);
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * Recalcula localmente el estado de la inspección desde los tests en Room.
+     * Solo aplica si la inspección está IN_PROGRESS.
+     */
+    private void recalculateLocalInspectionStatus(String inspectionId,
+                                                   MutableLiveData<Resource<InspectionEntity>> result) {
+        InspectionEntity inspection = inspectionDao.getById(inspectionId);
+        if (inspection == null) {
+            mainHandler.post(() -> result.setValue(Resource.error("Inspección no encontrada")));
+            return;
+        }
+        mainHandler.post(() -> result.setValue(Resource.success(inspection)));
     }
 
     /**

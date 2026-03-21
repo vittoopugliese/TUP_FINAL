@@ -82,4 +82,15 @@ public class InspectionController {
                 id, request.getSignerName(), email);
         return ResponseEntity.ok(signed);
     }
+
+    @GetMapping("/{id}/status")
+    @Operation(summary = "Obtener estado de inspección",
+               description = "Recalcula el estado de la inspección a partir de los tests y retorna el resultado. "
+                       + "Si todos los tests son COMPLETED → DONE_COMPLETED. "
+                       + "Si algún test es FAILED → DONE_FAILED. "
+                       + "Si quedan tests PENDING → permanece IN_PROGRESS.")
+    public ResponseEntity<InspectionListResponse> getInspectionStatus(@PathVariable String id) {
+        InspectionListResponse status = inspectionService.recalculateAndGetStatus(id);
+        return ResponseEntity.ok(status);
+    }
 }

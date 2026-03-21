@@ -54,6 +54,7 @@ public class InspectionDetailViewModel extends ViewModel {
     private MutableLiveData<Resource<InspectionEntity>> inspection;
     private final MediatorLiveData<Resource<List<DeviceEntity>>> devices = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<InspectionEntity>> startResult = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<InspectionEntity>> statusRefreshResult = new MediatorLiveData<>();
 
     private final MediatorLiveData<Resource<List<InspectionAssignmentEntity>>> assignments = new MediatorLiveData<>();
     private final MediatorLiveData<Resource<AssignmentResponse>> addAssignmentResult = new MediatorLiveData<>();
@@ -371,6 +372,44 @@ public class InspectionDetailViewModel extends ViewModel {
             if (ROLE_INSPECTOR.equals(a.role)) result.add(a);
         }
         return result;
+    }
+
+    public LiveData<Resource<InspectionEntity>> getStatusRefreshResult() {
+        return statusRefreshResult;
+    }
+
+    /**
+     * Refresca el estado de la inspección (consulta backend para recalcular
+     * DONE_COMPLETED / DONE_FAILED). Actualiza también la LiveData de inspección
+     * para que la UI se actualice automáticamente.
+     */
+    public void refreshInspectionStatus() {
+        if (currentInspectionId == null) return;
+        LiveData<Resource<InspectionEntity>> source =
+                inspectionRepository.refreshInspectionStatus(currentInspectionId);
+        statusRefreshResult.addSource(source, resource -> {
+            statusRefreshResult.setValue(resource);
+            if (resource != null && resource.getStatus() != Resource.Status.LOADING) {
+                statusRefreshResult.removeSource(source);
+                if (resource.getStatus() == Resource.Status.SUCCESS && resource.getData() != null) {
+                    if (inspection != null) {
+                        inspection.postValue(Resource.success(resource.getData()));
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Determina el label del resultado final basado en el status.
+     */
+    public String getResultLabel(InspectionEntity inspection) {
+        if (inspection == null || inspection.status == null) return null;
+        switch (inspection.status) {
+            case "DONE_COMPLETED": return "APROBADA";
+            case "DONE_FAILED":    return "REPROBADA";
+            default:               return null;
+        }
     }
 
     public List<InspectionAssignmentEntity> getOperatorAssignments() {

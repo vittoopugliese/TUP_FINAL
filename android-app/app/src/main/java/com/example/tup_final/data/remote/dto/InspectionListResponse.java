@@ -16,6 +16,7 @@ public class InspectionListResponse {
     private String signer;
     private boolean signed;
     private String signDate;
+    private String result;
 
     public InspectionListResponse() {}
 
@@ -48,4 +49,7 @@ public class InspectionListResponse {
 
     public String getSignDate() { return signDate; }
     public void setSignDate(String signDate) { this.signDate = signDate; }
+
+    public String getResult() { return result; }
+    public void setResult(String result) { this.result = result; }
 }
