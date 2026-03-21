@@ -28,8 +28,8 @@ import retrofit2.Response;
 
 /**
  * Repositorio de observaciones. Estrategia local-first:
- * 1. Si hay foto, persiste un PhotoEntity completo con sus metadatos (GPS, timestamp, inspector).
- * 2. Guarda ObservationEntity en Room con referencia al photoId.
+ * 1. Si hay foto, persiste PhotoEntity con metadatos completos (GPS, timestamp, inspector).
+ * 2. Guarda ObservationEntity en Room con deficiencyTypeId y referencia al photoId.
  * 3. Intenta sincronizar con la API en background.
  */
 @Singleton
@@ -45,24 +45,26 @@ public class ObservationRepository {
     public ObservationRepository(ObservationDao observationDao,
                                  ObservationApi observationApi,
                                  PhotoRepository photoRepository) {
-        this.observationDao   = observationDao;
-        this.observationApi   = observationApi;
-        this.photoRepository  = photoRepository;
+        this.observationDao  = observationDao;
+        this.observationApi  = observationApi;
+        this.photoRepository = photoRepository;
     }
 
     /**
      * Guarda la observación localmente y luego intenta sincronizar con la API.
      *
-     * @param stepId       ID del step al que se adjunta.
-     * @param inspectionId ID de la inspección (para indexar).
-     * @param type         "REMARKS" (Observación) o "DEFICIENCIES" (Deficiencia).
-     * @param description  Texto obligatorio.
-     * @param photo        Metadatos de la foto capturada (null si no aplica).
-     * @param result       LiveData al que se publica el resultado.
+     * @param stepId           ID del step al que se adjunta.
+     * @param inspectionId     ID de la inspección (para indexar).
+     * @param type             "REMARKS" (Observación) o "DEFICIENCIES" (Deficiencia).
+     * @param description      Texto obligatorio.
+     * @param photo            Metadatos de la foto (null si no aplica).
+     * @param deficiencyTypeId ID del tipo de deficiencia (null para REMARKS).
+     * @param result           LiveData al que se publica el resultado.
      */
     public void saveObservation(String stepId, String inspectionId,
                                 String type, String description,
                                 @Nullable PhotoMetadata photo,
+                                @Nullable String deficiencyTypeId,
                                 MutableLiveData<Resource<ObservationEntity>> result) {
         result.setValue(Resource.loading());
 
@@ -78,15 +80,16 @@ public class ObservationRepository {
                 }
 
                 ObservationEntity entity = new ObservationEntity();
-                entity.id            = id;
-                entity.testStepId    = stepId;
-                entity.inspectionId  = inspectionId;
-                entity.type          = type;
-                entity.description   = description;
-                entity.mediaId       = mediaId;
-                entity.name          = "DEFICIENCIES".equals(type) ? "Deficiencia" : "Observación";
-                entity.createdAt     = now;
-                entity.updatedAt     = now;
+                entity.id               = id;
+                entity.testStepId       = stepId;
+                entity.inspectionId     = inspectionId;
+                entity.type             = type;
+                entity.description      = description;
+                entity.mediaId          = mediaId;
+                entity.deficiencyTypeId = deficiencyTypeId;
+                entity.name             = "DEFICIENCIES".equals(type) ? "Deficiencia" : "Observación";
+                entity.createdAt        = now;
+                entity.updatedAt        = now;
 
                 observationDao.insert(entity);
 
@@ -142,12 +145,12 @@ public class ObservationRepository {
     private void trySyncToApi(ObservationEntity entity) {
         try {
             CreateObservationRequest req = new CreateObservationRequest(
-                    entity.type, entity.description, entity.inspectionId, entity.mediaId);
+                    entity.type, entity.description,
+                    entity.inspectionId, entity.mediaId, entity.deficiencyTypeId);
             Response<ObservationResponse> response =
                     observationApi.createObservation(entity.testStepId, req).execute();
             if (response.isSuccessful() && response.body() != null) {
-                ObservationEntity synced = toEntity(response.body());
-                observationDao.insert(synced);
+                observationDao.insert(toEntity(response.body()));
             }
         } catch (Exception ignored) {
             // Se sincronizará en la próxima oportunidad (SyncWorker)
@@ -156,16 +159,16 @@ public class ObservationRepository {
 
     private ObservationEntity toEntity(ObservationResponse dto) {
         ObservationEntity e = new ObservationEntity();
-        e.id             = dto.id;
-        e.testStepId     = dto.testStepId;
-        e.inspectionId   = dto.inspectionId;
-        e.name           = dto.name;
-        e.type           = dto.type;
-        e.description    = dto.description;
+        e.id               = dto.id;
+        e.testStepId       = dto.testStepId;
+        e.inspectionId     = dto.inspectionId;
+        e.name             = dto.name;
+        e.type             = dto.type;
+        e.description      = dto.description;
         e.deficiencyTypeId = dto.deficiencyTypeId;
-        e.mediaId        = dto.mediaId;
-        e.createdAt      = dto.createdAt;
-        e.updatedAt      = dto.updatedAt;
+        e.mediaId          = dto.mediaId;
+        e.createdAt        = dto.createdAt;
+        e.updatedAt        = dto.updatedAt;
         return e;
     }
 }

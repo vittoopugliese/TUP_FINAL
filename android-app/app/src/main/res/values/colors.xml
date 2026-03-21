@@ -10,11 +10,11 @@
     <color name="deficiency_warning_text">#B71C1C</color>
     <color name="design_default_color_error">#B00020</color>
 
-    <!-- Step status badge -->
-    <color name="step_status_pending_bg">#E0E0E0</color>
-    <color name="step_status_pending_text">#616161</color>
-    <color name="step_status_completed_bg">#E8F5E9</color>
-    <color name="step_status_completed_text">#2E7D32</color>
-    <color name="step_status_failed_bg">#FFEBEE</color>
+    <!-- Step status badges -->
+    <color name="step_status_failed_bg">#FFCDD2</color>
     <color name="step_status_failed_text">#B71C1C</color>
+    <color name="step_status_completed_bg">#C8E6C9</color>
+    <color name="step_status_completed_text">#1B5E20</color>
+    <color name="step_status_pending_bg">#FFF9C4</color>
+    <color name="step_status_pending_text">#F57F17</color>
 </resources>

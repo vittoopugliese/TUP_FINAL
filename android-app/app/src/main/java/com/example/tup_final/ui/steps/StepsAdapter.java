@@ -16,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -164,6 +165,7 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
         final TextView textStepIndex;
         final TextView textStepName;
         final TextView textStepStatus;
+        final com.google.android.material.card.MaterialCardView cardStep;
         final MaterialCheckBox checkNa;
         final ViewGroup containerInput;
         final LayoutInflater inflater;
@@ -173,16 +175,16 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
 
         StepViewHolder(@NonNull View itemView) {
             super(itemView);
-            cardStep = (MaterialCardView) itemView;
-            textStepIndex = itemView.findViewById(R.id.text_step_index);
-            textStepName = itemView.findViewById(R.id.text_step_name);
-            textStepStatus = itemView.findViewById(R.id.text_step_status);
-            checkNa = itemView.findViewById(R.id.check_step_na);
-            containerInput = itemView.findViewById(R.id.container_step_input);
+            textStepIndex         = itemView.findViewById(R.id.text_step_index);
+            textStepName          = itemView.findViewById(R.id.text_step_name);
+            textStepStatus        = itemView.findViewById(R.id.text_step_status);
+            cardStep              = (com.google.android.material.card.MaterialCardView) itemView;
+            checkNa               = itemView.findViewById(R.id.check_step_na);
+            containerInput        = itemView.findViewById(R.id.container_step_input);
             containerObservations = itemView.findViewById(R.id.container_observations);
-            dividerObservations = itemView.findViewById(R.id.divider_observations);
-            btnAddObservation = itemView.findViewById(R.id.btn_add_observation);
-            inflater = LayoutInflater.from(itemView.getContext());
+            dividerObservations   = itemView.findViewById(R.id.divider_observations);
+            btnAddObservation     = itemView.findViewById(R.id.btn_add_observation);
+            inflater              = LayoutInflater.from(itemView.getContext());
         }
 
         void bind(StepUiModel step, List<ObservationEntity> observations,
@@ -221,57 +223,45 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
             });
         }
 
-        /**
-         * Renders the step status badge (PENDING / COMPLETED / FAILED) in the header row.
-         * Only shown for FAILED and COMPLETED states; hidden for PENDING to keep the UI clean.
-         */
-        void bindStatusBadge(String status) {
-            if (status == null) status = StepConstants.STATUS_PENDING;
-            int badgeBg;
-            int badgeText;
-            int strokeColor;
-            int strokeWidth;
-            String label;
+        /** Muestra el badge de estado (FAILED/COMPLETED/PENDING) en la cabecera del step. */
+        void bindStatusBadge(@Nullable String status) {
+            android.content.Context ctx = itemView.getContext();
+            int dpToPx1 = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, 1f, ctx.getResources().getDisplayMetrics());
 
-            switch (status) {
-                case StepConstants.STATUS_FAILED:
-                    badgeBg     = itemView.getContext().getColor(R.color.step_status_failed_bg);
-                    badgeText   = itemView.getContext().getColor(R.color.step_status_failed_text);
-                    strokeColor = itemView.getContext().getColor(R.color.step_status_failed_text);
-                    strokeWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1.5f,
-                            itemView.getContext().getResources().getDisplayMetrics());
-                    label = "⚠ FALLIDO";
-                    break;
-                case StepConstants.STATUS_COMPLETED:
-                    badgeBg     = itemView.getContext().getColor(R.color.step_status_completed_bg);
-                    badgeText   = itemView.getContext().getColor(R.color.step_status_completed_text);
-                    strokeColor = itemView.getContext().getColor(R.color.step_status_completed_text);
-                    strokeWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1f,
-                            itemView.getContext().getResources().getDisplayMetrics());
-                    label = "✓ OK";
-                    break;
-                default:
-                    // PENDING: hide badge, no stroke
-                    textStepStatus.setVisibility(View.GONE);
-                    cardStep.setStrokeWidth(0);
-                    return;
+            if ("FAILED".equals(status)) {
+                textStepStatus.setVisibility(View.VISIBLE);
+                textStepStatus.setText("⚠ FALLIDO");
+                int bgColor  = ctx.getResources().getColor(R.color.step_status_failed_bg,  null);
+                int txtColor = ctx.getResources().getColor(R.color.step_status_failed_text, null);
+                textStepStatus.setTextColor(txtColor);
+                GradientDrawable badge = new GradientDrawable();
+                badge.setShape(GradientDrawable.RECTANGLE);
+                badge.setCornerRadius(12f * dpToPx1);
+                badge.setColor(bgColor);
+                textStepStatus.setBackground(badge);
+                cardStep.setStrokeColor(ctx.getResources().getColor(R.color.step_status_failed_bg, null));
+                cardStep.setStrokeWidth(2 * dpToPx1);
+
+            } else if ("COMPLETED".equals(status)) {
+                textStepStatus.setVisibility(View.VISIBLE);
+                textStepStatus.setText("✓ OK");
+                int bgColor  = ctx.getResources().getColor(R.color.step_status_completed_bg,  null);
+                int txtColor = ctx.getResources().getColor(R.color.step_status_completed_text, null);
+                textStepStatus.setTextColor(txtColor);
+                GradientDrawable badge = new GradientDrawable();
+                badge.setShape(GradientDrawable.RECTANGLE);
+                badge.setCornerRadius(12f * dpToPx1);
+                badge.setColor(bgColor);
+                textStepStatus.setBackground(badge);
+                cardStep.setStrokeColor(ctx.getResources().getColor(R.color.step_status_completed_bg, null));
+                cardStep.setStrokeWidth(2 * dpToPx1);
+
+            } else {
+                textStepStatus.setVisibility(View.GONE);
+                cardStep.setStrokeColor(android.graphics.Color.TRANSPARENT);
+                cardStep.setStrokeWidth(0);
             }
-
-            // Badge background with rounded corners
-            GradientDrawable badgeBgDrawable = new GradientDrawable();
-            float cornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f,
-                    itemView.getContext().getResources().getDisplayMetrics());
-            badgeBgDrawable.setCornerRadius(cornerRadius);
-            badgeBgDrawable.setColor(badgeBg);
-
-            textStepStatus.setBackground(badgeBgDrawable);
-            textStepStatus.setTextColor(badgeText);
-            textStepStatus.setText(label);
-            textStepStatus.setVisibility(View.VISIBLE);
-
-            // Card stroke to reinforce the status
-            cardStep.setStrokeColor(strokeColor);
-            cardStep.setStrokeWidth(strokeWidth);
         }
 
         // Called for partial updates (PAYLOAD_OBS) — does NOT touch input views.

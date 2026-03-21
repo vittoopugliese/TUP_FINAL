@@ -74,9 +74,30 @@
             app:chipIcon="@android:drawable/ic_dialog_alert"
             android:textColor="@color/deficiency_warning_text"
             android:textSize="12sp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="8dp"
             android:visibility="gone"
             tools:visibility="visible" />
+
+        <!-- Selector de tipo de deficiencia (solo visible cuando se elige DEFICIENCIAS) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_deficiency_type"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/obs_deficiency_type_hint"
+            app:errorEnabled="true"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/spinner_deficiency_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                tools:text="Extintor vencido" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Descripción -->
         <com.google.android.material.textfield.TextInputLayout
@@ -139,109 +160,72 @@
 
         </FrameLayout>
 
-        <!-- Tarjeta de metadatos de la foto (visible cuando hay foto adjunta) -->
+        <!-- Tarjeta de metadatos (timestamp, GPS, inspector) — aparece tras elegir foto -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_photo_metadata"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:visibility="gone"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="?attr/colorSurfaceVariant"
+            app:cardElevation="1dp"
             app:cardCornerRadius="8dp"
+            app:cardBackgroundColor="#F5F5F5"
+            android:visibility="gone"
             tools:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="12dp">
+                android:padding="10dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/meta_section_title"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:layout_marginBottom="8dp" />
-
-                <!-- Fila: Timestamp -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="6dp">
+                    android:gravity="center_vertical">
 
                     <TextView
-                        android:layout_width="24dp"
-                        android:layout_height="wrap_content"
-                        android:text="📅"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/text_meta_timestamp"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textSize="13sp"
-                        tools:text="17/03/2026 14:30:22" />
-
-                </LinearLayout>
-
-                <!-- Fila: GPS -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="6dp">
-
-                    <TextView
-                        android:layout_width="24dp"
-                        android:layout_height="wrap_content"
-                        android:text="📍"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/text_meta_gps"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="13sp"
-                        tools:text="-31.416700°, -64.183500°" />
+                        android:text="Metadatos de la foto"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="#555555" />
 
                     <ProgressBar
                         android:id="@+id/progress_gps"
                         style="?android:attr/progressBarStyleSmall"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:visibility="gone"
                         tools:visibility="visible" />
 
                 </LinearLayout>
 
-                <!-- Fila: Inspector -->
-                <LinearLayout
+                <TextView
+                    android:id="@+id/text_meta_timestamp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:textSize="11sp"
+                    android:layout_marginTop="4dp"
+                    tools:text="📅 17/03/2026 14:32:00" />
 
-                    <TextView
-                        android:layout_width="24dp"
-                        android:layout_height="wrap_content"
-                        android:text="👤"
-                        android:textSize="14sp" />
+                <TextView
+                    android:id="@+id/text_meta_gps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:layout_marginTop="2dp"
+                    tools:text="📍 -34.603684, -58.381559" />
 
-                    <TextView
-                        android:id="@+id/text_meta_inspector"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="13sp"
-                        tools:text="Juan García" />
-
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/text_meta_inspector"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:layout_marginTop="2dp"
+                    tools:text="👤 Juan Pérez" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

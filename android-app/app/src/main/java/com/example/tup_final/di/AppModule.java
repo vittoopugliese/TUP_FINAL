@@ -11,6 +11,7 @@ import com.example.tup_final.data.remote.InspectionApi;
 import com.example.tup_final.data.remote.InspectionTemplateApi;
 import com.example.tup_final.data.remote.LocationApi;
 import com.example.tup_final.data.remote.DeviceTypesApi;
+import com.example.tup_final.data.remote.DeficiencyTypeApi;
 import com.example.tup_final.data.remote.ObservationApi;
 import com.example.tup_final.data.remote.StepsApi;
 import com.example.tup_final.data.remote.ZonesApi;
@@ -131,6 +132,12 @@ public final class AppModule {
     @Singleton
     public ObservationApi provideObservationApi(Retrofit retrofit) {
         return retrofit.create(ObservationApi.class);
+    }
+
+    @Provides
+    @Singleton
+    public DeficiencyTypeApi provideDeficiencyTypeApi(Retrofit retrofit) {
+        return retrofit.create(DeficiencyTypeApi.class);
     }
 
     @Provides

@@ -74,7 +74,7 @@ public final class Migrations {
         }
     };
 
-    /** Adds gpsLatitude, gpsLongitude, and inspectorName columns to photos table. */
+    /** Adds GPS and inspector metadata columns to photos table. */
     public static final Migration MIGRATION_5_6 = new Migration(5, 6) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase db) {
@@ -84,7 +84,26 @@ public final class Migrations {
         }
     };
 
-    public static final Migration[] ALL = { MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6 };
+    /** Creates the deficiency_types catalog table. */
+    public static final Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS deficiency_types (" +
+                    "id TEXT PRIMARY KEY NOT NULL, " +
+                    "code TEXT, " +
+                    "name TEXT, " +
+                    "description TEXT, " +
+                    "category TEXT, " +
+                    "sortOrder INTEGER NOT NULL DEFAULT 0)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_deficiency_types_category ON deficiency_types(category)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_deficiency_types_code ON deficiency_types(code)");
+        }
+    };
+
+    public static final Migration[] ALL = {
+        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
+        MIGRATION_5_6, MIGRATION_6_7
+    };
 
     private Migrations() {}
 }

@@ -1,5 +1,6 @@
 package com.example.tup_final.ui.steps;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -63,18 +64,20 @@ public class StepsViewModel extends ViewModel {
      * @param inspectionId  ID de la inspección (para indexar).
      * @param type          "REMARKS" (Observación) o "DEFICIENCIES" (Deficiencia).
      * @param description   Texto obligatorio.
-     * @param photo         Metadatos de la foto (null si no aplica).
+     * @param photo            Metadatos de la foto (null si no aplica).
+     * @param deficiencyTypeId ID del tipo de deficiencia (null para REMARKS).
      */
     public void saveObservation(String stepId, String inspectionId,
-                                String type, String description, @Nullable PhotoMetadata photo) {
+                                String type, String description,
+                                @Nullable PhotoMetadata photo,
+                                @Nullable String deficiencyTypeId) {
         observationRepository.saveObservation(
-                stepId, inspectionId, type, description, photo, saveObsResult);
+                stepId, inspectionId, type, description, photo, deficiencyTypeId, saveObsResult);
     }
 
     /**
      * Marca un step como FAILED en Room de forma inmediata y republica la lista
-     * de steps al LiveData para que la UI se refresque sin esperar a la API.
-     * Debe llamarse cuando se guarda una observación de tipo DEFICIENCIES.
+     * de steps al LiveData. Debe llamarse cuando se guarda una DEFICIENCIA.
      */
     public void markStepFailed(String stepId) {
         repository.markStepFailed(stepId, stepsData);
