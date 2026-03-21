@@ -44,7 +44,7 @@ public interface UserApi {
 
     /**
      * PATCH /api/users/{id}/role
-     * Actualiza el rol de un usuario (solo INSPECTOR o SUPERVISOR).
+     * Actualiza el rol de un usuario (solo INSPECTOR u OPERATOR).
      */
     @PATCH("users/{id}/role")
     Call<UserProfileResponse> updateUserRole(@Path("id") String userId, @Body UpdateRoleRequest request);

@@ -79,7 +79,7 @@ public class InspectionDetailViewModel extends ViewModel {
         this.prefs = prefs;
     }
 
-    /** Rol del usuario actual (SUPERVISOR, ADMIN, INSPECTOR). Solo SUPERVISOR/ADMIN pueden remover al inspector. */
+    /** Rol del usuario actual (ADMIN, INSPECTOR, OPERATOR). Solo ADMIN puede remover al inspector. */
     public String getCurrentUserRole() {
         return prefs.getString(PREFS_ROLE, "INSPECTOR");
     }

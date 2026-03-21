@@ -64,10 +64,10 @@ public class UserService {
 
     /**
      * Actualiza el rol de un usuario.
-     * Solo permite INSPECTOR o SUPERVISOR. No se puede asignar ADMIN.
+     * Solo permite INSPECTOR u OPERATOR. No se puede asignar ADMIN.
      *
      * @param userId  UUID del usuario
-     * @param newRole Nuevo rol (INSPECTOR o SUPERVISOR)
+     * @param newRole Nuevo rol (INSPECTOR u OPERATOR)
      * @return UserProfileResponse con el perfil actualizado
      */
     public UserProfileResponse updateUserRole(String userId, String newRole) {
@@ -75,8 +75,8 @@ public class UserService {
             throw new IllegalArgumentException("No se puede asignar rol ADMIN");
         }
         String normalized = newRole != null ? newRole.toUpperCase() : null;
-        if (!"INSPECTOR".equals(normalized) && !"SUPERVISOR".equals(normalized)) {
-            throw new IllegalArgumentException("Rol inválido. Solo INSPECTOR o SUPERVISOR.");
+        if (!"INSPECTOR".equals(normalized) && !"OPERATOR".equals(normalized)) {
+            throw new IllegalArgumentException("Rol inválido. Solo INSPECTOR u OPERATOR.");
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException(

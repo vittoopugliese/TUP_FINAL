@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Endpoints de inspecciones.
  *
- * GET /api/inspections – Lista inspecciones (filtradas por rol: SUPERVISOR=todas, INSPECTOR=solo asignadas)
+ * GET /api/inspections – Lista inspecciones (filtradas por rol: ADMIN=todas, INSPECTOR/OPERATOR=solo asignadas)
  * POST /api/inspections – Crea una inspección building-wide
  */
 @RestController
@@ -37,7 +37,7 @@ public class InspectionController {
 
     @GetMapping
     @Operation(summary = "Listar inspecciones",
-               description = "SUPERVISOR/ADMIN: todas. INSPECTOR: solo asignadas. Requiere autenticación.")
+               description = "ADMIN: todas. INSPECTOR/OPERATOR: solo asignadas. Requiere autenticación.")
     public ResponseEntity<?> getInspections() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null

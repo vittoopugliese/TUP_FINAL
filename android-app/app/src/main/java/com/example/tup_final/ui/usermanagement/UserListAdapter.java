@@ -17,7 +17,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 /**
  * Adapter para la lista de usuarios en la pantalla de gestión (admin).
- * Muestra nombre, email y dropdown de rol (INSPECTOR/SUPERVISOR).
+ * Muestra nombre, email y dropdown de rol (INSPECTOR/OPERATOR).
  * Los usuarios ADMIN muestran el rol como texto readonly.
  */
 public class UserListAdapter extends ListAdapter<UserProfileResponse, UserListAdapter.ViewHolder> {
@@ -27,10 +27,10 @@ public class UserListAdapter extends ListAdapter<UserProfileResponse, UserListAd
     }
 
     private static final String ROLE_INSPECTOR = "INSPECTOR";
-    private static final String ROLE_SUPERVISOR = "SUPERVISOR";
+    private static final String ROLE_OPERATOR = "OPERATOR";
     private static final String ROLE_ADMIN = "ADMIN";
 
-    private static final String[] EDITABLE_ROLES = {ROLE_INSPECTOR, ROLE_SUPERVISOR};
+    private static final String[] EDITABLE_ROLES = {ROLE_INSPECTOR, ROLE_OPERATOR};
 
     private OnRoleChangeListener roleChangeListener;
 

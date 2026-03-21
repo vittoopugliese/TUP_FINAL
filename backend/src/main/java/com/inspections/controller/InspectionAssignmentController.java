@@ -57,7 +57,7 @@ public class InspectionAssignmentController {
     }
 
     @DeleteMapping("/{inspectionId}/assignments/{email}")
-    @Operation(summary = "Remover asignacion", description = "Solo SUPERVISOR/ADMIN pueden remover al inspector. INSPECTOR no puede remover asignaciones de inspector.")
+    @Operation(summary = "Remover asignacion", description = "Solo ADMIN puede remover al inspector. INSPECTOR puede remover operadores.")
     public ResponseEntity<?> removeAssignment(@PathVariable String inspectionId, @PathVariable String email) {
         try {
             String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);

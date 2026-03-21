@@ -13,14 +13,14 @@ import java.time.Instant;
 
 /**
  * Inicializador de datos para desarrollo.
- * Crea usuarios de prueba por rol (admin, supervisor, inspector).
+ * Crea usuarios de prueba por rol (admin, inspector, operador).
  * Las inspecciones y demás datos vienen de data.sql.
  *
  * Credenciales de prueba:
- * - ADMIN:      admin@inspections.com     / Admin1234!
- * - SUPERVISOR: supervisor@inspections.com / Supervisor123
- * - INSPECTOR:  inspector@example.com    / Inspector123 (asignado a todas las inspecciones)
- * - INSPECTOR:  inspector2@example.com   / Inspector123 (sin asignaciones)
+ * - ADMIN:     admin@inspections.com      / Admin1234!
+ * - OPERATOR:  operador@inspections.com   / Operador123
+ * - INSPECTOR: inspector@example.com     / Inspector123 (asignado a todas las inspecciones)
+ * - INSPECTOR: inspector2@example.com    / Inspector123 (sin asignaciones)
  */
 @Configuration
 public class DataInitializer {
@@ -28,7 +28,7 @@ public class DataInitializer {
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     public static final String ADMIN_USER_ID = "admin-001";
-    public static final String SUPERVISOR_USER_ID = "supervisor-001";
+    public static final String OPERATOR_USER_ID = "operator-001";
     public static final String INSPECTOR_USER_ID = "inspector-001";
     public static final String INSPECTOR2_USER_ID = "inspector-002";
 
@@ -40,8 +40,8 @@ public class DataInitializer {
                     ADMIN_USER_ID, "admin@inspections.com", "Admin1234!",
                     "Admin", "Inspector", "ADMIN");
             createUserIfNotExists(userRepository, passwordEncoder,
-                    SUPERVISOR_USER_ID, "supervisor@inspections.com", "Supervisor123",
-                    "Supervisor", "Sistema", "SUPERVISOR");
+                    OPERATOR_USER_ID, "operador@inspections.com", "Operador123",
+                    "Operador", "Sistema", "OPERATOR");
             createUserIfNotExists(userRepository, passwordEncoder,
                     INSPECTOR_USER_ID, "inspector@example.com", "Inspector123",
                     "María", "García", "INSPECTOR");

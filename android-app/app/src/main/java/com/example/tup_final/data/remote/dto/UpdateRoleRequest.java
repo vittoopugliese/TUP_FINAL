@@ -2,7 +2,7 @@ package com.example.tup_final.data.remote.dto;
 
 /**
  * DTO para actualizar el rol de un usuario.
- * Coincide con UpdateRoleRequest del backend: { "role": "INSPECTOR" | "SUPERVISOR" }.
+ * Coincide con UpdateRoleRequest del backend: { "role": "INSPECTOR" | "OPERATOR" }.
  */
 public class UpdateRoleRequest {
 

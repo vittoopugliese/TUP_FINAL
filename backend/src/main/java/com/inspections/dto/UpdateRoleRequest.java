@@ -5,12 +5,12 @@ import jakarta.validation.constraints.Pattern;
 
 /**
  * DTO para actualizar el rol de un usuario.
- * Solo permite INSPECTOR o SUPERVISOR.
+ * Solo permite INSPECTOR u OPERATOR.
  */
 public class UpdateRoleRequest {
 
     @NotBlank(message = "El rol es requerido")
-    @Pattern(regexp = "INSPECTOR|SUPERVISOR", message = "Rol inválido. Solo INSPECTOR o SUPERVISOR.")
+    @Pattern(regexp = "INSPECTOR|OPERATOR", message = "Rol inválido. Solo INSPECTOR u OPERATOR.")
     private String role;
 
     public UpdateRoleRequest() {}

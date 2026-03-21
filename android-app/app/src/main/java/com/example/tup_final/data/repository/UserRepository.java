@@ -212,7 +212,7 @@ public class UserRepository {
     }
 
     /**
-     * Actualiza el rol de un usuario (solo INSPECTOR o SUPERVISOR).
+     * Actualiza el rol de un usuario (solo INSPECTOR u OPERATOR).
      */
     public LiveData<Resource<UserProfileResponse>> updateUserRole(String userId, String newRole) {
         MutableLiveData<Resource<UserProfileResponse>> result = new MutableLiveData<>();

@@ -51,7 +51,7 @@ public class UserController {
 
     @PatchMapping("/{id}/role")
     @Operation(summary = "Actualizar rol de usuario",
-               description = "Actualiza el rol de un usuario. Solo INSPECTOR o SUPERVISOR.")
+               description = "Actualiza el rol de un usuario. Solo INSPECTOR u OPERATOR.")
     public ResponseEntity<?> updateUserRole(
             @PathVariable String id,
             @Valid @RequestBody UpdateRoleRequest request) {

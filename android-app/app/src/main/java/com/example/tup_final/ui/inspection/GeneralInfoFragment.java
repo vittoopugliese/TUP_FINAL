@@ -71,7 +71,7 @@ public class GeneralInfoFragment extends Fragment {
         String currentRole = viewModel.getCurrentUserRole();
         inspectorAdapter = new AssignmentAdapter(
                 this::onRemoveInspectorClicked,
-                a -> !ROLE_INSPECTOR.equals(currentRole));
+                a -> "ADMIN".equalsIgnoreCase(currentRole));
         binding.recyclerInspector.setAdapter(inspectorAdapter);
 
         binding.btnAddInspector.setOnClickListener(v -> addInspector());

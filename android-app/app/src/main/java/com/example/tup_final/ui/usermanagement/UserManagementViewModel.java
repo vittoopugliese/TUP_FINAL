@@ -22,7 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 /**
  * ViewModel para la pantalla de gestión de usuarios (admin).
- * Lista usuarios y permite cambiar roles entre INSPECTOR y SUPERVISOR.
+ * Lista usuarios y permite cambiar roles entre INSPECTOR y OPERATOR.
  * Verifica que el usuario actual sea ADMIN antes de mostrar contenido.
  */
 @HiltViewModel
@@ -102,7 +102,7 @@ public class UserManagementViewModel extends ViewModel {
      * Actualiza el rol de un usuario.
      *
      * @param userId  ID del usuario
-     * @param newRole INSPECTOR o SUPERVISOR
+     * @param newRole INSPECTOR u OPERATOR
      */
     public void updateUserRole(String userId, String newRole) {
         LiveData<Resource<UserProfileResponse>> source = userRepository.updateUserRole(userId, newRole);

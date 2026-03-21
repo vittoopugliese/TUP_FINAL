@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * Servicio para asignaciones de inspectores y operadores a inspecciones.
  * Reglas: max 1 INSPECTOR por inspeccion, operadores ilimitados.
- * Se permite remover al unico inspector para que el supervisor pueda reasignar.
+ * Se permite remover al único inspector solo a ADMIN (para reasignar).
  */
 @Service
 public class InspectionAssignmentService {
@@ -86,8 +86,8 @@ public class InspectionAssignmentService {
         if (toRemove == null) {
             return;
         }
-        if (ROLE_INSPECTOR.equals(toRemove.getRole()) && "INSPECTOR".equals(role)) {
-            throw new IllegalArgumentException("Solo el supervisor puede remover al inspector asignado");
+        if (ROLE_INSPECTOR.equals(toRemove.getRole()) && !"ADMIN".equals(role)) {
+            throw new IllegalArgumentException("Solo el administrador puede remover al inspector asignado");
         }
         assignmentRepository.delete(toRemove);
     }

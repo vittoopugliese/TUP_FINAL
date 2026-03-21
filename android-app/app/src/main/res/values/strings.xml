@@ -80,7 +80,6 @@
     <string name="user_management_empty">No hay usuarios.</string>
     <string name="user_management_role_updated">Rol actualizado.</string>
     <string name="btn_manage_users">Gestionar usuarios</string>
-    <string name="role_supervisor">Supervisor</string>
     <string name="role_admin">Administrador</string>
 
     <!-- Inspections filter -->
@@ -224,7 +223,7 @@ Esta acción no se puede deshacer.\n\n¿Confirmar firma?</string>
     <string name="assignment_cannot_remove_inspector">No se puede remover al único Inspector</string>
     <string name="assignment_invalid_email">Ingrese un email válido</string>
     <string name="assignment_duplicate">Este email ya está asignado</string>
-    <string name="assignment_only_supervisor_can_remove">Solo el supervisor puede remover al inspector asignado</string>
+    <string name="assignment_only_admin_can_remove">Solo el administrador puede remover al inspector asignado</string>
     <string name="assignment_adding">Agregando inspector…</string>
     <string name="assignment_added_success">Inspector agregado correctamente</string>
     <string name="assignment_removing">Removiendo asignación…</string>

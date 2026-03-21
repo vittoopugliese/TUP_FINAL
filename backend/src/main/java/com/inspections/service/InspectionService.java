@@ -66,16 +66,16 @@ public class InspectionService {
 
     /**
      * Obtiene las inspecciones según el rol del usuario autenticado.
-     * - ADMIN, SUPERVISOR: ven todas las inspecciones.
-     * - INSPECTOR: solo las inspecciones donde está asignado.
+     * - ADMIN: ve todas las inspecciones.
+     * - INSPECTOR, OPERATOR: solo las inspecciones donde está asignado.
      *
-     * @param userEmail Email del usuario autenticado (no null para INSPECTOR)
-     * @param userRole  Rol del usuario: ADMIN, SUPERVISOR o INSPECTOR
+     * @param userEmail Email del usuario autenticado (no null para INSPECTOR/OPERATOR)
+     * @param userRole  Rol del usuario: ADMIN, INSPECTOR u OPERATOR
      * @return Lista filtrada de InspectionListResponse
      */
     public List<InspectionListResponse> getInspectionsForCurrentUser(String userEmail, String userRole) {
         String role = (userRole != null ? userRole : "").toUpperCase();
-        if ("ADMIN".equals(role) || "SUPERVISOR".equals(role)) {
+        if ("ADMIN".equals(role)) {
             return inspectionRepository.findAll().stream()
                     .map(this::mapToListResponse)
                     .collect(Collectors.toList());
