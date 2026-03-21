@@ -240,14 +240,8 @@ public class StepsRepository {
 
         if (anyPending) return;
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String now = sdf.format(new Date());
-
-        inspection.status = anyFailed ? "DONE_FAILED" : "DONE_COMPLETED";
-        inspection.result = anyFailed ? "FAILED" : "SUCCESS";
-        inspection.updatedAt = now;
-        inspectionDao.update(inspection);
+        // Do NOT persist DONE_* here. Inspection stays IN_PROGRESS until signInspection.
+        // T5.3.3: only signInspection may transition to DONE_COMPLETED / DONE_FAILED.
     }
 
     private String computeTestStatus(List<StepEntity> steps) {

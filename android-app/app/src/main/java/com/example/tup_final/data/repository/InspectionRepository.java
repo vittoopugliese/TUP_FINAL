@@ -200,8 +200,8 @@ public class InspectionRepository {
 
     /**
      * Refresca el estado de una inspección consultando al backend.
-     * Si el backend recalcula a DONE_COMPLETED/DONE_FAILED, actualiza Room.
-     * Fallback: recalcula localmente desde los tests en Room.
+     * Actualiza status y result en Room según la respuesta (signed=true tras firmar).
+     * Fallback cuando la API falla: devuelve la inspección actual de Room.
      */
     public LiveData<Resource<InspectionEntity>> refreshInspectionStatus(String inspectionId) {
         MutableLiveData<Resource<InspectionEntity>> result = new MutableLiveData<>();
@@ -237,8 +237,8 @@ public class InspectionRepository {
     }
 
     /**
-     * Recalcula localmente el estado de la inspección desde los tests en Room.
-     * Solo aplica si la inspección está IN_PROGRESS.
+     * Fallback cuando la API falla: devuelve la inspección actual de Room sin modificar.
+     * No se recalcula status/result localmente: DONE_* solo se persiste al firmar vía API.
      */
     private void recalculateLocalInspectionStatus(String inspectionId,
                                                    MutableLiveData<Resource<InspectionEntity>> result) {

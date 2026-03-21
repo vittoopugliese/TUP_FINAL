@@ -167,11 +167,8 @@ public class StepService {
 
         if (anyPending) return; // remains IN_PROGRESS
 
-        Instant now = Instant.now();
-        inspection.setStatus(anyFailed ? INSPECTION_DONE_FAILED : INSPECTION_DONE_COMPLETED);
-        inspection.setResult(anyFailed ? "FAILED" : "SUCCESS");
-        inspection.setUpdatedAt(now);
-        inspectionRepository.save(inspection);
+        // Do NOT persist DONE_* here. Inspection stays IN_PROGRESS until signInspection.
+        // T5.3.3: only signInspection may transition to DONE_COMPLETED / DONE_FAILED.
     }
 
     private String normalizeStatus(String status) {

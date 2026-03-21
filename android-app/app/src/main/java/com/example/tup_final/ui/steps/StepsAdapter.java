@@ -165,7 +165,6 @@ public class StepsAdapter extends ListAdapter<StepUiModel, RecyclerView.ViewHold
         final TextView textStepIndex;
         final TextView textStepName;
         final TextView textStepStatus;
-        final com.google.android.material.card.MaterialCardView cardStep;
         final MaterialCheckBox checkNa;
         final ViewGroup containerInput;
         final LayoutInflater inflater;

@@ -15,13 +15,13 @@ public interface DeficiencyTypeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<DeficiencyTypeEntity> types);
 
-    @Query("SELECT * FROM deficiency_types ORDER BY sort_order ASC, name ASC")
+    @Query("SELECT * FROM deficiency_types ORDER BY sortOrder ASC, name ASC")
     List<DeficiencyTypeEntity> getAll();
 
     @Query("SELECT * FROM deficiency_types WHERE id = :id")
     DeficiencyTypeEntity getById(String id);
 
-    @Query("SELECT * FROM deficiency_types WHERE category = :category ORDER BY sort_order ASC")
+    @Query("SELECT * FROM deficiency_types WHERE category = :category ORDER BY sortOrder ASC")
     List<DeficiencyTypeEntity> getByCategory(String category);
 
     @Query("DELETE FROM deficiency_types")

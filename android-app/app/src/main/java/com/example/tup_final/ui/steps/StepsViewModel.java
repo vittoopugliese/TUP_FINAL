@@ -6,8 +6,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import androidx.annotation.Nullable;
-
 import com.example.tup_final.data.entity.ObservationEntity;
 import com.example.tup_final.data.repository.ObservationRepository;
 import com.example.tup_final.data.repository.StepsRepository;

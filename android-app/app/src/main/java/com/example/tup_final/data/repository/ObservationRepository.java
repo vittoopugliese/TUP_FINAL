@@ -150,7 +150,9 @@ public class ObservationRepository {
             Response<ObservationResponse> response =
                     observationApi.createObservation(entity.testStepId, req).execute();
             if (response.isSuccessful() && response.body() != null) {
-                observationDao.insert(toEntity(response.body()));
+                ObservationEntity serverEntity = toEntity(response.body());
+                observationDao.deleteById(entity.id);
+                observationDao.insert(serverEntity);
             }
         } catch (Exception ignored) {
             // Se sincronizará en la próxima oportunidad (SyncWorker)

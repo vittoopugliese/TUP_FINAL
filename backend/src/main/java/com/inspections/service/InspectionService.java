@@ -287,14 +287,8 @@ public class InspectionService {
             if ("FAILED".equals(st)) anyFailed = true;
         }
 
-        if (!anyPending) {
-            Instant now = Instant.now();
-            inspection.setStatus(anyFailed ? "DONE_FAILED" : "DONE_COMPLETED");
-            inspection.setResult(anyFailed ? "FAILED" : "SUCCESS");
-            inspection.setUpdatedAt(now);
-            inspectionRepository.save(inspection);
-        }
-
+        // Do NOT persist DONE_* here. Inspection stays IN_PROGRESS until signInspection.
+        // T5.3.3: only signInspection may transition to DONE_COMPLETED / DONE_FAILED.
         return mapToListResponse(inspection);
     }
     private void validateAssignments(List<AssignmentRequest> assignments) {

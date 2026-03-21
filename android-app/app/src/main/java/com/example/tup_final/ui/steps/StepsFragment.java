@@ -19,8 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.tup_final.R;
 import com.example.tup_final.data.entity.ObservationEntity;
 import com.example.tup_final.ui.inspectiontests.InspectionTestsFragment;
-
-import java.util.Map;
 import com.example.tup_final.util.Resource;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;

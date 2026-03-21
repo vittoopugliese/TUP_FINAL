@@ -48,13 +48,5 @@ public class PhotoEntity {
     /** Marca de tiempo de creación (ISO string). */
     public String createdAt;
 
-    // ── Metadata de captura (agregado en versión 6) ────────────────────────────
-    /** Nombre completo del inspector que capturó la foto. */
-    public String inspectorName;
-    /** Latitud GPS en el momento de la captura. Null si sin permiso/señal. */
-    public Double gpsLatitude;
-    /** Longitud GPS en el momento de la captura. Null si sin permiso/señal. */
-    public Double gpsLongitude;
-
     public PhotoEntity() {}
 }
