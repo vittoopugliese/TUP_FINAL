@@ -43,7 +43,7 @@ public class PhotoRepository {
         entity.localPath    = metadata.localPath;
         entity.timestamp    = metadata.timestamp;
         entity.inspectorId  = metadata.inspectorId;
-        entity.inspectorName = metadata.inspectorName;
+        entity.inspectorName= metadata.inspectorName;
         entity.gpsLatitude  = metadata.latitude;
         entity.gpsLongitude = metadata.longitude;
         entity.stepId       = stepId;

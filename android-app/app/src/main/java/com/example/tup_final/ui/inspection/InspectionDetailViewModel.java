@@ -439,9 +439,21 @@ public class InspectionDetailViewModel extends ViewModel {
         if (inv.status == null || (!inv.status.equals("DONE_COMPLETED") && !inv.status.equals("DONE_FAILED"))) {
             return false;
         }
+        String currentRole = getCurrentUserRole();
+        boolean isAllowedRole = ROLE_INSPECTOR.equalsIgnoreCase(currentRole)
+                || ROLE_OPERATOR.equalsIgnoreCase(currentRole);
+        if (!isAllowedRole) {
+            return false;
+        }
         String currentEmail = prefs.getString("cached_email", "");
         List<InspectionAssignmentEntity> inspectors = getInspectorAssignments();
         List<InspectionAssignmentEntity> operators = getOperatorAssignments();
+        boolean hasAssignmentsLoaded = !inspectors.isEmpty() || !operators.isEmpty();
+        // La API valida nuevamente que el usuario esté asignado; si la cache local de
+        // asignaciones llega vacía, no ocultamos el botón para inspectores/operadores.
+        if (!hasAssignmentsLoaded) {
+            return true;
+        }
         for (InspectionAssignmentEntity a : inspectors) {
             if (a.userEmail != null && a.userEmail.equalsIgnoreCase(currentEmail)) return true;
         }
