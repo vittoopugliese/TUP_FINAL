@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.example.tup_final.data.entity.InspectionEntity;
@@ -16,8 +17,22 @@ public interface InspectionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(InspectionEntity inspection);
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long insertOrIgnore(InspectionEntity inspection);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<InspectionEntity> inspections);
+
+    @Transaction
+    default void upsert(InspectionEntity inspection) {
+        long id = insertOrIgnore(inspection);
+        if (id == -1L) {
+            update(inspection);
+        }
+    }
+
+    @Query("DELETE FROM inspections WHERE id NOT IN (:ids)")
+    void deleteNotIn(List<String> ids);
 
     @Query("SELECT * FROM inspections WHERE id = :id")
     InspectionEntity getById(String id);

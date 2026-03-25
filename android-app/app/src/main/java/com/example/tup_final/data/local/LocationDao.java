@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.example.tup_final.data.entity.LocationEntity;
@@ -16,8 +17,19 @@ public interface LocationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(LocationEntity location);
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long insertOrIgnore(LocationEntity location);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<LocationEntity> locations);
+
+    @Transaction
+    default void upsert(LocationEntity location) {
+        long id = insertOrIgnore(location);
+        if (id == -1L) {
+            update(location);
+        }
+    }
 
     @Query("SELECT * FROM locations WHERE id = :id")
     LocationEntity getById(String id);

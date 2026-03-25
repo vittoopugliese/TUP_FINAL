@@ -98,7 +98,8 @@ public class LocationAdapter extends ListAdapter<LocationWithStats, LocationAdap
         void bind(LocationWithStats item) {
             textName.setText(item.location.name != null ? item.location.name : "-");
             textDescription.setText(item.location.details != null ? item.location.details : "-");
-            textTests.setText(itemView.getContext().getString(R.string.location_tests_count, item.testCount));
+            textTests.setText(itemView.getContext().getString(
+                    R.string.location_tests_progress, item.completedTestCount, item.testCount));
 
             int color = item.isComplete() ? COLOR_COMPLETE : COLOR_INCOMPLETE;
             GradientDrawable drawable = new GradientDrawable();

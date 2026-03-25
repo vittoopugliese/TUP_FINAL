@@ -44,6 +44,9 @@ public interface InspectionApi {
     @DELETE("inspections/{id}/assignments/{email}")
     Call<Void> removeAssignment(@Path("id") String inspectionId, @Path("email") String email);
 
+    @POST("inspections/{id}/start")
+    Call<InspectionListResponse> startInspection(@Path("id") String inspectionId);
+
     @POST("inspections/{id}/sign")
     Call<InspectionListResponse> signInspection(@Path("id") String inspectionId,
                                                  @Body SignInspectionRequest request);

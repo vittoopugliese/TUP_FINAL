@@ -393,7 +393,7 @@ public class InspectionTestsRepository {
                                String locationId, String inspectionId, String buildingId) {
         for (ZoneWithDevicesResponse z : dtos) {
             ZoneEntity ze = new ZoneEntity(z.getId(), z.getLocationId(), z.getName(), z.getDetails());
-            zoneDao.insert(ze);
+            zoneDao.upsert(ze);
 
             if (z.getDevices() != null) {
                 for (DeviceWithTestsResponse d : z.getDevices()) {
@@ -406,7 +406,7 @@ public class InspectionTestsRepository {
                     de.deviceCategory = d.getDeviceCategory();
                     de.deviceSerialNumber = d.getDeviceSerialNumber();
                     de.enabled = d.isEnabled();
-                    deviceDao.insert(de);
+                    deviceDao.upsert(de);
 
                     if (d.getTests() != null) {
                         for (TestResponse t : d.getTests()) {
@@ -418,7 +418,7 @@ public class InspectionTestsRepository {
                                 te.name = t.getName();
                                 te.description = t.getDescription();
                                 te.status = t.getStatus();
-                                testDao.insert(te);
+                                testDao.upsert(te);
                             }
                         }
                     }
