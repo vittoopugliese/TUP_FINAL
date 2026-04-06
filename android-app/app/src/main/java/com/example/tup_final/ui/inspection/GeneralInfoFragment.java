@@ -37,6 +37,9 @@ public class GeneralInfoFragment extends Fragment {
     private AssignmentAdapter inspectorAdapter;
     private AssignmentAdapter operatorAdapter;
 
+    /** Solo ADMIN e INSPECTOR pueden agregar asignaciones (coincide con el backend). */
+    private boolean canAddAssignments;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -52,7 +55,11 @@ public class GeneralInfoFragment extends Fragment {
 
         viewModel = new ViewModelProvider(requireParentFragment()).get(InspectionDetailViewModel.class);
 
-        setupInspectorSection();
+        String currentRole = viewModel.getCurrentUserRole();
+        canAddAssignments = "ADMIN".equalsIgnoreCase(currentRole)
+                || "INSPECTOR".equalsIgnoreCase(currentRole);
+
+        setupInspectorSection(currentRole);
         setupOperatorsSection();
         setupTextWatchers();
         observeAssignments();
@@ -66,15 +73,18 @@ public class GeneralInfoFragment extends Fragment {
         });
     }
 
-    private void setupInspectorSection() {
+    private void setupInspectorSection(String currentRole) {
         binding.recyclerInspector.setLayoutManager(new LinearLayoutManager(requireContext()));
-        String currentRole = viewModel.getCurrentUserRole();
         inspectorAdapter = new AssignmentAdapter(
                 this::onRemoveInspectorClicked,
                 a -> "ADMIN".equalsIgnoreCase(currentRole));
         binding.recyclerInspector.setAdapter(inspectorAdapter);
 
         binding.btnAddInspector.setOnClickListener(v -> addInspector());
+        if (!canAddAssignments) {
+            binding.layoutInspectorEmail.setVisibility(View.GONE);
+            binding.btnAddInspector.setVisibility(View.GONE);
+        }
     }
 
     private void setupOperatorsSection() {
@@ -85,6 +95,10 @@ public class GeneralInfoFragment extends Fragment {
         binding.recyclerOperators.setAdapter(operatorAdapter);
 
         binding.btnAddOperator.setOnClickListener(v -> addOperator());
+        if (!canAddAssignments) {
+            binding.layoutOperatorEmail.setVisibility(View.GONE);
+            binding.btnAddOperator.setVisibility(View.GONE);
+        }
     }
 
     private void setupTextWatchers() {
@@ -201,9 +215,10 @@ public class GeneralInfoFragment extends Fragment {
                 operatorAdapter.submitList(operators);
 
                 boolean hasInspector = !inspectors.isEmpty();
-                binding.layoutInspectorEmail.setVisibility(hasInspector ? View.GONE : View.VISIBLE);
-                binding.btnAddInspector.setVisibility(hasInspector ? View.GONE : View.VISIBLE);
-                binding.btnAddInspector.setEnabled(!hasInspector && isValidEmail(
+                boolean showInspectorAdd = canAddAssignments && !hasInspector;
+                binding.layoutInspectorEmail.setVisibility(showInspectorAdd ? View.VISIBLE : View.GONE);
+                binding.btnAddInspector.setVisibility(showInspectorAdd ? View.VISIBLE : View.GONE);
+                binding.btnAddInspector.setEnabled(showInspectorAdd && isValidEmail(
                         binding.inputInspectorEmail.getText() != null
                                 ? binding.inputInspectorEmail.getText().toString().trim()
                                 : ""));

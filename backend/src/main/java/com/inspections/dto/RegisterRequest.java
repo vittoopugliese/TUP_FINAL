@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 /**
  * Request de registro de usuario.
  * Campos: email, nombre, rol (INSPECTOR | OPERATOR), contraseña.
+ * El backend ignora el rol del request y asigna OPERATOR al registrarse.
  */
 public class RegisterRequest {
 

@@ -90,7 +90,7 @@ public class AuthService {
      * Registra un nuevo usuario.
      * Valida email único, hashea la contraseña y persiste en la base de datos.
      *
-     * @param request datos del usuario (email, fullName, role, password)
+     * @param request datos del usuario (email, fullName, role, password); el rol se fija en OPERATOR
      * @return RegisterResponse con mensaje de éxito y email
      * @throws IllegalArgumentException si el email ya está registrado
      */
@@ -105,7 +105,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFullName() != null ? request.getFullName().trim() : "");
         user.setLastName("");
-        user.setRole("INSPECTOR");
+        user.setRole("OPERATOR");
         user.setEnabled(true);
         user.setCreatedAt(Instant.now());
 

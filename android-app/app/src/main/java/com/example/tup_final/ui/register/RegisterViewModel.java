@@ -60,7 +60,7 @@ public class RegisterViewModel extends ViewModel {
 
     /**
      * Ejecuta el registro. Valida campos antes de llamar al backend.
-     * El rol se asigna automáticamente como INSPECTOR.
+     * El rol se asigna automáticamente como OPERATOR.
      */
     public void register(String email, String fullName, String password, String confirmPassword) {
         String validationError = validate(email, fullName, password, confirmPassword);

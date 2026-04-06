@@ -5,7 +5,7 @@ import java.time.Instant;
 
 /**
  * Entidad JPA para User.
- * Roles: INSPECTOR, OPERATOR.
+ * Roles: ADMIN, INSPECTOR, OPERATOR (registro público: OPERATOR por defecto).
  * Tiene passwordHash que la app Android no almacena (solo el backend autentica).
  */
 @Entity
@@ -32,9 +32,9 @@ public class User {
     private String avatarImage;
     private String phoneNumber;
 
-    /** Rol: INSPECTOR | OPERATOR. */
+    /** Rol: ADMIN | INSPECTOR | OPERATOR. */
     @Column(nullable = false)
-    private String role = "INSPECTOR";
+    private String role = "OPERATOR";
 
     /** Indica si la cuenta está activa. */
     private boolean enabled = true;

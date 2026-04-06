@@ -18,7 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 /**
  * Fragment de Registro de usuario.
  * Formulario con email, nombre, contraseña y confirmación.
- * El rol se asigna automáticamente como INSPECTOR.
+ * El rol se asigna automáticamente como OPERATOR.
  * Tras registro exitoso, vuelve al login.
  */
 @AndroidEntryPoint

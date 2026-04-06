@@ -166,7 +166,7 @@ public class AuthRepository {
                 RegisterRequest request = new RegisterRequest(
                         email != null ? email.trim() : "",
                         fullName != null ? fullName.trim() : "",
-                        "INSPECTOR",
+                        "OPERATOR",
                         password
                 );
                 Response<RegisterResponse> response = authApi.register(request).execute();
