@@ -37,8 +37,10 @@ public class GeneralInfoFragment extends Fragment {
     private AssignmentAdapter inspectorAdapter;
     private AssignmentAdapter operatorAdapter;
 
-    /** Solo ADMIN e INSPECTOR pueden agregar asignaciones (coincide con el backend). */
+    /** Solo ADMIN e INSPECTOR pueden agregar operadores (coincide con el backend). */
     private boolean canAddAssignments;
+
+    private boolean isAdminUser;
 
     @Nullable
     @Override
@@ -56,7 +58,8 @@ public class GeneralInfoFragment extends Fragment {
         viewModel = new ViewModelProvider(requireParentFragment()).get(InspectionDetailViewModel.class);
 
         String currentRole = viewModel.getCurrentUserRole();
-        canAddAssignments = "ADMIN".equalsIgnoreCase(currentRole)
+        isAdminUser = "ADMIN".equalsIgnoreCase(currentRole);
+        canAddAssignments = isAdminUser
                 || "INSPECTOR".equalsIgnoreCase(currentRole);
 
         setupInspectorSection(currentRole);
@@ -81,7 +84,7 @@ public class GeneralInfoFragment extends Fragment {
         binding.recyclerInspector.setAdapter(inspectorAdapter);
 
         binding.btnAddInspector.setOnClickListener(v -> addInspector());
-        if (!canAddAssignments) {
+        if (!isAdminUser) {
             binding.layoutInspectorEmail.setVisibility(View.GONE);
             binding.btnAddInspector.setVisibility(View.GONE);
         }
@@ -215,7 +218,7 @@ public class GeneralInfoFragment extends Fragment {
                 operatorAdapter.submitList(operators);
 
                 boolean hasInspector = !inspectors.isEmpty();
-                boolean showInspectorAdd = canAddAssignments && !hasInspector;
+                boolean showInspectorAdd = isAdminUser && !hasInspector;
                 binding.layoutInspectorEmail.setVisibility(showInspectorAdd ? View.VISIBLE : View.GONE);
                 binding.btnAddInspector.setVisibility(showInspectorAdd ? View.VISIBLE : View.GONE);
                 binding.btnAddInspector.setEnabled(showInspectorAdd && isValidEmail(
