@@ -37,6 +37,7 @@ public class InspectionService {
     private final TestTemplateStepRepository testTemplateStepRepository;
     private final StepRepository stepRepository;
     private final InspectionAssignmentRepository assignmentRepository;
+    private final UserRepository userRepository;
 
     public InspectionService(InspectionRepository inspectionRepository,
                             BuildingRepository buildingRepository,
@@ -49,7 +50,8 @@ public class InspectionService {
                             TestRepository testRepository,
                             TestTemplateStepRepository testTemplateStepRepository,
                             StepRepository stepRepository,
-                            InspectionAssignmentRepository assignmentRepository) {
+                            InspectionAssignmentRepository assignmentRepository,
+                            UserRepository userRepository) {
         this.inspectionRepository = inspectionRepository;
         this.buildingRepository = buildingRepository;
         this.inspectionTemplateRepository = inspectionTemplateRepository;
@@ -62,6 +64,7 @@ public class InspectionService {
         this.testTemplateStepRepository = testTemplateStepRepository;
         this.stepRepository = stepRepository;
         this.assignmentRepository = assignmentRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -312,6 +315,18 @@ public class InspectionService {
             emails.add(email);
             if (ROLE_INSPECTOR.equals(role)) {
                 inspectorCount++;
+                User user = userRepository.findByEmailIgnoreCase(email)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "El usuario no existe: " + email));
+                String accountRole = user.getRole() != null ? user.getRole().trim().toUpperCase() : "";
+                if (!ROLE_INSPECTOR.equals(accountRole)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "El usuario no tiene rol de Inspector");
+                }
+            } else if (ROLE_OPERATOR.equals(role)) {
+                userRepository.findByEmailIgnoreCase(email)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "El usuario no existe: " + email));
             }
         }
         if (inspectorCount < 1) {
