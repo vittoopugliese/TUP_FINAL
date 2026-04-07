@@ -1,8 +1,10 @@
 package com.inspections.service;
 
 import com.inspections.entity.InspectionAssignment;
+import com.inspections.entity.User;
 import com.inspections.repository.InspectionAssignmentRepository;
 import com.inspections.repository.InspectionRepository;
+import com.inspections.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +25,14 @@ public class InspectionAssignmentService {
 
     private final InspectionAssignmentRepository assignmentRepository;
     private final InspectionRepository inspectionRepository;
+    private final UserRepository userRepository;
 
     public InspectionAssignmentService(InspectionAssignmentRepository assignmentRepository,
-                                       InspectionRepository inspectionRepository) {
+                                       InspectionRepository inspectionRepository,
+                                       UserRepository userRepository) {
         this.assignmentRepository = assignmentRepository;
         this.inspectionRepository = inspectionRepository;
+        this.userRepository = userRepository;
     }
 
     public List<InspectionAssignment> getAssignments(String inspectionId) {
@@ -35,7 +40,8 @@ public class InspectionAssignmentService {
     }
 
     @Transactional
-    public InspectionAssignment addAssignment(String inspectionId, String userEmail, String role) {
+    public InspectionAssignment addAssignment(String inspectionId, String userEmail, String role,
+                                             String currentUserRole) {
         if (inspectionId == null || userEmail == null || role == null) {
             throw new IllegalArgumentException("inspectionId, userEmail and role are required");
         }
@@ -46,9 +52,14 @@ public class InspectionAssignmentService {
 
         String normalizedEmail = userEmail.trim().toLowerCase();
         String normalizedRole = role.toUpperCase();
+        String callerRole = (currentUserRole != null ? currentUserRole : "").toUpperCase();
 
         if (!ROLE_INSPECTOR.equals(normalizedRole) && !ROLE_OPERATOR.equals(normalizedRole)) {
             throw new IllegalArgumentException("Role must be INSPECTOR or OPERATOR");
+        }
+
+        if (ROLE_INSPECTOR.equals(normalizedRole) && !"ADMIN".equals(callerRole)) {
+            throw new IllegalArgumentException("Solo el administrador puede asignar o reasignar al inspector");
         }
 
         if (assignmentRepository.existsByInspectionIdAndUserEmail(inspectionId, normalizedEmail)) {
@@ -56,10 +67,21 @@ public class InspectionAssignmentService {
         }
 
         if (ROLE_INSPECTOR.equals(normalizedRole)) {
+            User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                    .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
+            String accountRole = user.getRole() != null ? user.getRole().trim().toUpperCase() : "";
+            if (!ROLE_INSPECTOR.equals(accountRole)) {
+                throw new IllegalArgumentException("El usuario no tiene rol de Inspector");
+            }
             long inspectorCount = assignmentRepository.countByInspectionIdAndRole(inspectionId, ROLE_INSPECTOR);
             if (inspectorCount >= 1) {
                 throw new IllegalArgumentException("Only 1 Inspector is allowed per inspection");
             }
+        }
+
+        if (ROLE_OPERATOR.equals(normalizedRole)) {
+            userRepository.findByEmailIgnoreCase(normalizedEmail)
+                    .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
         }
 
         InspectionAssignment assignment = new InspectionAssignment();

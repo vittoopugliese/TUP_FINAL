@@ -45,13 +45,14 @@ public class InspectionAssignmentController {
     @PostMapping("/{inspectionId}/assignments")
     @PreAuthorize("hasAnyRole('ADMIN','INSPECTOR')")
     @Operation(summary = "Agregar asignacion",
-            description = "Agrega un inspector u operador a la inspeccion. Solo ADMIN e INSPECTOR.")
+            description = "Agrega operadores (ADMIN o INSPECTOR). Solo ADMIN puede agregar o reasignar inspector; el email debe ser de un usuario con rol INSPECTOR.")
     public ResponseEntity<?> addAssignment(@PathVariable String inspectionId, @RequestBody AssignmentRequest request) {
         try {
             InspectionAssignment assignment = assignmentService.addAssignment(
                     inspectionId,
                     request.getUserEmail(),
-                    request.getRole()
+                    request.getRole(),
+                    extractRoleFromAuth()
             );
             return ResponseEntity.ok(toResponse(assignment));
         } catch (IllegalArgumentException e) {
