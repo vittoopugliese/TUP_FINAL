@@ -44,8 +44,7 @@ public class InspectionAssignmentController {
 
     @PostMapping("/{inspectionId}/assignments")
     @PreAuthorize("hasAnyRole('ADMIN','INSPECTOR')")
-    @Operation(summary = "Agregar asignacion",
-            description = "Agrega operadores (ADMIN o INSPECTOR). Solo ADMIN puede agregar o reasignar inspector; el email debe ser de un usuario con rol INSPECTOR.")
+    @Operation(summary = "Agregar asignacion", description = "Solo ADMIN e INSPECTOR. Agrega un inspector o operador a la inspeccion")
     public ResponseEntity<?> addAssignment(@PathVariable String inspectionId, @RequestBody AssignmentRequest request) {
         try {
             InspectionAssignment assignment = assignmentService.addAssignment(
@@ -61,7 +60,8 @@ public class InspectionAssignmentController {
     }
 
     @DeleteMapping("/{inspectionId}/assignments/{email}")
-    @Operation(summary = "Remover asignacion", description = "Solo ADMIN puede remover al inspector. INSPECTOR puede remover operadores.")
+    @PreAuthorize("hasAnyRole('ADMIN','INSPECTOR')")
+    @Operation(summary = "Remover asignacion", description = "Solo ADMIN puede remover al inspector. INSPECTOR puede remover operadores. OPERATOR no puede quitar.")
     public ResponseEntity<?> removeAssignment(@PathVariable String inspectionId, @PathVariable String email) {
         try {
             String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);

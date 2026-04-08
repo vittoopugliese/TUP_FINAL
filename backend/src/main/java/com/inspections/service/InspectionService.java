@@ -102,9 +102,14 @@ public class InspectionService {
 
     /**
      * Crea una inspección building-wide con snapshot de tests heredados.
+     *
+     * @param creatorEmail email del usuario autenticado (se guarda en {@code createdByEmail})
+     * @param creatorRole  rol del creador (ADMIN: usa asignaciones del body; INSPECTOR: fuerza inspector = creador y solo operadores del body)
      */
     @Transactional
-    public CreateInspectionResponse createInspection(CreateInspectionRequest request) {
+    public CreateInspectionResponse createInspection(CreateInspectionRequest request,
+                                                     String creatorEmail,
+                                                     String creatorRole) {
         String buildingId = request.getBuildingId().trim();
         String type = request.getType().trim();
         String inspectionTemplateId = request.getInspectionTemplateId().trim();
@@ -121,7 +126,12 @@ public class InspectionService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Inspection template not found: " + inspectionTemplateId));
 
-        validateAssignments(request.getAssignments());
+        String createdBy = creatorEmail == null ? "" : creatorEmail.trim().toLowerCase();
+        if (createdBy.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no autenticado");
+        }
+
+        List<AssignmentRequest> assignmentsToPersist = resolveAssignmentsForCreate(request, createdBy, creatorRole);
 
         Instant now = Instant.now();
         String inspectionId = UUID.randomUUID().toString();
@@ -135,12 +145,13 @@ public class InspectionService {
         inspection.setScheduledDate(request.getScheduledDate());
         inspection.setInspectionTemplateId(inspectionTemplateId);
         inspection.setNotes(request.getNotes() != null ? request.getNotes().trim() : null);
+        inspection.setCreatedByEmail(createdBy);
         inspection.setCreatedAt(now);
         inspection.setUpdatedAt(now);
         inspectionRepository.save(inspection);
 
         int testsCreated = createSnapshotTests(inspectionId, buildingId, now);
-        createAssignments(inspectionId, request.getAssignments(), now);
+        createAssignments(inspectionId, assignmentsToPersist, now);
 
         List<Location> locations = locationRepository.findByBuildingIdOrderByNameAsc(buildingId);
         int zonesCount = 0;
@@ -329,6 +340,45 @@ public class InspectionService {
         // T5.3.3: only signInspection may transition to DONE_COMPLETED / DONE_FAILED.
         return mapToListResponse(inspection);
     }
+    /**
+     * ADMIN: valida y usa las asignaciones del request tal cual.
+     * INSPECTOR: un único inspector (el creador) y operadores opcionales deduplicados del body.
+     */
+    private List<AssignmentRequest> resolveAssignmentsForCreate(CreateInspectionRequest request,
+                                                                  String creatorEmailNormalized,
+                                                                  String creatorRole) {
+        String upperRole = (creatorRole != null ? creatorRole : "").toUpperCase();
+        if ("INSPECTOR".equals(upperRole)) {
+            List<AssignmentRequest> merged = new ArrayList<>();
+            LinkedHashSet<String> seenOperatorEmails = new LinkedHashSet<>();
+            if (request.getAssignments() != null) {
+                for (AssignmentRequest a : request.getAssignments()) {
+                    if (a == null) continue;
+                    String r = (a.getRole() != null ? a.getRole().trim() : "").toUpperCase();
+                    if (!ROLE_OPERATOR.equals(r)) {
+                        continue;
+                    }
+                    String em = (a.getUserEmail() != null ? a.getUserEmail().trim() : "").toLowerCase();
+                    if (em.isEmpty() || em.equals(creatorEmailNormalized)) {
+                        continue;
+                    }
+                    if (seenOperatorEmails.add(em)) {
+                        merged.add(new AssignmentRequest(em, ROLE_OPERATOR));
+                    }
+                }
+            }
+            merged.add(new AssignmentRequest(creatorEmailNormalized, ROLE_INSPECTOR));
+            validateAssignments(merged);
+            return merged;
+        }
+        if ("ADMIN".equals(upperRole)) {
+            validateAssignments(request.getAssignments());
+            return new ArrayList<>(request.getAssignments());
+        }
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "Solo ADMIN o INSPECTOR pueden crear inspecciones");
+    }
+
     private void validateAssignments(List<AssignmentRequest> assignments) {
         if (assignments == null || assignments.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one INSPECTOR is required");
@@ -363,12 +413,31 @@ public class InspectionService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                 "El usuario no existe: " + email));
             }
+            validateUserRoleMatchesAssignment(email, role);
         }
         if (inspectorCount < 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one INSPECTOR is required");
         }
         if (inspectorCount > 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only one INSPECTOR is allowed per inspection");
+        }
+    }
+
+    private void validateUserRoleMatchesAssignment(String emailNormalized, String assignmentRoleUpper) {
+        User user = userRepository.findByEmailIgnoreCase(emailNormalized)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Usuario no registrado: " + emailNormalized));
+        String dbRole = user.getRole() != null ? user.getRole().toUpperCase() : "";
+        if (ROLE_INSPECTOR.equals(assignmentRoleUpper)) {
+            if (!ROLE_INSPECTOR.equals(dbRole)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Solo usuarios con rol INSPECTOR pueden asignarse como inspector");
+            }
+        } else if (ROLE_OPERATOR.equals(assignmentRoleUpper)) {
+            if (!ROLE_INSPECTOR.equals(dbRole) && !ROLE_OPERATOR.equals(dbRole)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "En operadores solo se pueden asignar usuarios con rol INSPECTOR u OPERATOR");
+            }
         }
     }
 
@@ -459,6 +528,7 @@ public class InspectionService {
         dto.setSigner(inspection.getSigner());
         dto.setSigned(inspection.isSigned());
         dto.setSignDate(inspection.getSignDate());
+        dto.setCreatedByEmail(inspection.getCreatedByEmail());
         return dto;
     }
 }

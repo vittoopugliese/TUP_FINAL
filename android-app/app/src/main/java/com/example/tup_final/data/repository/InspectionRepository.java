@@ -176,6 +176,7 @@ public class InspectionRepository {
             entity.createdAt = null;
             entity.updatedAt = null;
             entity.locationId = dto.getLocationId();
+            entity.createdByEmail = dto.getCreatedByEmail();
             entities.add(entity);
         }
         return entities;
@@ -253,6 +254,9 @@ public class InspectionRepository {
                             existing.signed = true;
                             existing.signer = dto.getSigner();
                             existing.signDate = dto.getSignDate();
+                        }
+                        if (dto.getCreatedByEmail() != null && !dto.getCreatedByEmail().isEmpty()) {
+                            existing.createdByEmail = dto.getCreatedByEmail();
                         }
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
                         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -465,6 +469,9 @@ public class InspectionRepository {
                         entity.signer   = dto.getSigner();
                         entity.signed   = dto.isSigned();
                         entity.signDate = dto.getSignDate();
+                        if (dto.getCreatedByEmail() != null && !dto.getCreatedByEmail().isEmpty()) {
+                            entity.createdByEmail = dto.getCreatedByEmail();
+                        }
                         entity.updatedAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
                                 .format(new Date());
                         inspectionDao.update(entity);

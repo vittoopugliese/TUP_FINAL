@@ -17,6 +17,7 @@ public class InspectionListResponse {
     private boolean signed;
     private String signDate;
     private String result;
+    private String createdByEmail;
 
     public InspectionListResponse() {}
 
@@ -52,4 +53,7 @@ public class InspectionListResponse {
 
     public String getResult() { return result; }
     public void setResult(String result) { this.result = result; }
+
+    public String getCreatedByEmail() { return createdByEmail; }
+    public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
 }

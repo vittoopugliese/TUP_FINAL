@@ -51,6 +51,10 @@ public class Inspection {
     private String inspectionTemplateId;
     private String coverPageId;
 
+    /** Email (minúsculas) del usuario autenticado que creó la fila de inspección. */
+    @Column(name = "created_by_email", length = 255)
+    private String createdByEmail;
+
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -105,6 +109,9 @@ public class Inspection {
 
     public String getCoverPageId() { return coverPageId; }
     public void setCoverPageId(String v) { this.coverPageId = v; }
+
+    public String getCreatedByEmail() { return createdByEmail; }
+    public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

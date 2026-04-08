@@ -79,9 +79,19 @@ public class InspectionAssignmentService {
             }
         }
 
-        if (ROLE_OPERATOR.equals(normalizedRole)) {
-            userRepository.findByEmailIgnoreCase(normalizedEmail)
-                    .orElseThrow(() -> new IllegalArgumentException("El usuario no existe"));
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no registrado: " + normalizedEmail));
+        String dbRole = user.getRole() != null ? user.getRole().toUpperCase() : "";
+        if (ROLE_INSPECTOR.equals(normalizedRole)) {
+            if (!ROLE_INSPECTOR.equals(dbRole)) {
+                throw new IllegalArgumentException(
+                        "Solo usuarios con rol INSPECTOR pueden asignarse como inspector");
+            }
+        } else {
+            if (!ROLE_INSPECTOR.equals(dbRole) && !ROLE_OPERATOR.equals(dbRole)) {
+                throw new IllegalArgumentException(
+                        "En operadores solo se pueden asignar usuarios con rol INSPECTOR u OPERATOR");
+            }
         }
 
         InspectionAssignment assignment = new InspectionAssignment();
@@ -102,6 +112,10 @@ public class InspectionAssignmentService {
 
         String normalizedEmail = userEmail.trim().toLowerCase();
         String role = (currentUserRole != null ? currentUserRole : "").toUpperCase();
+
+        if (ROLE_OPERATOR.equals(role)) {
+            throw new IllegalArgumentException("Los operadores no pueden modificar asignaciones");
+        }
 
         InspectionAssignment toRemove = assignmentRepository.findByInspectionIdAndUserEmail(inspectionId, normalizedEmail)
                 .orElse(null);

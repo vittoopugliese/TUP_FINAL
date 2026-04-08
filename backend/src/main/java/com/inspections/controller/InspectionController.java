@@ -61,7 +61,18 @@ public class InspectionController {
                description = "Crea una inspección building-wide con snapshot de locations, zones, devices y tests. Solo ADMIN e INSPECTOR.")
     public ResponseEntity<CreateInspectionResponse> createInspection(
             @Valid @RequestBody CreateInspectionRequest request) {
-        CreateInspectionResponse created = inspectionService.createInspection(request);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = auth.getPrincipal().toString();
+        String role = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> a.startsWith("ROLE_"))
+                .map(a -> a.substring(5))
+                .findFirst()
+                .orElse("INSPECTOR");
+        CreateInspectionResponse created = inspectionService.createInspection(request, email, role);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 

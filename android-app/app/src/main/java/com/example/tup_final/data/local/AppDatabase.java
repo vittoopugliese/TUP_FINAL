@@ -24,6 +24,7 @@ import com.example.tup_final.data.entity.ZoneEntity;
  * Version history:
  *  5 → 6: PhotoEntity new columns (gpsLatitude, gpsLongitude, inspectorName)
  *  6 → 7: DeficiencyTypeEntity new table
+ *  7 → 8: InspectionEntity.createdByEmail
  */
 @Database(
     entities = {
@@ -40,7 +41,7 @@ import com.example.tup_final.data.entity.ZoneEntity;
         AuditLogEntity.class,
         DeficiencyTypeEntity.class
     },
-    version = 7,
+    version = 8,
     exportSchema = true
 )
 public abstract class AppDatabase extends RoomDatabase {

@@ -345,6 +345,17 @@
                         android:textColor="?android:attr/textColorPrimary" />
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/text_inspection_created_by"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:visibility="gone"
+                    tools:text="Creada por: inspector@example.com"
+                    tools:visibility="visible" />
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layout_inspector_email"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"

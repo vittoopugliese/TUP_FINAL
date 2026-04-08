@@ -64,6 +64,7 @@ public class GeneralInfoFragment extends Fragment {
 
         setupInspectorSection(currentRole);
         setupOperatorsSection();
+        applyRoleBasedOperatorControls();
         setupTextWatchers();
         observeAssignments();
         observeAddResult();
@@ -92,9 +93,10 @@ public class GeneralInfoFragment extends Fragment {
 
     private void setupOperatorsSection() {
         binding.recyclerOperators.setLayoutManager(new LinearLayoutManager(requireContext()));
+        String currentRole = viewModel.getCurrentUserRole();
         operatorAdapter = new AssignmentAdapter(
                 this::onRemoveOperatorClicked,
-                a -> true);
+                a -> "ADMIN".equalsIgnoreCase(currentRole) || "INSPECTOR".equalsIgnoreCase(currentRole));
         binding.recyclerOperators.setAdapter(operatorAdapter);
 
         binding.btnAddOperator.setOnClickListener(v -> addOperator());
@@ -102,6 +104,13 @@ public class GeneralInfoFragment extends Fragment {
             binding.layoutOperatorEmail.setVisibility(View.GONE);
             binding.btnAddOperator.setVisibility(View.GONE);
         }
+    }
+
+    /** Operador no puede agregar ni quitar en la tarjeta de operadores. */
+    private void applyRoleBasedOperatorControls() {
+        boolean isOperator = "OPERATOR".equalsIgnoreCase(viewModel.getCurrentUserRole());
+        binding.layoutOperatorEmail.setVisibility(isOperator ? View.GONE : View.VISIBLE);
+        binding.btnAddOperator.setVisibility(isOperator ? View.GONE : View.VISIBLE);
     }
 
     private void setupTextWatchers() {
@@ -218,10 +227,10 @@ public class GeneralInfoFragment extends Fragment {
                 operatorAdapter.submitList(operators);
 
                 boolean hasInspector = !inspectors.isEmpty();
-                boolean showInspectorAdd = isAdminUser && !hasInspector;
-                binding.layoutInspectorEmail.setVisibility(showInspectorAdd ? View.VISIBLE : View.GONE);
-                binding.btnAddInspector.setVisibility(showInspectorAdd ? View.VISIBLE : View.GONE);
-                binding.btnAddInspector.setEnabled(showInspectorAdd && isValidEmail(
+                boolean isAdmin = "ADMIN".equalsIgnoreCase(viewModel.getCurrentUserRole());
+                binding.layoutInspectorEmail.setVisibility((hasInspector || !isAdmin) ? View.GONE : View.VISIBLE);
+                binding.btnAddInspector.setVisibility((hasInspector || !isAdmin) ? View.GONE : View.VISIBLE);
+                binding.btnAddInspector.setEnabled(!hasInspector && isAdmin && isValidEmail(
                         binding.inputInspectorEmail.getText() != null
                                 ? binding.inputInspectorEmail.getText().toString().trim()
                                 : ""));
@@ -290,6 +299,14 @@ public class GeneralInfoFragment extends Fragment {
             binding.textSigner.setText(inspection.signer);
         } else {
             binding.cardSigner.setVisibility(View.GONE);
+        }
+
+        if (inspection.createdByEmail != null && !inspection.createdByEmail.trim().isEmpty()) {
+            binding.textInspectionCreatedBy.setVisibility(View.VISIBLE);
+            binding.textInspectionCreatedBy.setText(
+                    getString(R.string.inspection_created_by, inspection.createdByEmail.trim()));
+        } else {
+            binding.textInspectionCreatedBy.setVisibility(View.GONE);
         }
     }
 
