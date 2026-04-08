@@ -1,2 +1,3 @@
+com\inspections\service\InspectionReportPdfServiceTest.class
 com\inspections\controller\DeviceMoveIntegrationTest.class
 com\inspections\controller\DeviceCreateIntegrationTest.class
