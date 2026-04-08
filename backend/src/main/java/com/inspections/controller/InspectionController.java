@@ -65,6 +65,15 @@ public class InspectionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    @PostMapping("/{id}/start")
+    @Operation(summary = "Iniciar inspección",
+               description = "Transiciona la inspección de PENDING/SCHEDULED a IN_PROGRESS. "
+                       + "Requiere al menos 1 Inspector asignado.")
+    public ResponseEntity<InspectionListResponse> startInspection(@PathVariable String id) {
+        InspectionListResponse started = inspectionService.startInspection(id);
+        return ResponseEntity.ok(started);
+    }
+
     @PostMapping("/{id}/sign")
     @Operation(summary = "Firmar inspección",
                description = "Firma digital: valida que todos los tests estén COMPLETED o FAILED "

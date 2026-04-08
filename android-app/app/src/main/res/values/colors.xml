@@ -10,6 +10,10 @@
     <color name="deficiency_warning_text">#B71C1C</color>
     <color name="design_default_color_error">#B00020</color>
 
+    <!-- Sign button -->
+    <color name="sign_btn_pending">#1B5E20</color>
+    <color name="sign_btn_ready">#4CAF50</color>
+
     <!-- Step status badges -->
     <color name="step_status_failed_bg">#FFCDD2</color>
     <color name="step_status_failed_text">#B71C1C</color>

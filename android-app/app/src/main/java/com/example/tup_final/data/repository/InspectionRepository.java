@@ -82,9 +82,13 @@ public class InspectionRepository {
                 Response<List<InspectionListResponse>> response = inspectionApi.getInspections().execute();
                 if (response.isSuccessful() && response.body() != null) {
                     List<InspectionEntity> entities = mapToEntities(response.body());
-                    inspectionDao.deleteAll();
-                    if (!entities.isEmpty()) {
-                        inspectionDao.insertAll(entities);
+                    List<String> freshIds = new ArrayList<>();
+                    for (InspectionEntity e : entities) {
+                        freshIds.add(e.id);
+                        inspectionDao.upsert(e);
+                    }
+                    if (!freshIds.isEmpty()) {
+                        inspectionDao.deleteNotIn(freshIds);
                     }
                     mainHandler.post(() -> result.setValue(Resource.success(entities)));
                 } else {
@@ -180,6 +184,7 @@ public class InspectionRepository {
     /**
      * Starts or continues an inspection: sets status to IN_PROGRESS
      * and records the startedAt timestamp.
+     * Calls the API to notify the server, with Room-only fallback.
      */
     public LiveData<Resource<InspectionEntity>> startInspection(String inspectionId) {
         MutableLiveData<Resource<InspectionEntity>> result = new MutableLiveData<>();
@@ -193,7 +198,19 @@ public class InspectionRepository {
                 return;
             }
 
-            inspection.status = "IN_PROGRESS";
+            try {
+                Response<InspectionListResponse> response =
+                        inspectionApi.startInspection(inspectionId).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    InspectionListResponse dto = response.body();
+                    inspection.status = dto.getStatus();
+                }  else {
+                    inspection.status = "IN_PROGRESS";
+                }
+            } catch (Exception ignored) {
+                inspection.status = "IN_PROGRESS";
+            }
+
             if (inspection.startedAt == null || inspection.startedAt.isEmpty()) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -212,6 +229,7 @@ public class InspectionRepository {
     /**
      * Refresca el estado de una inspección consultando al backend.
      * Actualiza status y result en Room según la respuesta (signed=true tras firmar).
+     * No permite regresión de status (e.g. IN_PROGRESS no se sobreescribe con PENDING).
      * Fallback cuando la API falla: devuelve la inspección actual de Room.
      */
     public LiveData<Resource<InspectionEntity>> refreshInspectionStatus(String inspectionId) {
@@ -226,8 +244,16 @@ public class InspectionRepository {
                     com.example.tup_final.data.remote.dto.InspectionListResponse dto = response.body();
                     InspectionEntity existing = inspectionDao.getById(inspectionId);
                     if (existing != null) {
-                        existing.status = dto.getStatus();
+                        String serverStatus = dto.getStatus();
+                        if (statusPriority(serverStatus) >= statusPriority(existing.status)) {
+                            existing.status = serverStatus;
+                        }
                         existing.result = dto.getResult();
+                        if (dto.isSigned()) {
+                            existing.signed = true;
+                            existing.signer = dto.getSigner();
+                            existing.signDate = dto.getSignDate();
+                        }
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
                         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                         existing.updatedAt = sdf.format(new Date());
@@ -245,6 +271,16 @@ public class InspectionRepository {
         });
 
         return result;
+    }
+
+    private int statusPriority(String status) {
+        if (status == null) return 0;
+        switch (status) {
+            case "IN_PROGRESS": return 1;
+            case "DONE_COMPLETED":
+            case "DONE_FAILED": return 2;
+            default: return 0;
+        }
     }
 
     /**

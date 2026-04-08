@@ -162,6 +162,7 @@
     <string name="locations_empty">No hay ubicaciones.</string>
     <string name="locations_error">No se pudieron cargar las ubicaciones.</string>
     <string name="location_tests_count">Tests: %d</string>
+    <string name="location_tests_progress">Tests: %1$d / %2$d</string>
     <string name="btn_locations">Ubicaciones</string>
     <string name="btn_new_location">Nueva Ubicación</string>
     <string name="create_location_title">Nueva Ubicación</string>

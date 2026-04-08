@@ -25,6 +25,8 @@ import com.example.tup_final.util.Resource;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import android.content.res.ColorStateList;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -300,6 +302,25 @@ public class InspectionDetailFragment extends Fragment {
         }
         boolean show = viewModel.shouldShowSignButton(inspection);
         binding.btnSignInspection.setVisibility(show ? View.VISIBLE : View.GONE);
+
+        if (show) {
+            refreshSignButtonColor();
+        }
+    }
+
+    private void refreshSignButtonColor() {
+        String inspectionId = viewModel.getCurrentInspectionId();
+        if (inspectionId == null || binding == null) return;
+
+        int pendingColor = ContextCompat.getColor(requireContext(), R.color.sign_btn_pending);
+        binding.btnSignInspection.setBackgroundTintList(ColorStateList.valueOf(pendingColor));
+
+        viewModel.validateAllTestsDone(inspectionId, allDone -> {
+            if (!isAdded() || binding == null) return;
+            int color = ContextCompat.getColor(requireContext(),
+                    allDone ? R.color.sign_btn_ready : R.color.sign_btn_pending);
+            binding.btnSignInspection.setBackgroundTintList(ColorStateList.valueOf(color));
+        });
     }
 
     private void updateSignedInfo(InspectionEntity inspection) {

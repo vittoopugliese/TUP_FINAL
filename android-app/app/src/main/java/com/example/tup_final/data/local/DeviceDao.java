@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Transaction;
 import androidx.room.Update;
 
 import com.example.tup_final.data.entity.DeviceEntity;
@@ -16,8 +17,19 @@ public interface DeviceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(DeviceEntity device);
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long insertOrIgnore(DeviceEntity device);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<DeviceEntity> devices);
+
+    @Transaction
+    default void upsert(DeviceEntity device) {
+        long id = insertOrIgnore(device);
+        if (id == -1L) {
+            update(device);
+        }
+    }
 
     @Query("SELECT * FROM devices WHERE id = :id")
     DeviceEntity getById(String id);

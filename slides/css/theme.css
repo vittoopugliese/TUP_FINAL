@@ -1,0 +1,48 @@
+/**
+ * Tema global — modifica estos valores para cambiar colores en toda la presentación.
+ * Los slides generados usan estas variables CSS.
+ */
+:root {
+    /* Marca: rojo / naranja */
+    --color-primary: #da1515;
+    --color-accent: #f41d1d;
+    --color-primary-rgb: 192, 57, 43;
+    --color-accent-rgb: 230, 126, 34;
+
+    /* Fondo del lienzo 1280×720 */
+    --slide-bg-1: #291313;
+    --slide-bg-2: #290b0b;
+    --slide-bg-3: #460707;
+
+    /* Fondo fuera de la slide (letterbox) */
+    --color-body-bg: #0d0d0d;
+
+    /* Acentos “éxito” (slides con variante verde) */
+    --color-success: rgb(231, 110, 12);
+    --color-success-rgb: 231, 110, 12;
+    --color-success-rgb-green: 11, 184, 37;
+    --color-success-light: rgb(241, 142, 12);
+    --color-success-light-rgb: 241, 142, 12;
+    --color-success-light-green: 11, 184, 37;
+
+    /* Estados semánticos (pain points, badges) — opcional unificar */
+    --color-status-critical: #E74C3C;
+    --color-status-warning: #F39C12;
+    --color-status-info: #3498DB;
+
+    /* UI del reproductor */
+    --nav-bg: rgba(13, 13, 13, 0.85);
+    --nav-border: rgba(255, 255, 255, 0.12);
+    --nav-text: rgba(255, 255, 255, 0.9);
+    --nav-muted: rgba(255, 255, 255, 0.55);
+
+    /* Barra de marca (logo fijo en index) */
+    --brand-bar-bg: rgba(13, 13, 13, 0.65);
+    --brand-bar-border: rgba(255, 255, 255, 0.12);
+    --brand-name-color: #ffffff;
+}
+
+*::selection {
+    background: #FFF;
+    color: var(--slide-bg-3);
+}

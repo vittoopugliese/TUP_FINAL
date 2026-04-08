@@ -59,7 +59,7 @@ public class LocationRepository {
                     List<LocationEntity> entities = mapToEntities(response.body());
                     if (!entities.isEmpty()) {
                         for (LocationEntity e : entities) {
-                            locationDao.insert(e);
+                            locationDao.upsert(e);
                         }
                     }
                 }

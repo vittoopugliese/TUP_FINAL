@@ -1,0 +1,152 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: var(--color-body-bg);
+    overflow: hidden;
+}
+
+#viewport {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-body-bg);
+}
+
+#stage-scale {
+    width: 1280px;
+    height: 720px;
+    flex-shrink: 0;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+#slide-mount {
+    width: 100%;
+    height: 100%;
+}
+
+/* Marca fija (todas las slides) */
+#brand-bar {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 14px 6px 6px;
+    border-radius: 16px;
+    background: var(--brand-bar-bg);
+    border: 1px solid var(--brand-bar-border);
+    backdrop-filter: blur(10px);
+    pointer-events: none;
+    user-select: none;
+}
+
+#brand-bar .brand-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: cover;
+    display: block;
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+#brand-bar .brand-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.02em;
+    color: var(--brand-name-color);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+}
+
+/* Barra de navegación (encima del letterbox) */
+#slide-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px 14px;
+    background: var(--nav-bg);
+    border: 1px solid var(--nav-border);
+    border-bottom: none;
+    border-radius: 14px 14px 0 0;
+    backdrop-filter: blur(10px);
+    font-family: 'Montserrat', sans-serif;
+}
+
+#slide-nav button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--nav-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--nav-text);
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+#slide-nav button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(var(--color-accent-rgb), 0.45);
+}
+
+#slide-nav button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+#nav-counter {
+    min-width: 72px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--nav-muted);
+    letter-spacing: 0.02em;
+}
+
+#nav-counter strong {
+    color: var(--nav-text);
+    font-weight: 700;
+}
+
+#nav-hint {
+    font-size: 11px;
+    color: var(--nav-muted);
+    margin-left: 8px;
+    white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+    #nav-hint {
+        display: none;
+    }
+
+    #brand-bar .brand-name {
+        font-size: 15px;
+    }
+}

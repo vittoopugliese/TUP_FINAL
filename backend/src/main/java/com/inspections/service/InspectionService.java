@@ -166,6 +166,41 @@ public class InspectionService {
     }
 
     /**
+     * Inicia una inspección: transiciona de PENDING/SCHEDULED a IN_PROGRESS.
+     * Solo se permite si la inspección tiene al menos un INSPECTOR asignado.
+     */
+    @Transactional
+    public InspectionListResponse startInspection(String inspectionId) {
+        Inspection inspection = inspectionRepository.findById(inspectionId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Inspección no encontrada: " + inspectionId));
+
+        if ("IN_PROGRESS".equals(inspection.getStatus())) {
+            return mapToListResponse(inspection);
+        }
+
+        if (inspection.getStatus() != null && inspection.getStatus().startsWith("DONE")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No se puede iniciar una inspección ya finalizada.");
+        }
+
+        List<InspectionAssignment> inspectors = assignmentRepository
+                .findByInspectionId(inspectionId).stream()
+                .filter(a -> ROLE_INSPECTOR.equals(a.getRole()))
+                .collect(Collectors.toList());
+        if (inspectors.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Se requiere al menos 1 Inspector asignado para iniciar la inspección.");
+        }
+
+        inspection.setStatus("IN_PROGRESS");
+        inspection.setUpdatedAt(Instant.now());
+        inspectionRepository.save(inspection);
+
+        return mapToListResponse(inspection);
+    }
+
+    /**
      * Firma digitalmente una inspección.
      *
      * Validaciones:
