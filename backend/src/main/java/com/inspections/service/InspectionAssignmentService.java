@@ -1,8 +1,10 @@
 package com.inspections.service;
 
 import com.inspections.entity.InspectionAssignment;
+import com.inspections.entity.User;
 import com.inspections.repository.InspectionAssignmentRepository;
 import com.inspections.repository.InspectionRepository;
+import com.inspections.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +25,14 @@ public class InspectionAssignmentService {
 
     private final InspectionAssignmentRepository assignmentRepository;
     private final InspectionRepository inspectionRepository;
+    private final UserRepository userRepository;
 
     public InspectionAssignmentService(InspectionAssignmentRepository assignmentRepository,
-                                       InspectionRepository inspectionRepository) {
+                                       InspectionRepository inspectionRepository,
+                                       UserRepository userRepository) {
         this.assignmentRepository = assignmentRepository;
         this.inspectionRepository = inspectionRepository;
+        this.userRepository = userRepository;
     }
 
     public List<InspectionAssignment> getAssignments(String inspectionId) {
@@ -62,6 +67,21 @@ public class InspectionAssignmentService {
             }
         }
 
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no registrado: " + normalizedEmail));
+        String dbRole = user.getRole() != null ? user.getRole().toUpperCase() : "";
+        if (ROLE_INSPECTOR.equals(normalizedRole)) {
+            if (!ROLE_INSPECTOR.equals(dbRole)) {
+                throw new IllegalArgumentException(
+                        "Solo usuarios con rol INSPECTOR pueden asignarse como inspector");
+            }
+        } else {
+            if (!ROLE_INSPECTOR.equals(dbRole) && !ROLE_OPERATOR.equals(dbRole)) {
+                throw new IllegalArgumentException(
+                        "En operadores solo se pueden asignar usuarios con rol INSPECTOR u OPERATOR");
+            }
+        }
+
         InspectionAssignment assignment = new InspectionAssignment();
         assignment.setId(UUID.randomUUID().toString());
         assignment.setInspectionId(inspectionId);
@@ -80,6 +100,10 @@ public class InspectionAssignmentService {
 
         String normalizedEmail = userEmail.trim().toLowerCase();
         String role = (currentUserRole != null ? currentUserRole : "").toUpperCase();
+
+        if (ROLE_OPERATOR.equals(role)) {
+            throw new IllegalArgumentException("Los operadores no pueden modificar asignaciones");
+        }
 
         InspectionAssignment toRemove = assignmentRepository.findByInspectionIdAndUserEmail(inspectionId, normalizedEmail)
                 .orElse(null);

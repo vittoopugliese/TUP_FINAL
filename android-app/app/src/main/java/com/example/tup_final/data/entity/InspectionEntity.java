@@ -56,6 +56,8 @@ public class InspectionEntity {
     public String createdAt;
     /** Marca de tiempo de actualización (ISO string). */
     public String updatedAt;
+    /** Email del usuario que creó la inspección en el backend (auditoría / UI). */
+    public String createdByEmail;
 
     public InspectionEntity() {}
 }

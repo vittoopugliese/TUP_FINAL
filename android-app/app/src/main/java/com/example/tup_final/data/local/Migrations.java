@@ -100,9 +100,16 @@ public final class Migrations {
         }
     };
 
+    public static final Migration MIGRATION_7_8 = new Migration(7, 8) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE inspections ADD COLUMN createdByEmail TEXT");
+        }
+    };
+
     public static final Migration[] ALL = {
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
-        MIGRATION_5_6, MIGRATION_6_7
+        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8
     };
 
     private Migrations() {}

@@ -34,7 +34,7 @@ public class User {
 
     /** Rol: INSPECTOR | OPERATOR. */
     @Column(nullable = false)
-    private String role = "INSPECTOR";
+    private String role = "OPERATOR";
 
     /** Indica si la cuenta está activa. */
     private boolean enabled = true;

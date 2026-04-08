@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS inspections (
     inspection_report_id VARCHAR(36),
     inspection_template_id VARCHAR(36),
     cover_page_id VARCHAR(36),
+    created_by_email VARCHAR(255),
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );

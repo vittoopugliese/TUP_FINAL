@@ -215,7 +215,8 @@ Esta acción no se puede deshacer.\n\n¿Confirmar firma?</string>
 
     <!-- Assignment (Inspector/Operators) -->
     <string name="assignment_inspector_title">Inspector</string>
-    <string name="assignment_operators_title">Inspectores</string>
+    <string name="inspection_created_by">Creada por: %1$s</string>
+    <string name="assignment_operators_title">Operadores</string>
     <string name="assignment_email_hint">Email del usuario</string>
     <string name="assignment_add">Agregar</string>
     <string name="assignment_remove_title">Remover asignación</string>

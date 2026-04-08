@@ -105,7 +105,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFullName() != null ? request.getFullName().trim() : "");
         user.setLastName("");
-        user.setRole("INSPECTOR");
+        user.setRole("OPERATOR");
         user.setEnabled(true);
         user.setCreatedAt(Instant.now());
 

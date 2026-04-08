@@ -7,6 +7,7 @@ import com.inspections.service.InspectionAssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,7 +43,8 @@ public class InspectionAssignmentController {
     }
 
     @PostMapping("/{inspectionId}/assignments")
-    @Operation(summary = "Agregar asignacion", description = "Agrega un inspector o operador a la inspeccion")
+    @PreAuthorize("hasAnyRole('ADMIN','INSPECTOR')")
+    @Operation(summary = "Agregar asignacion", description = "Solo ADMIN e INSPECTOR. Agrega un inspector o operador a la inspeccion")
     public ResponseEntity<?> addAssignment(@PathVariable String inspectionId, @RequestBody AssignmentRequest request) {
         try {
             InspectionAssignment assignment = assignmentService.addAssignment(
@@ -57,7 +59,8 @@ public class InspectionAssignmentController {
     }
 
     @DeleteMapping("/{inspectionId}/assignments/{email}")
-    @Operation(summary = "Remover asignacion", description = "Solo ADMIN puede remover al inspector. INSPECTOR puede remover operadores.")
+    @PreAuthorize("hasAnyRole('ADMIN','INSPECTOR')")
+    @Operation(summary = "Remover asignacion", description = "Solo ADMIN puede remover al inspector. INSPECTOR puede remover operadores. OPERATOR no puede quitar.")
     public ResponseEntity<?> removeAssignment(@PathVariable String inspectionId, @PathVariable String email) {
         try {
             String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);
