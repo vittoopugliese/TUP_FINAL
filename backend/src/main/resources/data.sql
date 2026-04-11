@@ -1,7 +1,8 @@
 -- ============================================================
 -- Datos de ejemplo para Inspections API backend
 -- Adaptado de database/data-ejemplo.sql para H2 (snake_case)
--- El usuario admin se crea en DataInitializer (admin@inspections.com)
+-- Usuarios de prueba (4): se crean en DataInitializer.java al arrancar el backend:
+--   admin@inspections.com, inspector@example.com, operador@inspections.com, operador1@inspections.com
 -- ============================================================
 
 -- Buildings (catálogo de edificios para inspecciones building-wide)
@@ -193,17 +194,15 @@ INSERT INTO devices (id, zone_id, location_id, building_id, device_type_id, devi
 
 -- Inspections (building-wide: location_id NULL; building_id es ref lógica)
 -- Solo 3 inspecciones demo: PENDING (bld-001), IN_PROGRESS (bld-002), DONE_COMPLETED (bld-003)
-INSERT INTO inspections (id, building_id, location_id, type, status, scheduled_date, approval_date, result, notes, signer, signed, sign_date, started_at, inspection_report_id, inspection_template_id, cover_page_id, created_at, updated_at) VALUES
-('insp-001', 'bld-001', NULL, 'Weekly', 'PENDING', '2025-03-20 08:00:00', NULL, NULL, 'Inspección semanal - Hospital Central (programada)', NULL, FALSE, NULL, NULL, NULL, 'tpl-001', NULL, '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
-('insp-002', 'bld-002', NULL, 'Monthly', 'IN_PROGRESS', '2025-03-18 10:00:00', NULL, NULL, 'Inspección mensual depósito - en curso', NULL, FALSE, NULL, '2025-03-18 09:00:00', NULL, 'tpl-002', NULL, '2025-03-15 09:00:00', '2025-03-18 09:00:00'),
-('insp-003', 'bld-003', NULL, 'Weekly', 'DONE_COMPLETED', '2025-03-15 09:00:00', '2025-03-15 16:00:00', 'SUCCESS', 'Inspección semanal Clínica Sur - completada OK', 'María García', TRUE, '2025-03-15 16:00:00', '2025-03-15 09:00:00', 'rpt-001', 'tpl-002', NULL, '2025-03-12 09:00:00', '2025-03-15 16:00:00');
+INSERT INTO inspections (id, building_id, location_id, type, status, scheduled_date, approval_date, result, notes, signer, signed, sign_date, started_at, inspection_report_id, inspection_template_id, cover_page_id, created_by_email, created_at, updated_at) VALUES
+('insp-001', 'bld-001', NULL, 'Weekly', 'PENDING', '2025-03-20 08:00:00', NULL, NULL, 'Inspección semanal - Hospital Central (programada)', NULL, FALSE, NULL, NULL, NULL, 'tpl-001', NULL, 'inspector@example.com', '2025-03-10 09:00:00', '2025-03-10 09:00:00'),
+('insp-002', 'bld-002', NULL, 'Monthly', 'IN_PROGRESS', '2025-03-18 10:00:00', NULL, NULL, 'Inspección mensual depósito - en curso', NULL, FALSE, NULL, '2025-03-18 09:00:00', NULL, 'tpl-002', NULL, 'inspector@example.com', '2025-03-15 09:00:00', '2025-03-18 09:00:00'),
+('insp-003', 'bld-003', NULL, 'Weekly', 'DONE_COMPLETED', '2025-03-15 09:00:00', '2025-03-15 16:00:00', 'SUCCESS', 'Inspección semanal Clínica Sur - completada OK', 'María García', TRUE, '2025-03-15 16:00:00', '2025-03-15 09:00:00', 'rpt-001', 'tpl-002', NULL, 'inspector@example.com', '2025-03-12 09:00:00', '2025-03-15 16:00:00');
 
 -- Inspection assignments (FK: inspection_id -> inspections)
 INSERT INTO inspection_assignments (id, inspection_id, user_email, role, created_at) VALUES
 ('asgn-001', 'insp-001', 'inspector@example.com', 'INSPECTOR', '2025-03-10 09:00:00'),
-('asgn-002', 'insp-001', 'operator@example.com', 'OPERATOR', '2025-03-10 09:00:00'),
 ('asgn-003', 'insp-002', 'inspector@example.com', 'INSPECTOR', '2025-03-15 09:00:00'),
-('asgn-004', 'insp-002', 'operator@example.com', 'OPERATOR', '2025-03-15 09:00:00'),
 ('asgn-005', 'insp-003', 'inspector@example.com', 'INSPECTOR', '2025-03-12 09:00:00');
 
 -- Photos (para observations)

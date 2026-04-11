@@ -78,6 +78,10 @@
     <string name="user_management_title">Gestionar usuarios</string>
     <string name="user_management_role_hint">Rol</string>
     <string name="user_management_empty">No hay usuarios.</string>
+    <string name="user_management_no_results">Sin resultados para la búsqueda.</string>
+    <string name="search_users_hint">Buscar usuario…</string>
+    <string name="filter_role_hint">Filtrar por rol</string>
+    <string name="filter_role_all">Todos</string>
     <string name="user_management_role_updated">Rol actualizado.</string>
     <string name="btn_manage_users">Gestionar usuarios</string>
     <string name="role_admin">Administrador</string>

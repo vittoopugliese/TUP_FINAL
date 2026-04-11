@@ -1,11 +1,12 @@
 package com.example.tup_final.ui.usermanagement;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,7 +15,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tup_final.R;
 import com.example.tup_final.data.remote.dto.UserProfileResponse;
@@ -62,9 +62,54 @@ public class UserManagementFragment extends Fragment {
         binding.recyclerUsers.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.recyclerUsers.setAdapter(adapter);
 
+        setupRoleDropdown();
+        setupSearchField();
+
         observeAdminGuard();
         observeUsers();
+        observeFilteredUsers();
         observeUpdateResult();
+    }
+
+    private void setupRoleDropdown() {
+        String[] labels = new String[]{
+                getString(R.string.filter_role_all),
+                getString(R.string.role_inspector),
+                getString(R.string.role_operator)
+        };
+        ArrayAdapter<String> roleAdapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                labels);
+        binding.inputFilterRole.setAdapter(roleAdapter);
+        binding.inputFilterRole.setText(labels[0], false);
+        viewModel.setRoleFilterKey(UserManagementViewModel.FILTER_ROLE_ALL);
+        binding.inputFilterRole.setOnItemClickListener((parent, view1, position, id) -> {
+            String key = UserManagementViewModel.FILTER_ROLE_ALL;
+            if (position == 1) {
+                key = UserManagementViewModel.FILTER_ROLE_INSPECTOR;
+            } else if (position == 2) {
+                key = UserManagementViewModel.FILTER_ROLE_OPERATOR;
+            }
+            viewModel.setRoleFilterKey(key);
+        });
+    }
+
+    private void setupSearchField() {
+        binding.inputSearchUsers.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                viewModel.setSearchQuery(s != null ? s.toString() : "");
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
     }
 
     private void observeAdminGuard() {
@@ -88,10 +133,10 @@ public class UserManagementFragment extends Fragment {
                     List<UserProfileResponse> list = resource.getData();
                     if (list == null || list.isEmpty()) {
                         binding.textEmpty.setVisibility(View.VISIBLE);
+                        binding.textEmpty.setText(getString(R.string.user_management_empty));
                         adapter.submitList(new ArrayList<>());
                     } else {
                         binding.textEmpty.setVisibility(View.GONE);
-                        adapter.submitList(new ArrayList<>(list));
                     }
                     break;
                 case ERROR:
@@ -101,6 +146,33 @@ public class UserManagementFragment extends Fragment {
                             ? resource.getMessage() : getString(R.string.inspections_error));
                     adapter.submitList(new ArrayList<>());
                     break;
+            }
+        });
+    }
+
+    private void observeFilteredUsers() {
+        viewModel.getFilteredUsers().observe(getViewLifecycleOwner(), filtered -> {
+            if (binding == null) return;
+            Resource<List<UserProfileResponse>> res = viewModel.getUsersResult().getValue();
+            if (res == null || res.getStatus() == LOADING || res.getStatus() == ERROR) {
+                return;
+            }
+            if (res.getStatus() != SUCCESS) {
+                return;
+            }
+
+            adapter.submitList(filtered != null ? new ArrayList<>(filtered) : new ArrayList<>());
+
+            int full = viewModel.getLastFetchedUserCount();
+            boolean emptyFiltered = filtered == null || filtered.isEmpty();
+            if (emptyFiltered && full > 0) {
+                binding.textEmpty.setVisibility(View.VISIBLE);
+                binding.textEmpty.setText(getString(R.string.user_management_no_results));
+            } else if (emptyFiltered && full == 0) {
+                binding.textEmpty.setVisibility(View.VISIBLE);
+                binding.textEmpty.setText(getString(R.string.user_management_empty));
+            } else {
+                binding.textEmpty.setVisibility(View.GONE);
             }
         });
     }

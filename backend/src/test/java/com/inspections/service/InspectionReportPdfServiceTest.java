@@ -62,7 +62,7 @@ class InspectionReportPdfServiceTest {
         data.setResult("OK");
         data.setSigned(true);
         data.setInspectorEmails(List.of("inspector@example.com"));
-        data.setOperatorEmails(List.of("operator@example.com"));
+        data.setOperatorEmails(List.of("operador@inspections.com"));
         data.setScheduledDate(Instant.parse("2025-01-15T10:00:00Z"));
         data.setStartedAt(Instant.parse("2025-01-15T10:30:00Z"));
         data.setSignDate(Instant.parse("2025-01-15T12:00:00Z"));
