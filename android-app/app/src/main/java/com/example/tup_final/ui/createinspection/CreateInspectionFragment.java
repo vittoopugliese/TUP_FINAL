@@ -41,6 +41,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class CreateInspectionFragment extends Fragment {
 
     private CreateInspectionViewModel viewModel;
+    private TextInputLayout layoutBuilding;
+    private TextInputLayout layoutType;
+    private TextInputLayout layoutTemplate;
     private AutoCompleteTextView inputBuilding;
     private AutoCompleteTextView inputType;
     private AutoCompleteTextView inputTemplate;
@@ -49,6 +52,7 @@ public class CreateInspectionFragment extends Fragment {
     private TextInputLayout layoutInspector;
     private TextInputEditText inputInspector;
     private TextView textSummary;
+    private TextView textInspectorInfo;
 
     @Nullable
     @Override
@@ -63,6 +67,9 @@ public class CreateInspectionFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(CreateInspectionViewModel.class);
 
+        layoutBuilding = view.findViewById(R.id.layout_building);
+        layoutType = view.findViewById(R.id.layout_type);
+        layoutTemplate = view.findViewById(R.id.layout_template);
         inputBuilding = view.findViewById(R.id.input_building);
         inputType = view.findViewById(R.id.input_type);
         inputTemplate = view.findViewById(R.id.input_template);
@@ -71,18 +78,54 @@ public class CreateInspectionFragment extends Fragment {
         layoutInspector = view.findViewById(R.id.layout_inspector);
         inputInspector = view.findViewById(R.id.input_inspector);
         textSummary = view.findViewById(R.id.text_summary);
+        textInspectorInfo = view.findViewById(R.id.text_inspector_info);
 
+        applyRoleToInspectorSection();
         setupBuildingDropdown();
         setupTypeDropdown();
         setupTemplateDropdown();
         setupDatePicker();
         setupInspectorInput();
+        setupInspectorFieldClearListener();
         setupButtons(view);
         observeData();
         observeInspectorPrefill();
     }
 
+    private void applyRoleToInspectorSection() {
+        boolean admin = viewModel.isAdminUser();
+        layoutInspector.setVisibility(admin ? View.VISIBLE : View.GONE);
+        textInspectorInfo.setVisibility(admin ? View.GONE : View.VISIBLE);
+    }
+
+    private void clearFormFieldErrors() {
+        layoutBuilding.setError(null);
+        layoutType.setError(null);
+        layoutTemplate.setError(null);
+        layoutInspector.setError(null);
+    }
+
+    private void setupInspectorFieldClearListener() {
+        inputInspector.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                layoutInspector.setError(null);
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+            }
+        });
+    }
+
     private void observeInspectorPrefill() {
+        if (!viewModel.isAdminUser()) {
+            return;
+        }
         viewModel.getInspectorEmail().observe(getViewLifecycleOwner(), email -> {
             if (email != null && !email.isEmpty() && inputInspector != null
                     && (inputInspector.getText() == null || inputInspector.getText().toString().isEmpty())) {
@@ -106,6 +149,7 @@ public class CreateInspectionFragment extends Fragment {
                     if (position >= 0 && position < buildings.size()) {
                         viewModel.setSelectedBuildingId(buildings.get(position).getId());
                     }
+                    layoutBuilding.setError(null);
                 });
             }
         });
@@ -119,6 +163,7 @@ public class CreateInspectionFragment extends Fragment {
             if (position >= 0 && position < CreateInspectionViewModel.TYPE_OPTIONS.length) {
                 viewModel.setSelectedType(CreateInspectionViewModel.TYPE_OPTIONS[position]);
             }
+            layoutType.setError(null);
         });
     }
 
@@ -137,6 +182,7 @@ public class CreateInspectionFragment extends Fragment {
                     if (position >= 0 && position < templates.size()) {
                         viewModel.setSelectedTemplateId(templates.get(position).getId());
                     }
+                    layoutTemplate.setError(null);
                 });
             }
         });
@@ -159,13 +205,11 @@ public class CreateInspectionFragment extends Fragment {
     }
 
     private void setupInspectorInput() {
-        if (inputInspector != null) {
-            inputInspector.setOnFocusChangeListener((v, hasFocus) -> {
-                if (!hasFocus && inputInspector.getText() != null) {
-                    viewModel.setInspectorEmail(inputInspector.getText().toString());
-                }
-            });
-        }
+        inputInspector.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus && inputInspector.getText() != null) {
+                viewModel.setInspectorEmail(inputInspector.getText().toString());
+            }
+        });
     }
 
     private void setupButtons(View view) {
@@ -173,7 +217,7 @@ public class CreateInspectionFragment extends Fragment {
             if (inputNotes.getText() != null) {
                 viewModel.setNotes(inputNotes.getText().toString());
             }
-            if (inputInspector.getText() != null) {
+            if (viewModel.isAdminUser() && inputInspector.getText() != null) {
                 viewModel.setInspectorEmail(inputInspector.getText().toString());
             }
             viewModel.createInspection();
@@ -217,12 +261,22 @@ public class CreateInspectionFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().setFragmentResult("create_inspection_success", result);
                 NavHostFragment.findNavController(this).navigateUp();
             } else if (resource.getStatus() == Resource.Status.ERROR) {
+                clearFormFieldErrors();
                 String msg = resource.getMessage();
-                layoutInspector.setError(msg);
+                String field = resource.getFormField();
+                if (CreateInspectionViewModel.FIELD_BUILDING.equals(field)) {
+                    layoutBuilding.setError(msg);
+                } else if (CreateInspectionViewModel.FIELD_TYPE.equals(field)) {
+                    layoutType.setError(msg);
+                } else if (CreateInspectionViewModel.FIELD_TEMPLATE.equals(field)) {
+                    layoutTemplate.setError(msg);
+                } else if (CreateInspectionViewModel.FIELD_INSPECTOR.equals(field)) {
+                    layoutInspector.setError(msg);
+                }
                 Toast.makeText(requireContext(), msg != null ? msg : getString(R.string.error_unknown),
-                        Toast.LENGTH_SHORT).show();
+                        Toast.LENGTH_LONG).show();
             } else if (resource.getStatus() == Resource.Status.LOADING) {
-                layoutInspector.setError(null);
+                clearFormFieldErrors();
             }
         });
     }

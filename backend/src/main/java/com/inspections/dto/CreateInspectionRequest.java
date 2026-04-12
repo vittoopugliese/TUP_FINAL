@@ -2,7 +2,6 @@ package com.inspections.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
@@ -11,6 +10,10 @@ import java.util.List;
 /**
  * Request DTO para crear una inspección desde un building.
  * La inspección es building-wide; locationId queda null.
+ * <p>
+ * {@code assignments}: opcional si el creador es INSPECTOR (el backend asigna al creador como único inspector
+ * y solo usa del body las filas con rol OPERATOR). Si el creador es ADMIN, debe incluir al menos una asignación
+ * con rol INSPECTOR (exactamente una) y las de OPERATOR que correspondan.
  */
 public class CreateInspectionRequest {
 
@@ -28,7 +31,6 @@ public class CreateInspectionRequest {
 
     private String notes;
 
-    @NotEmpty(message = "At least one assignment with role INSPECTOR is required")
     @Valid
     private List<AssignmentRequest> assignments;
 

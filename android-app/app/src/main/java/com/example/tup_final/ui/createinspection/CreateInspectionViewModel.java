@@ -19,6 +19,7 @@ import com.example.tup_final.util.Resource;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,6 +33,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class CreateInspectionViewModel extends ViewModel {
 
     public static final String[] TYPE_OPTIONS = {"Daily", "Weekly", "Monthly", "Annually"};
+
+    /** Claves para {@link Resource#getFormField()} en validación local. */
+    public static final String FIELD_BUILDING = "building";
+    public static final String FIELD_TYPE = "type";
+    public static final String FIELD_DATE = "date";
+    public static final String FIELD_TEMPLATE = "template";
+    public static final String FIELD_INSPECTOR = "inspector";
+
+    private static final String PREFS_ROLE = "cached_role";
 
     private final CreateInspectionRepository repository;
     private final SharedPreferences prefs;
@@ -59,10 +69,20 @@ public class CreateInspectionViewModel extends ViewModel {
     }
 
     /**
-     * Pre-llena el email del inspector con el usuario actual para que,
-     * al crear su inspección, quede asignado y la vea en la lista.
+     * Solo el ADMIN elige el inspector en el formulario; el backend asigna al INSPECTOR creador automáticamente.
+     */
+    public boolean isAdminUser() {
+        String r = prefs.getString(PREFS_ROLE, "");
+        return r != null && "ADMIN".equalsIgnoreCase(r.trim());
+    }
+
+    /**
+     * Pre-llena el email del inspector para ADMIN (útil si el admin también inspecciona).
      */
     private void prefillInspectorWithCurrentUser() {
+        if (!isAdminUser()) {
+            return;
+        }
         String email = prefs.getString("cached_email", "");
         if (email != null && !email.trim().isEmpty()) {
             inspectorEmail.setValue(email.trim());
@@ -140,37 +160,44 @@ public class CreateInspectionViewModel extends ViewModel {
         String inspector = inspectorEmail.getValue() != null ? inspectorEmail.getValue().trim() : "";
 
         if (buildingId == null || buildingId.isEmpty()) {
-            createResult.setValue(Resource.error("Seleccioná un edificio"));
+            createResult.setValue(Resource.error("Seleccioná un edificio", FIELD_BUILDING));
             return;
         }
         if (type == null || type.isEmpty()) {
-            createResult.setValue(Resource.error("Seleccioná un tipo de inspección"));
+            createResult.setValue(Resource.error("Seleccioná un tipo de inspección", FIELD_TYPE));
             return;
         }
         if (dateMillis == null) {
-            createResult.setValue(Resource.error("Seleccioná una fecha programada"));
+            createResult.setValue(Resource.error("Seleccioná una fecha programada", FIELD_DATE));
             return;
         }
         if (templateId == null || templateId.isEmpty()) {
-            createResult.setValue(Resource.error("Seleccioná una plantilla"));
+            createResult.setValue(Resource.error("Seleccioná una plantilla", FIELD_TEMPLATE));
             return;
         }
-        if (inspector.isEmpty()) {
-            createResult.setValue(Resource.error("Ingresá el email del inspector"));
-            return;
-        }
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(inspector).matches()) {
-            createResult.setValue(Resource.error("Email del inspector inválido"));
-            return;
+
+        List<AssignmentRequest> assignments;
+        if (isAdminUser()) {
+            if (inspector.isEmpty()) {
+                createResult.setValue(Resource.error("Ingresá el email del inspector", FIELD_INSPECTOR));
+                return;
+            }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(inspector).matches()) {
+                createResult.setValue(Resource.error("Email del inspector inválido", FIELD_INSPECTOR));
+                return;
+            }
+            assignments = new ArrayList<>();
+            assignments.add(new AssignmentRequest(inspector, "INSPECTOR"));
+        } else {
+            // INSPECTOR: el backend ignora asignaciones INSPECTOR del body y asigna al creador;
+            // lista vacía cumple el contrato actualizado del API.
+            assignments = new ArrayList<>();
         }
 
         String scheduledDateIso = Instant.ofEpochMilli(dateMillis)
                 .atZone(ZoneId.systemDefault())
                 .toInstant()
                 .toString();
-
-        List<AssignmentRequest> assignments = new ArrayList<>();
-        assignments.add(new AssignmentRequest(inspector, "INSPECTOR"));
 
         CreateInspectionRequest request = new CreateInspectionRequest(
                 buildingId,
