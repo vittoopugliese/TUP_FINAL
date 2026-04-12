@@ -342,6 +342,7 @@ Esta acción no se puede deshacer.\n\n¿Confirmar firma?</string>
     <string name="create_inspection_template_hint">Plantilla</string>
     <string name="create_inspection_notes_hint">Notas (opcional)</string>
     <string name="create_inspection_inspector_hint">Email del inspector</string>
+    <string name="create_inspection_inspector_self_info">Como inspector, quedarás asignado automáticamente a esta inspección.</string>
     <string name="create_inspection_summary">Este edificio heredará %1$d ubicaciones, %2$d zonas, %3$d dispositivos y %4$d tests.</string>
     <string name="create_inspection_summary_loading">Cargando resumen…</string>
     <string name="create_inspection_success">Inspección creada correctamente</string>

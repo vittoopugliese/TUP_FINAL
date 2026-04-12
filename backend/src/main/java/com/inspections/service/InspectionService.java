@@ -372,8 +372,11 @@ public class InspectionService {
             return merged;
         }
         if ("ADMIN".equals(upperRole)) {
-            validateAssignments(request.getAssignments());
-            return new ArrayList<>(request.getAssignments());
+            List<AssignmentRequest> adminAssignments = request.getAssignments() != null
+                    ? request.getAssignments()
+                    : List.of();
+            validateAssignments(adminAssignments);
+            return new ArrayList<>(adminAssignments);
         }
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                 "Solo ADMIN o INSPECTOR pueden crear inspecciones");

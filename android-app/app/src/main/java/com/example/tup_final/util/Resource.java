@@ -27,22 +27,35 @@ public class Resource<T> {
     @Nullable
     private final String message;
 
-    private Resource(@NonNull Status status, @Nullable T data, @Nullable String message) {
+    /**
+     * Clave opcional para asociar un error de validación local a un campo del formulario
+     * (p. ej. "building", "inspector"). Null en errores de API o sin campo concreto.
+     */
+    @Nullable
+    private final String formField;
+
+    private Resource(@NonNull Status status, @Nullable T data, @Nullable String message,
+                      @Nullable String formField) {
         this.status = status;
         this.data = data;
         this.message = message;
+        this.formField = formField;
     }
 
     public static <T> Resource<T> loading() {
-        return new Resource<>(Status.LOADING, null, null);
+        return new Resource<>(Status.LOADING, null, null, null);
     }
 
     public static <T> Resource<T> success(@Nullable T data) {
-        return new Resource<>(Status.SUCCESS, data, null);
+        return new Resource<>(Status.SUCCESS, data, null, null);
     }
 
     public static <T> Resource<T> error(@NonNull String message) {
-        return new Resource<>(Status.ERROR, null, message);
+        return new Resource<>(Status.ERROR, null, message, null);
+    }
+
+    public static <T> Resource<T> error(@NonNull String message, @Nullable String formField) {
+        return new Resource<>(Status.ERROR, null, message, formField);
     }
 
     @NonNull
@@ -58,5 +71,10 @@ public class Resource<T> {
     @Nullable
     public String getMessage() {
         return message;
+    }
+
+    @Nullable
+    public String getFormField() {
+        return formField;
     }
 }
