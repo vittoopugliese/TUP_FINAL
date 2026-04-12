@@ -83,7 +83,7 @@ N/A por step: `applicable=false`. Excluido de validación y resultado.
 ### Backend (Spring Boot)
 - El backend usa `backend/src/main/resources/schema.sql` y `data.sql`
 - `data.sql` está adaptado de `data-ejemplo.sql` para H2 (snake_case, formato de fechas)
-- El usuario admin se crea en `DataInitializer` (admin@inspections.com / Admin1234!)
+- Los usuarios de prueba se crean en `backend/.../DataInitializer.java` (no en `data.sql`): admin, inspector y dos operadores — ver credenciales en el Javadoc de esa clase (`admin@inspections.com`, `inspector@example.com`, `operador@inspections.com`, `operador1@inspections.com`).
 - Al iniciar el backend, se cargan automáticamente: locations, zones, devices, inspections, photos, tests, steps, observations, audit_logs
 
 ### Android (Room)

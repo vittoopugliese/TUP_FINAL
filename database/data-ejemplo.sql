@@ -6,15 +6,15 @@
 -- Orden respeta dependencias de foreign keys
 --
 -- Backend: Este archivo está adaptado en backend/src/main/resources/data.sql (H2/snake_case)
+-- Usuarios de ejemplo: mismos 4 que crea DataInitializer.java (admin, inspector, 2 operadores).
 -- ============================================================
 
--- Users (no FKs)
+-- Users (no FKs) — alineados con backend DataInitializer (ids locales usr-* solo para este script)
 INSERT INTO users (id, email, firstName, lastName, avatarImage, phoneNumber, role, lastLoginAt, createdAt) VALUES
 ('usr-001', 'inspector@example.com', 'María', 'García', 'https://example.com/avatars/1.jpg', '+54 11 1234-5678', 'INSPECTOR', '2025-03-14T10:00:00Z', '2025-01-15T09:00:00Z'),
-('usr-002', 'operator@example.com', 'Carlos', 'López', NULL, '+54 11 8765-4321', 'OPERATOR', '2025-03-13T14:30:00Z', '2025-01-20T11:00:00Z'),
-('usr-003', 'admin@inspections.com', 'Admin', 'Sistema', NULL, '+54 11 5555-0000', 'ADMIN', '2025-03-14T08:00:00Z', '2025-01-01T00:00:00Z'),
-('usr-004', 'juan.perez@empresa.com', 'Juan', 'Pérez', NULL, '+54 11 3333-4444', 'INSPECTOR', '2025-03-12T16:00:00Z', '2025-02-01T10:00:00Z'),
-('usr-005', 'ana.martinez@empresa.com', 'Ana', 'Martínez', NULL, '+54 11 2222-1111', 'OPERATOR', '2025-03-11T09:00:00Z', '2025-02-05T14:00:00Z');
+('usr-002', 'operador@inspections.com', 'Operador', 'Sistema', NULL, '+54 11 8765-4321', 'OPERATOR', '2025-03-13T14:30:00Z', '2025-01-20T11:00:00Z'),
+('usr-003', 'admin@inspections.com', 'Admin', 'Inspector', NULL, '+54 11 5555-0000', 'ADMIN', '2025-03-14T08:00:00Z', '2025-01-01T00:00:00Z'),
+('usr-004', 'operador1@inspections.com', 'Operador', 'Uno', NULL, '+54 11 2222-1111', 'OPERATOR', '2025-03-11T09:00:00Z', '2025-02-05T14:00:00Z');
 
 -- Locations (buildingId es ref lógica; múltiples edificios y ubicaciones)
 INSERT INTO locations (id, buildingId, name, details, createdAt, updatedAt) VALUES
@@ -60,17 +60,15 @@ INSERT INTO devices (id, zoneId, locationId, buildingId, deviceTypeId, deviceCat
 
 -- Inspections (buildingId y locationId son refs lógicas)
 -- Solo 3 inspecciones demo: PENDING (bld-001), IN_PROGRESS (bld-002), DONE_COMPLETED (bld-003)
-INSERT INTO inspections (id, buildingId, locationId, type, status, scheduledDate, approvalDate, result, notes, signer, signed, signDate, startedAt, inspectionReportId, inspectionTemplateId, coverPageId, createdAt, updatedAt) VALUES
-('insp-001', 'bld-001', NULL, 'Weekly', 'PENDING', '2025-03-20T08:00:00Z', NULL, NULL, 'Inspección semanal - Hospital Central (programada)', NULL, 0, NULL, NULL, NULL, 'tpl-001', NULL, '2025-03-10T09:00:00Z', '2025-03-10T09:00:00Z'),
-('insp-002', 'bld-002', NULL, 'Monthly', 'IN_PROGRESS', '2025-03-18T10:00:00Z', NULL, NULL, 'Inspección mensual depósito - en curso', NULL, 0, NULL, '2025-03-18T09:00:00Z', NULL, 'tpl-002', NULL, '2025-03-15T09:00:00Z', '2025-03-18T09:00:00Z'),
-('insp-003', 'bld-003', NULL, 'Weekly', 'DONE_COMPLETED', '2025-03-15T09:00:00Z', '2025-03-15T16:00:00Z', 'SUCCESS', 'Inspección semanal Clínica Sur - completada OK', 'María García', 1, '2025-03-15T16:00:00Z', '2025-03-15T09:00:00Z', 'rpt-001', 'tpl-002', NULL, '2025-03-12T09:00:00Z', '2025-03-15T16:00:00Z');
+INSERT INTO inspections (id, buildingId, locationId, type, status, scheduledDate, approvalDate, result, notes, signer, signed, signDate, startedAt, inspectionReportId, inspectionTemplateId, coverPageId, createdByEmail, createdAt, updatedAt) VALUES
+('insp-001', 'bld-001', NULL, 'Weekly', 'PENDING', '2025-03-20T08:00:00Z', NULL, NULL, 'Inspección semanal - Hospital Central (programada)', NULL, 0, NULL, NULL, NULL, 'tpl-001', NULL, 'inspector@example.com', '2025-03-10T09:00:00Z', '2025-03-10T09:00:00Z'),
+('insp-002', 'bld-002', NULL, 'Monthly', 'IN_PROGRESS', '2025-03-18T10:00:00Z', NULL, NULL, 'Inspección mensual depósito - en curso', NULL, 0, NULL, '2025-03-18T09:00:00Z', NULL, 'tpl-002', NULL, 'inspector@example.com', '2025-03-15T09:00:00Z', '2025-03-18T09:00:00Z'),
+('insp-003', 'bld-003', NULL, 'Weekly', 'DONE_COMPLETED', '2025-03-15T09:00:00Z', '2025-03-15T16:00:00Z', 'SUCCESS', 'Inspección semanal Clínica Sur - completada OK', 'María García', 1, '2025-03-15T16:00:00Z', '2025-03-15T09:00:00Z', 'rpt-001', 'tpl-002', NULL, 'inspector@example.com', '2025-03-12T09:00:00Z', '2025-03-15T16:00:00Z');
 
 -- Inspection assignments (FK: inspectionId -> inspections)
 INSERT INTO inspection_assignments (id, inspectionId, userEmail, role, createdAt) VALUES
 ('asgn-001', 'insp-001', 'inspector@example.com', 'INSPECTOR', '2025-03-10T09:00:00Z'),
-('asgn-002', 'insp-001', 'operator@example.com', 'OPERATOR', '2025-03-10T09:00:00Z'),
 ('asgn-003', 'insp-002', 'inspector@example.com', 'INSPECTOR', '2025-03-15T09:00:00Z'),
-('asgn-004', 'insp-002', 'operator@example.com', 'OPERATOR', '2025-03-15T09:00:00Z'),
 ('asgn-005', 'insp-003', 'inspector@example.com', 'INSPECTOR', '2025-03-12T09:00:00Z');
 
 -- Photos (referenciadas por observations.mediaId)

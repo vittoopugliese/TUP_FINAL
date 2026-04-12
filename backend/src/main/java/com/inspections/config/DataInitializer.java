@@ -17,10 +17,10 @@ import java.time.Instant;
  * Las inspecciones y demás datos vienen de data.sql.
  *
  * Credenciales de prueba:
- * - ADMIN:     admin@inspections.com      / Admin1234!
- * - OPERATOR:  operador@inspections.com   / Operador123
- * - INSPECTOR: inspector@example.com     / Inspector123 (asignado a todas las inspecciones)
- * - INSPECTOR: inspector2@example.com    / Inspector123 (sin asignaciones)
+ * - ADMIN:      admin@inspections.com      / Admin1234!
+ * - INSPECTOR:  inspector@example.com    / Inspector123 (asignado a todas las inspecciones en data.sql)
+ * - OPERATOR 1: operador@inspections.com / Operador123
+ * - OPERATOR 2: operador1@inspections.com / Operador123
  */
 @Configuration
 public class DataInitializer {
@@ -30,7 +30,7 @@ public class DataInitializer {
     public static final String ADMIN_USER_ID = "admin-001";
     public static final String OPERATOR_USER_ID = "operator-001";
     public static final String INSPECTOR_USER_ID = "inspector-001";
-    public static final String INSPECTOR2_USER_ID = "inspector-002";
+    public static final String OPERATOR2_USER_ID = "operator-002";
 
     @Bean
     public CommandLineRunner seedData(UserRepository userRepository,
@@ -46,8 +46,8 @@ public class DataInitializer {
                     INSPECTOR_USER_ID, "inspector@example.com", "Inspector123",
                     "María", "García", "INSPECTOR");
             createUserIfNotExists(userRepository, passwordEncoder,
-                    INSPECTOR2_USER_ID, "inspector2@example.com", "Inspector123",
-                    "Juan", "Pérez", "INSPECTOR");
+                    OPERATOR2_USER_ID, "operador1@inspections.com", "Operador123",
+                    "Operador", "Uno", "OPERATOR");
         };
     }
 

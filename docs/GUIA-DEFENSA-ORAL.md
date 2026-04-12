@@ -32,9 +32,9 @@ Esta guía te prepara para exponer el proyecto de punta a punta en una defensa o
 Al iniciar el backend se crean usuarios de prueba:
 
 - `admin@inspections.com` / `Admin1234!` (ADMIN)
-- `operador@inspections.com` / `Operador123` (OPERATOR)
 - `inspector@example.com` / `Inspector123` (INSPECTOR, asignado a inspecciones de ejemplo)
-- `inspector2@example.com` / `Inspector123` (INSPECTOR, sin asignaciones)
+- `operador@inspections.com` / `Operador123` (OPERATOR)
+- `operador1@inspections.com` / `Operador123` (OPERATOR)
 
 **Archivo:** `backend/src/main/java/com/inspections/config/DataInitializer.java`
 
