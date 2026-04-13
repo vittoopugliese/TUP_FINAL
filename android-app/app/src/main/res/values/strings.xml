@@ -91,6 +91,13 @@
     <string name="audit_apply_filters">Aplicar filtros</string>
     <string name="audit_clear_filters">Limpiar</string>
     <string name="audit_action_all">Todos</string>
+    <string name="audit_filter_user_hint">Usuario</string>
+    <string name="audit_filter_inspection_hint">Inspección</string>
+    <string name="audit_filter_user_all">Todos</string>
+    <string name="audit_filter_inspection_all">Todas</string>
+    <string name="audit_export_pdf">Exportar PDF</string>
+    <string name="audit_export_success">Informe descargado</string>
+    <string name="audit_export_error">Error al generar el informe</string>
     <string name="audit_log_empty">No hay registros de auditoría.</string>
     <string name="role_admin">Administrador</string>
 

@@ -36,16 +36,42 @@ public class AuditLogRepository {
         this.auditLogApi = auditLogApi;
     }
 
-    public LiveData<Resource<List<AuditLogResponse>>> getAuditLogs(String action, String fromIso, String toIso) {
+    public LiveData<Resource<List<AuditLogResponse>>> getAuditLogs(String action, String userId,
+                                                                    String entityId, String fromIso, String toIso) {
         MutableLiveData<Resource<List<AuditLogResponse>>> result = new MutableLiveData<>();
         result.setValue(Resource.loading());
 
         executor.execute(() -> {
             try {
                 Response<List<AuditLogResponse>> response =
-                        auditLogApi.getAuditLogs(action, fromIso, toIso).execute();
+                        auditLogApi.getAuditLogs(action, userId, entityId, fromIso, toIso).execute();
                 if (response.isSuccessful() && response.body() != null) {
                     mainHandler.post(() -> result.setValue(Resource.success(response.body())));
+                } else {
+                    String msg = parseErrorMessage(response.errorBody());
+                    mainHandler.post(() -> result.setValue(Resource.error(msg)));
+                }
+            } catch (IOException e) {
+                mainHandler.post(() -> result.setValue(
+                        Resource.error("Error de conexión. Verificá tu internet.")));
+            }
+        });
+
+        return result;
+    }
+
+    public LiveData<Resource<byte[]>> downloadReportPdf(String action, String userId,
+                                                         String entityId, String fromIso, String toIso) {
+        MutableLiveData<Resource<byte[]>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading());
+
+        executor.execute(() -> {
+            try {
+                Response<ResponseBody> response =
+                        auditLogApi.getAuditLogReportPdf(action, userId, entityId, fromIso, toIso).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    byte[] bytes = response.body().bytes();
+                    mainHandler.post(() -> result.setValue(Resource.success(bytes)));
                 } else {
                     String msg = parseErrorMessage(response.errorBody());
                     mainHandler.post(() -> result.setValue(Resource.error(msg)));

@@ -42,6 +42,44 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layout_filter_user"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:hint="@string/audit_filter_user_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_filter_action">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/input_filter_user"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layout_filter_inspection"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:hint="@string/audit_filter_inspection_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_filter_user">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/input_filter_inspection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_filter_date"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -52,7 +90,7 @@
             android:text="@string/audit_filter_date_hint"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layout_filter_action" />
+            app:layout_constraintTop_toBottomOf="@id/layout_filter_inspection" />
 
         <LinearLayout
             android:id="@+id/layout_apply_row"
@@ -82,6 +120,19 @@
                 android:text="@string/audit_clear_filters" />
         </LinearLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_export_pdf"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/audit_export_pdf"
+            app:icon="@android:drawable/ic_menu_save"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_apply_row" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_audit_logs"
             android:layout_width="0dp"
@@ -91,7 +142,7 @@
             app:layout_constraintBottom_toTopOf="@id/progress_audit"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layout_apply_row"
+            app:layout_constraintTop_toBottomOf="@id/btn_export_pdf"
             tools:listitem="@layout/item_audit_log" />
 
         <TextView
@@ -103,7 +154,7 @@
             app:layout_constraintBottom_toTopOf="@id/progress_audit"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layout_apply_row"
+            app:layout_constraintTop_toBottomOf="@id/btn_export_pdf"
             tools:visibility="visible" />
 
         <ProgressBar

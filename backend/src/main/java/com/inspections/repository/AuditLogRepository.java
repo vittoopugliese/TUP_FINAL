@@ -17,11 +17,15 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, String> {
 
     @Query("SELECT a FROM AuditLog a WHERE " +
             "(:action IS NULL OR a.action = :action) AND " +
+            "(:userId IS NULL OR a.userId = :userId) AND " +
+            "(:entityId IS NULL OR a.entityId = :entityId) AND " +
             "(:from IS NULL OR a.createdAt >= :from) AND " +
             "(:to IS NULL OR a.createdAt <= :to) " +
             "ORDER BY a.createdAt DESC")
     List<AuditLog> findByFilters(
             @Param("action") String action,
+            @Param("userId") String userId,
+            @Param("entityId") String entityId,
             @Param("from") Instant from,
             @Param("to") Instant to);
 }
