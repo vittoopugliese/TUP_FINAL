@@ -92,7 +92,8 @@ INSERT INTO tests (id, deviceId, inspectionId, testTemplateId, testStepIds, name
 ('test-009', 'dev-008', 'insp-003', 'tt-001', '["step-011","step-012"]', 'Verificación panel quirófanos', 'Revisión del panel de alarma', 'COMPLETED', 1, '2025-03-15T09:00:00Z', '2025-03-15T16:00:00Z'),
 ('test-010', 'dev-009', 'insp-003', 'tt-003', '["step-013"]', 'Prueba detector pasillo 101', 'Verificación detector humo', 'COMPLETED', 1, '2025-03-15T09:00:00Z', '2025-03-15T14:00:00Z'),
 ('test-011', 'dev-016', 'insp-003', 'tt-011', '["step-014"]', 'Calibración monitor anestesia', 'Verificar sensor gases anestésicos', 'COMPLETED', 1, '2025-03-15T09:00:00Z', '2025-03-15T15:00:00Z'),
-('test-012', 'dev-017', 'insp-003', 'tt-006', '["step-015"]', 'Inspección extintor pasillo', 'Verificar sello y accesibilidad', 'COMPLETED', 1, '2025-03-15T09:00:00Z', '2025-03-15T15:30:00Z');
+('test-012', 'dev-017', 'insp-003', 'tt-006', '["step-015"]', 'Inspección extintor pasillo', 'Verificar sello y accesibilidad', 'COMPLETED', 1, '2025-03-15T09:00:00Z', '2025-03-15T15:30:00Z'),
+('test-013', 'dev-003', 'insp-001', 'tt-008', '["step-016","step-017"]', 'Prueba Fire Pump', 'Verificación de arranque y presión nominal', 'PENDING', 1, '2025-03-10T09:00:00Z', '2025-03-10T09:00:00Z');
 
 -- Steps (FK: testId -> tests)
 INSERT INTO steps (id, testId, name, testStepType, applicable, status, description, valueJson, minValue, maxValue, createdAt, updatedAt) VALUES
@@ -110,7 +111,9 @@ INSERT INTO steps (id, testId, name, testStepType, applicable, status, descripti
 ('step-012', 'test-009', 'Sin alarmas activas', 'BINARY', 1, 'COMPLETED', 'No hay alarmas pendientes', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15T09:00:00Z', '2025-03-15T16:00:00Z'),
 ('step-013', 'test-010', 'Prueba de humo', 'BINARY', 1, 'COMPLETED', 'Detector respondió correctamente', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15T09:00:00Z', '2025-03-15T14:00:00Z'),
 ('step-014', 'test-011', 'Lectura sensor gases', 'RANGE', 1, 'COMPLETED', 'Calibración OK', '{"value": 2.1, "valueType": "NUMERIC_UNIT_VALUE"}', 0.0, 5.0, '2025-03-15T09:00:00Z', '2025-03-15T15:00:00Z'),
-('step-015', 'test-012', 'Sello y accesibilidad', 'BINARY', 1, 'COMPLETED', 'Extintor accesible y sello intacto', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15T09:00:00Z', '2025-03-15T15:30:00Z');
+('step-015', 'test-012', 'Sello y accesibilidad', 'BINARY', 1, 'COMPLETED', 'Extintor accesible y sello intacto', '{"value": true, "valueType": "BOOLEAN_VALUE"}', NULL, NULL, '2025-03-15T09:00:00Z', '2025-03-15T15:30:00Z'),
+('step-016', 'test-013', 'Presión nominal (psi)', 'RANGE', 1, 'PENDING', 'Verificar presión de descarga', NULL, 100.0, 150.0, '2025-03-10T09:00:00Z', '2025-03-10T09:00:00Z'),
+('step-017', 'test-013', 'Arranque correcto', 'BINARY', 1, 'PENDING', 'Bomba arranca sin fallos', NULL, NULL, NULL, '2025-03-10T09:00:00Z', '2025-03-10T09:00:00Z');
 
 -- Observations (FK: testStepId -> steps, inspectionId -> inspections; mediaId -> photos)
 INSERT INTO observations (id, testStepId, inspectionId, name, type, description, deficiencyTypeId, mediaId, createdAt, updatedAt) VALUES
