@@ -1,5 +1,7 @@
 package com.inspections.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inspections.entity.InspectionAssignment;
 import com.inspections.entity.User;
 import com.inspections.repository.InspectionAssignmentRepository;
@@ -9,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -26,13 +30,19 @@ public class InspectionAssignmentService {
     private final InspectionAssignmentRepository assignmentRepository;
     private final InspectionRepository inspectionRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
+    private final ObjectMapper objectMapper;
 
     public InspectionAssignmentService(InspectionAssignmentRepository assignmentRepository,
                                        InspectionRepository inspectionRepository,
-                                       UserRepository userRepository) {
+                                       UserRepository userRepository,
+                                       AuditService auditService,
+                                       ObjectMapper objectMapper) {
         this.assignmentRepository = assignmentRepository;
         this.inspectionRepository = inspectionRepository;
         this.userRepository = userRepository;
+        this.auditService = auditService;
+        this.objectMapper = objectMapper;
     }
 
     public List<InspectionAssignment> getAssignments(String inspectionId) {
@@ -41,7 +51,7 @@ public class InspectionAssignmentService {
 
     @Transactional
     public InspectionAssignment addAssignment(String inspectionId, String userEmail, String role,
-                                             String currentUserRole) {
+                                             String currentUserRole, String callerEmail) {
         if (inspectionId == null || userEmail == null || role == null) {
             throw new IllegalArgumentException("inspectionId, userEmail and role are required");
         }
@@ -101,11 +111,23 @@ public class InspectionAssignmentService {
         assignment.setRole(normalizedRole);
         assignment.setCreatedAt(Instant.now());
 
-        return assignmentRepository.save(assignment);
+        InspectionAssignment saved = assignmentRepository.save(assignment);
+        String actor = callerEmail != null ? callerEmail.trim().toLowerCase() : "";
+        Map<String, String> meta = new LinkedHashMap<>();
+        meta.put("assigneeEmail", normalizedEmail);
+        meta.put("role", normalizedRole);
+        try {
+            auditService.log(actor, "Inspection", inspectionId, "ASSIGNMENT_ADD",
+                    objectMapper.writeValueAsString(meta));
+        } catch (JsonProcessingException e) {
+            auditService.log(actor, "Inspection", inspectionId, "ASSIGNMENT_ADD", null);
+        }
+        return saved;
     }
 
     @Transactional
-    public void removeAssignment(String inspectionId, String userEmail, String currentUserRole) {
+    public void removeAssignment(String inspectionId, String userEmail, String currentUserRole,
+                                 String callerEmail) {
         if (inspectionId == null || userEmail == null) {
             throw new IllegalArgumentException("inspectionId and userEmail are required");
         }
@@ -125,6 +147,18 @@ public class InspectionAssignmentService {
         if (ROLE_INSPECTOR.equals(toRemove.getRole()) && !"ADMIN".equals(role)) {
             throw new IllegalArgumentException("Solo el administrador puede remover al inspector asignado");
         }
+        String removedEmail = toRemove.getUserEmail();
+        String removedRole = toRemove.getRole();
         assignmentRepository.delete(toRemove);
+        String actor = callerEmail != null ? callerEmail.trim().toLowerCase() : "";
+        Map<String, String> meta = new LinkedHashMap<>();
+        meta.put("assigneeEmail", removedEmail);
+        meta.put("role", removedRole);
+        try {
+            auditService.log(actor, "Inspection", inspectionId, "ASSIGNMENT_REMOVE",
+                    objectMapper.writeValueAsString(meta));
+        } catch (JsonProcessingException e) {
+            auditService.log(actor, "Inspection", inspectionId, "ASSIGNMENT_REMOVE", null);
+        }
     }
 }

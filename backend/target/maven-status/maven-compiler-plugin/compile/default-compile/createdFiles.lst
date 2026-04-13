@@ -69,6 +69,7 @@ com\inspections\entity\Inspection.class
 com\inspections\entity\User.class
 com\inspections\dto\report\ReportLocationData.class
 com\inspections\repository\StepRepository.class
+com\inspections\controller\AuditLogController.class
 com\inspections\repository\UserRepository.class
 com\inspections\dto\ForgotPasswordRequest.class
 com\inspections\dto\CreateDeviceRequest.class

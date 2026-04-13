@@ -71,6 +71,7 @@ C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\en
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\service\UserService.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\entity\Location.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\controller\InspectionController.java
+C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\service\AuditService.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\dto\report\ReportLocationData.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\dto\AuthResponse.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\entity\DeviceType.java
@@ -110,5 +111,6 @@ C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\dt
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\repository\PhotoRepository.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\dto\MoveDeviceResponse.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\entity\User.java
+C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\controller\AuditLogController.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\validation\PasswordConstraintValidator.java
 C:\Users\nahue\Desktop\PF-UTN\TUP_FINAL\backend\src\main\java\com\inspections\repository\AuditLogRepository.java

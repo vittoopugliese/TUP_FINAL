@@ -1,5 +1,7 @@
 package com.inspections.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inspections.dto.AvatarUploadResponse;
 import com.inspections.dto.UpdateProfileRequest;
 import com.inspections.dto.UserProfileResponse;
@@ -15,7 +17,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +29,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AuditService auditService;
+    private final ObjectMapper objectMapper;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -32,8 +38,12 @@ public class UserService {
     @Value("${server.port:8080}")
     private String serverPort;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       AuditService auditService,
+                       ObjectMapper objectMapper) {
         this.userRepository = userRepository;
+        this.auditService = auditService;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -70,7 +80,7 @@ public class UserService {
      * @param newRole Nuevo rol (INSPECTOR u OPERATOR)
      * @return UserProfileResponse con el perfil actualizado
      */
-    public UserProfileResponse updateUserRole(String userId, String newRole) {
+    public UserProfileResponse updateUserRole(String userId, String newRole, String callerEmail) {
         if ("ADMIN".equalsIgnoreCase(newRole)) {
             throw new IllegalArgumentException("No se puede asignar rol ADMIN");
         }
@@ -81,8 +91,21 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "Usuario no encontrado con ID: " + userId));
+        String oldRole = user.getRole();
+        String targetEmail = user.getEmail();
         user.setRole(normalized);
-        return mapToProfileResponse(userRepository.save(user));
+        UserProfileResponse saved = mapToProfileResponse(userRepository.save(user));
+        String actor = callerEmail != null ? callerEmail.trim().toLowerCase() : "";
+        Map<String, String> meta = new LinkedHashMap<>();
+        meta.put("oldRole", oldRole);
+        meta.put("newRole", normalized);
+        meta.put("targetEmail", targetEmail);
+        try {
+            auditService.log(actor, "User", userId, "ROLE_CHANGE", objectMapper.writeValueAsString(meta));
+        } catch (JsonProcessingException e) {
+            auditService.log(actor, "User", userId, "ROLE_CHANGE", null);
+        }
+        return saved;
     }
 
     private UserProfileResponse mapToProfileResponse(User user) {

@@ -201,13 +201,28 @@
         android:contentDescription="@string/fab_create_inspection"
         app:srcCompat="@android:drawable/ic_input_add" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_manage_users"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_margin="16dp"
-        android:visibility="gone"
-        android:text="@string/btn_manage_users" />
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_audit_log"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="@string/btn_audit_log" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_manage_users"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            android:text="@string/btn_manage_users" />
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -84,6 +84,7 @@ public class HomeFragment extends Fragment {
         setupFilterCollapse(view);
         setupFab(view);
         setupManageUsersButton(view);
+        setupAuditLogButton(view);
         observeData();
         observeActiveFilters();
         observeCurrentUserRole();
@@ -103,13 +104,23 @@ public class HomeFragment extends Fragment {
                         .navigate(R.id.action_home_to_userManagement));
     }
 
+    private void setupAuditLogButton(View view) {
+        view.findViewById(R.id.btn_audit_log).setOnClickListener(v ->
+                NavHostFragment.findNavController(HomeFragment.this)
+                        .navigate(R.id.action_home_to_auditLog));
+    }
+
     private void observeCurrentUserRole() {
         viewModel.getProfileForRole().observe(getViewLifecycleOwner(), r -> {});
         viewModel.getCurrentUserRole().observe(getViewLifecycleOwner(), role -> {
             View root = getView();
             if (root == null) return;
             View btnManage = root.findViewById(R.id.btn_manage_users);
+            View btnAudit = root.findViewById(R.id.btn_audit_log);
             View fabCreate = root.findViewById(R.id.fab_create_inspection);
+            if (btnAudit != null) {
+                btnAudit.setVisibility("ADMIN".equalsIgnoreCase(role) ? View.VISIBLE : View.GONE);
+            }
             if (btnManage != null) {
                 btnManage.setVisibility("ADMIN".equalsIgnoreCase(role) ? View.VISIBLE : View.GONE);
             }

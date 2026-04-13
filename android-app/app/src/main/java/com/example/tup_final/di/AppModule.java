@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.example.tup_final.data.remote.ApiService;
+import com.example.tup_final.data.remote.AuditLogApi;
 import com.example.tup_final.data.remote.AuthApi;
 import com.example.tup_final.data.remote.AuthInterceptor;
 import com.example.tup_final.data.remote.BuildingApi;
@@ -84,6 +85,12 @@ public final class AppModule {
     @Singleton
     public UserApi provideUserApi(Retrofit retrofit) {
         return retrofit.create(UserApi.class);
+    }
+
+    @Provides
+    @Singleton
+    public AuditLogApi provideAuditLogApi(Retrofit retrofit) {
+        return retrofit.create(AuditLogApi.class);
     }
 
     @Provides

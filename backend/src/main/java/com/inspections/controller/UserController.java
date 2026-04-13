@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -56,7 +58,8 @@ public class UserController {
             @PathVariable String id,
             @Valid @RequestBody UpdateRoleRequest request) {
         try {
-            UserProfileResponse profile = userService.updateUserRole(id, request.getRole());
+            String callerEmail = extractEmailFromAuth();
+            UserProfileResponse profile = userService.updateUserRole(id, request.getRole(), callerEmail);
             return ResponseEntity.ok(profile);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -88,5 +91,13 @@ public class UserController {
             return ResponseEntity.internalServerError()
                     .body("Error al guardar el archivo: " + e.getMessage());
         }
+    }
+
+    private static String extractEmailFromAuth() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            return null;
+        }
+        return auth.getName();
     }
 }

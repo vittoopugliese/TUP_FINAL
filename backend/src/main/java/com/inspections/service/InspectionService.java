@@ -1,5 +1,7 @@
 package com.inspections.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inspections.dto.AssignmentRequest;
 import com.inspections.dto.CreateInspectionRequest;
 import com.inspections.dto.CreateInspectionResponse;
@@ -38,6 +40,8 @@ public class InspectionService {
     private final StepRepository stepRepository;
     private final InspectionAssignmentRepository assignmentRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
+    private final ObjectMapper objectMapper;
 
     public InspectionService(InspectionRepository inspectionRepository,
                             BuildingRepository buildingRepository,
@@ -51,7 +55,9 @@ public class InspectionService {
                             TestTemplateStepRepository testTemplateStepRepository,
                             StepRepository stepRepository,
                             InspectionAssignmentRepository assignmentRepository,
-                            UserRepository userRepository) {
+                            UserRepository userRepository,
+                            AuditService auditService,
+                            ObjectMapper objectMapper) {
         this.inspectionRepository = inspectionRepository;
         this.buildingRepository = buildingRepository;
         this.inspectionTemplateRepository = inspectionTemplateRepository;
@@ -65,6 +71,8 @@ public class InspectionService {
         this.stepRepository = stepRepository;
         this.assignmentRepository = assignmentRepository;
         this.userRepository = userRepository;
+        this.auditService = auditService;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -152,6 +160,16 @@ public class InspectionService {
 
         int testsCreated = createSnapshotTests(inspectionId, buildingId, now);
         createAssignments(inspectionId, assignmentsToPersist, now);
+
+        Map<String, String> createMeta = new LinkedHashMap<>();
+        createMeta.put("buildingId", buildingId);
+        createMeta.put("type", type);
+        try {
+            auditService.log(createdBy, "Inspection", inspectionId, "CREATE",
+                    objectMapper.writeValueAsString(createMeta));
+        } catch (JsonProcessingException e) {
+            auditService.log(createdBy, "Inspection", inspectionId, "CREATE", null);
+        }
 
         List<Location> locations = locationRepository.findByBuildingIdOrderByNameAsc(buildingId);
         int zonesCount = 0;
@@ -293,6 +311,17 @@ public class InspectionService {
         inspection.setResult(anyFailed ? "FAILED" : "SUCCESS");
         inspection.setUpdatedAt(now);
         inspectionRepository.save(inspection);
+
+        String signerEmail = userEmail != null ? userEmail.trim().toLowerCase() : "";
+        Map<String, String> signMeta = new LinkedHashMap<>();
+        signMeta.put("signer", signerName);
+        signMeta.put("status", inspection.getStatus());
+        try {
+            auditService.log(signerEmail, "Inspection", inspectionId, "SIGN",
+                    objectMapper.writeValueAsString(signMeta));
+        } catch (JsonProcessingException e) {
+            auditService.log(signerEmail, "Inspection", inspectionId, "SIGN", null);
+        }
 
         return mapToListResponse(inspection);
     }

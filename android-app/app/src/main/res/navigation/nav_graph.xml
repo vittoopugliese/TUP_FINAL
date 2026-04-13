@@ -51,7 +51,16 @@
         <action
             android:id="@+id/action_home_to_userManagement"
             app:destination="@id/userManagementFragment" />
+        <action
+            android:id="@+id/action_home_to_auditLog"
+            app:destination="@id/auditLogFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/auditLogFragment"
+        android:name="com.example.tup_final.ui.auditlog.AuditLogFragment"
+        android:label="@string/audit_log_title"
+        tools:layout="@layout/fragment_audit_log" />
 
     <fragment
         android:id="@+id/userManagementFragment"

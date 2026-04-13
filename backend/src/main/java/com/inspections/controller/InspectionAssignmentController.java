@@ -51,7 +51,8 @@ public class InspectionAssignmentController {
                     inspectionId,
                     request.getUserEmail(),
                     request.getRole(),
-                    extractRoleFromAuth()
+                    extractRoleFromAuth(),
+                    extractEmailFromAuth()
             );
             return ResponseEntity.ok(toResponse(assignment));
         } catch (IllegalArgumentException e) {
@@ -66,11 +67,19 @@ public class InspectionAssignmentController {
         try {
             String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);
             String currentUserRole = extractRoleFromAuth();
-            assignmentService.removeAssignment(inspectionId, decodedEmail, currentUserRole);
+            assignmentService.removeAssignment(inspectionId, decodedEmail, currentUserRole, extractEmailFromAuth());
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    private String extractEmailFromAuth() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            return null;
+        }
+        return auth.getName();
     }
 
     private String extractRoleFromAuth() {

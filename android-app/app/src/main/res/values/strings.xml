@@ -84,6 +84,14 @@
     <string name="filter_role_all">Todos</string>
     <string name="user_management_role_updated">Rol actualizado.</string>
     <string name="btn_manage_users">Gestionar usuarios</string>
+    <string name="btn_audit_log">Registro de auditoría</string>
+    <string name="audit_log_title">Registro de auditoría</string>
+    <string name="audit_filter_action_hint">Acción</string>
+    <string name="audit_filter_date_hint">Rango de fechas</string>
+    <string name="audit_apply_filters">Aplicar filtros</string>
+    <string name="audit_clear_filters">Limpiar</string>
+    <string name="audit_action_all">Todos</string>
+    <string name="audit_log_empty">No hay registros de auditoría.</string>
     <string name="role_admin">Administrador</string>
 
     <!-- Inspections filter -->
