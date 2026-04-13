@@ -271,7 +271,9 @@ public class CreateInspectionFragment extends Fragment {
                 } else if (CreateInspectionViewModel.FIELD_TEMPLATE.equals(field)) {
                     layoutTemplate.setError(msg);
                 } else if (CreateInspectionViewModel.FIELD_INSPECTOR.equals(field)) {
-                    layoutInspector.setError(msg);
+                    if (viewModel.isAdminUser()) {
+                        layoutInspector.setError(msg);
+                    }
                 }
                 Toast.makeText(requireContext(), msg != null ? msg : getString(R.string.error_unknown),
                         Toast.LENGTH_LONG).show();

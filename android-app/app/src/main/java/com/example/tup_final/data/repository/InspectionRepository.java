@@ -165,7 +165,7 @@ public class InspectionRepository {
             entity.scheduledDate = dto.getScheduledDate();
             entity.approvalDate = null;
             entity.result = dto.getResult();
-            entity.notes = null;
+            entity.notes = dto.getNotes();
             entity.signer = dto.getSigner();
             entity.signed = dto.isSigned();
             entity.signDate = dto.getSignDate();

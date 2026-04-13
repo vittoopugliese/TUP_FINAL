@@ -528,6 +528,7 @@ public class InspectionService {
                 inspection.getType(),
                 inspection.getResult()
         );
+        dto.setNotes(inspection.getNotes());
         dto.setSigner(inspection.getSigner());
         dto.setSigned(inspection.isSigned());
         dto.setSignDate(inspection.getSignDate());

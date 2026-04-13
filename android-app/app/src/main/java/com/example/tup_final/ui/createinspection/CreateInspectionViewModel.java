@@ -19,7 +19,6 @@ import com.example.tup_final.util.Resource;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -157,7 +156,6 @@ public class CreateInspectionViewModel extends ViewModel {
         String type = selectedType.getValue();
         Long dateMillis = selectedDateMillis.getValue();
         String templateId = selectedTemplateId.getValue();
-        String inspector = inspectorEmail.getValue() != null ? inspectorEmail.getValue().trim() : "";
 
         if (buildingId == null || buildingId.isEmpty()) {
             createResult.setValue(Resource.error("Seleccioná un edificio", FIELD_BUILDING));
@@ -178,6 +176,7 @@ public class CreateInspectionViewModel extends ViewModel {
 
         List<AssignmentRequest> assignments;
         if (isAdminUser()) {
+            String inspector = inspectorEmail.getValue() != null ? inspectorEmail.getValue().trim() : "";
             if (inspector.isEmpty()) {
                 createResult.setValue(Resource.error("Ingresá el email del inspector", FIELD_INSPECTOR));
                 return;
@@ -189,8 +188,12 @@ public class CreateInspectionViewModel extends ViewModel {
             assignments = new ArrayList<>();
             assignments.add(new AssignmentRequest(inspector, "INSPECTOR"));
         } else {
-            // INSPECTOR: el backend ignora asignaciones INSPECTOR del body y asigna al creador;
-            // lista vacía cumple el contrato actualizado del API.
+            String selfEmail = prefs.getString("cached_email", "");
+            if (selfEmail == null || selfEmail.trim().isEmpty()) {
+                createResult.setValue(Resource.error("No se pudo determinar el email del inspector"));
+                return;
+            }
+            // INSPECTOR: el backend asigna al creador; el body puede ir vacío (solo OPERATOR opcionales).
             assignments = new ArrayList<>();
         }
 
