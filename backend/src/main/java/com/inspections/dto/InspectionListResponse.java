@@ -19,6 +19,7 @@ public class InspectionListResponse {
     private String signer;
     private boolean signed;
     private Instant signDate;
+    private String notes;
     /** Email del usuario que creó la inspección en el backend. */
     private String createdByEmail;
 
@@ -73,6 +74,9 @@ public class InspectionListResponse {
 
     public Instant getSignDate() { return signDate; }
     public void setSignDate(Instant signDate) { this.signDate = signDate; }
+
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
     public String getCreatedByEmail() { return createdByEmail; }
     public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
