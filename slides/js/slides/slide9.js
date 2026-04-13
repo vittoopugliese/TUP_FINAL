@@ -1,11 +1,247 @@
 /**
- * Slide 9
+ * Slide 9 — Administrador
  */
 export const meta = {
   index: 9,
-  title: "Modules Overview - InspectionsApp",
+  title: "Administrador - InspectionsApp",
 };
 
-export const styles = "* {\r\n            margin: 0;\r\n            padding: 0;\r\n            box-sizing: border-box;\r\n        }\r\n\r\n        body {\r\n            margin: 0;\r\n            padding: 0;\r\n            overflow: hidden;\r\n            font-family: 'Roboto', sans-serif;\r\n            background: var(--color-body-bg);\r\n        }\r\n\r\n        .slide-container {\r\n            position: relative;\r\n            width: 1280px;\r\n            height: 720px;\r\n            overflow: hidden;\r\n            background: linear-gradient(135deg, var(--slide-bg-1) 0%, var(--slide-bg-2) 50%, var(--slide-bg-3) 100%);\r\n        }\r\n\r\n        .bg-pattern {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            background-image:\r\n                radial-gradient(circle at 20% 80%, rgba(var(--color-success-rgb), 0.1) 0%, transparent 50%),\r\n                radial-gradient(circle at 80% 20%, rgba(var(--color-success-light-rgb), 0.1) 0%, transparent 50%);\r\n            opacity: 0.6;\r\n        }\r\n\r\n        .grid-overlay {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            background-image:\r\n                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),\r\n                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);\r\n            background-size: 50px 50px;\r\n            opacity: 0.3;\r\n        }\r\n\r\n        .content-wrapper {\r\n            position: relative;\r\n            width: 100%;\r\n            height: 100%;\r\n            padding: 40px 60px;\r\n            z-index: 10;\r\n        }\r\n\r\n        .header {\r\n            display: flex;\r\n            justify-content: space-between;\r\n            align-items: center;\r\n            margin-bottom: 25px;\r\n        }\r\n\r\n        .title-section {\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 15px;\r\n        }\r\n\r\n        .title-icon {\r\n            width: 50px;\r\n            height: 50px;\r\n            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);\r\n            border-radius: 12px;\r\n            display: flex;\r\n            align-items: center;\r\n            justify-content: center;\r\n            color: white;\r\n            font-size: 24px;\r\n        }\r\n\r\n        .main-title {\r\n            font-family: 'Montserrat', sans-serif;\r\n            font-size: 32px;\r\n            font-weight: 700;\r\n            color: white;\r\n            margin: 0;\r\n        }\r\n\r\n        .subtitle {\r\n            font-size: 14px;\r\n            color: rgba(255, 255, 255, 0.7);\r\n            margin-top: 5px;\r\n        }\r\n\r\n        .modules-grid {\r\n            display: grid;\r\n            grid-template-columns: repeat(4, 1fr);\r\n            grid-template-rows: repeat(2, 1fr);\r\n            gap: 15px;\r\n            margin-top: 20px;\r\n        }\r\n\r\n        .module-card {\r\n            background: rgba(255, 255, 255, 0.05);\r\n            border: 1px solid rgba(255, 255, 255, 0.1);\r\n            border-radius: 12px;\r\n            padding: 15px;\r\n            display: flex;\r\n            flex-direction: column;\r\n            align-items: flex-start;\r\n            transition: all 0.3s ease;\r\n            position: relative;\r\n            overflow: hidden;\r\n            min-height: 140px;\r\n        }\r\n\r\n        .module-card:hover {\r\n            background: rgba(255, 255, 255, 0.08);\r\n            border-color: rgba(var(--color-success-light-rgb), 0.3);\r\n            transform: translateY(-2px);\r\n        }\r\n\r\n        .module-header {\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 10px;\r\n            margin-bottom: 10px;\r\n            width: 100%;\r\n        }\r\n\r\n        .module-icon {\r\n            width: 40px;\r\n            height: 40px;\r\n            background: rgba(var(--color-success-rgb), 0.2);\r\n            border-radius: 8px;\r\n            display: flex;\r\n            align-items: center;\r\n            justify-content: center;\r\n            color: var(--color-success-light);\r\n            font-size: 18px;\r\n            flex-shrink: 0;\r\n        }\r\n\r\n        .module-title {\r\n            font-family: 'Montserrat', sans-serif;\r\n            font-size: 14px;\r\n            font-weight: 600;\r\n            color: white;\r\n            margin: 0;\r\n            flex: 1;\r\n        }\r\n\r\n        .module-desc {\r\n            font-size: 11.5px;\r\n            /* Adjusted from 12px for better text containment */\r\n            color: rgba(255, 255, 255, 0.7);\r\n            line-height: 1.4;\r\n            margin-bottom: 8px;\r\n        }\r\n\r\n        .module-tags {\r\n            display: flex;\r\n            gap: 6px;\r\n            flex-wrap: wrap;\r\n            margin-top: auto;\r\n        }\r\n\r\n        .module-tag {\r\n            background: rgba(var(--color-success-rgb), 0.2);\r\n            color: var(--color-success-light);\r\n            padding: 2px 8px;\r\n            border-radius: 10px;\r\n            font-size: 10px;\r\n            font-weight: 500;\r\n        }\r\n\r\n        .status-indicator {\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 5px;\r\n            font-size: 10px;\r\n            color: rgba(255, 255, 255, 0.6);\r\n            margin-top: 5px;\r\n        }\r\n\r\n        .status-dot {\r\n            width: 6px;\r\n            height: 6px;\r\n            border-radius: 50%;\r\n            background: var(--color-success-light);\r\n        }\r\n\r\n        .bottom-bar {\r\n            position: absolute;\r\n            bottom: 40px;\r\n            left: 60px;\r\n            right: 60px;\r\n            display: flex;\r\n            justify-content: space-between;\r\n            align-items: center;\r\n        }\r\n\r\n        .stats {\r\n            display: flex;\r\n            gap: 20px;\r\n        }\r\n\r\n        .stat-item {\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 8px;\r\n            background: rgba(255, 255, 255, 0.1);\r\n            padding: 8px 16px;\r\n            border-radius: 20px;\r\n        }\r\n\r\n        .stat-value {\r\n            font-size: 14px;\r\n            font-weight: 600;\r\n            color: white;\r\n        }\r\n\r\n        .stat-label {\r\n            font-size: 12px;\r\n            color: rgba(255, 255, 255, 0.7);\r\n        }\r\n\r\n        .cta-button {\r\n            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);\r\n            color: white;\r\n            padding: 12px 24px;\r\n            border-radius: 8px;\r\n            font-size: 14px;\r\n            font-weight: 600;\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 8px;\r\n            cursor: pointer;\r\n        }\r\n\r\n        .floating-elements {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            pointer-events: none;\r\n            overflow: hidden;\r\n        }\r\n\r\n        .floating-icon {\r\n            position: absolute;\r\n            color: rgba(var(--color-success-light-rgb), 0.1);\r\n            font-size: 20px;\r\n            animation: float 6s ease-in-out infinite;\r\n        }\r\n\r\n        @keyframes float {\r\n\r\n            0%,\r\n            100% {\r\n                transform: translateY(0) rotate(0deg);\r\n            }\r\n\r\n            50% {\r\n                transform: translateY(-20px) rotate(5deg);\r\n            }\r\n        }";
+export const styles = `* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-export const html = "<div class=\"slide-container\">\r\n        <div class=\"bg-pattern\"></div>\r\n        <div class=\"grid-overlay\"></div>\r\n        <div class=\"floating-elements\">\r\n            <i class=\"fas fa-check-circle floating-icon\" style=\"top: 15%; left: 10%;\"></i>\r\n            <i class=\"fas fa-shield-alt floating-icon\" style=\"top: 25%; right: 15%;\"></i>\r\n            <i class=\"fas fa-mobile-alt floating-icon\" style=\"bottom: 20%; left: 20%;\"></i>\r\n        </div>\r\n        <div class=\"content-wrapper\">\r\n            <div class=\"header\">\r\n                <div class=\"title-section\">\r\n                    <div class=\"title-icon\">\r\n                        <i class=\"fas fa-cubes\"></i>\r\n                    </div>\r\n                    <div>\r\n                        <div class=\"main-title\">Una Plataforma Completa</div>\r\n                        <div class=\"subtitle\">8 módulos integrados para gestión integral de inspecciones</div>\r\n                    </div>\r\n                </div>\r\n                <div class=\"stats\">\r\n                    <div class=\"stat-item\">\r\n                        <span class=\"stat-value\">8</span>\r\n                        <span class=\"stat-label\">módulos</span>\r\n                    </div>\r\n                    <div class=\"stat-item\">\r\n                        <span class=\"stat-value\">100%</span>\r\n                        <span class=\"stat-label\">cobertura</span>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"modules-grid\">\r\n                <div class=\"module-card\">\r\n                    <div class=\"module-header\">\r\n                        <div class=\"module-icon\">\r\n                            <i class=\"fas fa-user-lock\"></i>\r\n                        </div>\r\n                        <div class=\"module-title\">Autenticación</div>\r\n                    </div>\r\n                    <div class=\"module-desc\">Gestión de usuarios, roles y permisos con sincronización offline</div>\r\n                    <div class=\"module-tags\">\r\n                        <div class=\"module-tag\">Login</div>\r\n                        <div class=\"module-tag\">Roles</div>\r\n                    </div>\r\n                    <div class=\"status-indicator\">\r\n                        <div class=\"status-dot\"></div>\r\n                        <span>Seguro</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"module-card\">\r\n                    <div class=\"module-header\">\r\n                        <div class=\"module-icon\">\r\n                            <i class=\"fas fa-clipboard-list\"></i>\r\n                        </div>\r\n                        <div class=\"module-title\">Gestión Inspecciones</div>\r\n                    </div>\r\n                    <div class=\"module-desc\">Creación, asignación y seguimiento de inspecciones</div>\r\n                    <div class=\"module-tags\">\r\n                        <div class=\"module-tag\">Crear</div>\r\n                        <div class=\"module-tag\">Asignar</div>\r\n                    </div>\r\n                    <div class=\"status-indicator\">\r\n                        <div class=\"status-dot\"></div>\r\n                        <span>Activo</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"module-card\">\r\n                    <div class=\"module-header\">\r\n                        <div class=\"module-icon\">\r\n                            <i class=\"fas fa-map-marked-alt\"></i>\r\n                        </div>\r\n                        <div class=\"module-title\">Navegación</div>\r\n                    </div>\r\n                    <div class=\"module-desc\">Jerarquía: Inspección → Ubicación → Zona → Dispositivo</div>\r\n                    <div class=\"module-tags\">\r\n                        <div class=\"module-tag\">6 niveles</div>\r\n                        <div class=\"module-tag\">GPS</div>\r\n                    </div>\r\n                    <div class=\"status-indicator\">\r\n                        <div class=\"status-dot\"></div>\r\n                        <span>Completo</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"module-card\">\r\n                    <div class=\"module-header\">\r\n                        <div class=\"module-icon\">\r\n                            <i class=\"fas fa-fire-extinguisher\"></i>\r\n                        </div>\r\n                        <div class=\"module-title\">Catálogo</div>\r\n                    </div>\r\n                    <div class=\"module-desc\">Biblioteca de dispositivos y templates de tests</div>\r\n                    <div class=\"module-tags\">\r\n                        <div class=\"module-tag\">Tipos</div>\r\n                        <div class=\"module-tag\">Tests</div>\r\n                    </div>\r\n                    <div class=\"status-indicator\">\r\n                        <div class=\"status-dot\"></div>\r\n                        <span>Actualizado</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"module-card\">\r\n                    <div class=\"module-header\">\r\n                        <div class=\"module-icon\">\r\n                            <i class=\"fas fa-tasks\"></i>\r\n                        </div>\r\n                        <div class=\"module-title\">Ejecución</div>\r\n                    </div>\r\n                    <div class=\"module-desc\">Interfaz de inspección paso a paso con validaciones</div>\r\n                    <div class=\"module-tags\">\r\n                        <div class=\"module-tag\">Guía</div>\r\n                        <div class=\"module-tag\">Validación</div>\r\n                    </div>\r\n                    <div class=\"status-indicator\">\r\n                        <div class=\"status-dot\"></div>\r\n                        <span>En tiempo real</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"module-card\">\r\n                    <div class=\"module-header\">\r\n                        <div class=\"module-icon\">\r\n                            <i class=\"fas fa-camera\"></i>\r\n                        </div>\r\n                        <div class=\"module-title\">Evidencia</div>\r\n                    </div>\r\n                    <div class=\"module-desc\">Captura de fotos con metadatos y vinculación</div>\r\n                    <div class=\"module-tags\">\r\n                        <div class=\"module-tag\">Fotos</div>\r\n                        <div class=\"module-tag\">GPS</div>\r\n                    </div>\r\n                    <div class=\"status-indicator\">\r\n                        <div class=\"status-dot\"></div>\r\n                        <span>Automático</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"module-card\">\r\n                    <div class=\"module-header\">\r\n                        <div class=\"module-icon\">\r\n                            <i class=\"fas fa-sync-alt\"></i>\r\n                        </div>\r\n                        <div class=\"module-title\">Sincronización</div>\r\n                    </div>\r\n                    <div class=\"module-desc\">Offline-first con sincronización automática</div>\r\n                    <div class=\"module-tags\">\r\n                        <div class=\"module-tag\">Offline</div>\r\n                        <div class=\"module-tag\">Sync</div>\r\n                    </div>\r\n                    <div class=\"status-indicator\">\r\n                        <div class=\"status-dot\"></div>\r\n                        <span>Inteligente</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"module-card\">\r\n                    <div class=\"module-header\">\r\n                        <div class=\"module-icon\">\r\n                            <i class=\"fas fa-file-pdf\"></i>\r\n                        </div>\r\n                        <div class=\"module-title\">Reportes</div>\r\n                    </div>\r\n                    <div class=\"module-desc\">Generación de PDF con firma digital</div>\r\n                    <div class=\"module-tags\">\r\n                        <div class=\"module-tag\">PDF</div>\r\n                        <div class=\"module-tag\">Legal</div>\r\n                    </div>\r\n                    <div class=\"status-indicator\">\r\n                        <div class=\"status-dot\"></div>\r\n                        <span>Instantáneo</span>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"bottom-bar\">\r\n  ";
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    background: var(--color-body-bg);
+}
+
+.slide-container {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--slide-bg-1) 0%, var(--slide-bg-2) 50%, var(--slide-bg-3) 100%);
+}
+
+.bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 20% 80%, rgba(var(--color-success-rgb), 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(var(--color-success-light-rgb), 0.1) 0%, transparent 50%);
+    opacity: 0.6;
+}
+
+.grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.3;
+}
+
+.content-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 40px 60px;
+    z-index: 10;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.title-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.title-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.main-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 5px;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+.stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.screenshots-area {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+}
+
+.phone-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.screenshot-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.screenshot-card img {
+    border-radius: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    object-fit: contain;
+}
+
+.screenshot-card img.phone-img {
+    height: 360px;
+    width: auto;
+}
+
+.screenshot-card img.landscape-img {
+    width: 680px;
+    height: auto;
+    border-radius: 10px;
+}
+
+.screenshot-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+}
+
+.floating-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.floating-icon {
+    position: absolute;
+    color: rgba(var(--color-success-light-rgb), 0.1);
+    font-size: 20px;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}`;
+
+export const html = `<div class="slide-container">
+    <div class="bg-pattern"></div>
+    <div class="grid-overlay"></div>
+    <div class="floating-elements">
+        <i class="fas fa-user-shield floating-icon" style="top: 15%; left: 8%;"></i>
+        <i class="fas fa-shield-alt floating-icon" style="top: 25%; right: 12%;"></i>
+        <i class="fas fa-users-cog floating-icon" style="bottom: 18%; left: 15%;"></i>
+    </div>
+    <div class="content-wrapper">
+        <div class="header">
+            <div class="title-section">
+                <div class="title-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div>
+                    <div class="main-title">Administrador</div>
+                    <div class="subtitle">Funcionalidades exclusivas del rol ADMIN</div>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-value">4</span>
+                    <span class="stat-label">vistas</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">ADMIN</span>
+                    <span class="stat-label">rol</span>
+                </div>
+            </div>
+        </div>
+        <div class="screenshots-area">
+            <div class="phone-row">
+                <div class="screenshot-card">
+                    <img class="phone-img" src="assets/vista-admin.png" alt="Vista Admin">
+                    <div class="screenshot-label">Vista Admin</div>
+                </div>
+                <div class="screenshot-card">
+                    <img class="phone-img" src="assets/gestion-usuarios.png" alt="Admin Gestion de Usuarios">
+                    <div class="screenshot-label">Admin Gesti\u00f3n de Usuarios</div>
+                </div>
+                <div class="screenshot-card">
+                    <img class="phone-img" src="assets/log-auditoria.png" alt="Log para Auditoria">
+                    <div class="screenshot-label">Log para Auditor\u00eda</div>
+                </div>
+            </div>
+            <div class="screenshot-card">
+                <img class="landscape-img" src="assets/informe-pdf.png" alt="Informe de Auditoria en PDF">
+                <div class="screenshot-label">Informe de Auditor\u00eda en PDF</div>
+            </div>
+        </div>
+    </div>
+</div>`;
