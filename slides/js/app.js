@@ -1,4 +1,4 @@
-const TOTAL_SLIDES = 17;
+const TOTAL_SLIDES = 16;
 const SLIDE_WIDTH = 1280;
 const SLIDE_HEIGHT = 720;
 
