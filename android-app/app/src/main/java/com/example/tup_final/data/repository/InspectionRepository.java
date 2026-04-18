@@ -2,6 +2,7 @@ package com.example.tup_final.data.repository;
 
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -46,6 +47,8 @@ import retrofit2.Response;
  */
 @Singleton
 public class InspectionRepository {
+
+    private static final String TAG = "InspectionRepository";
 
     private final InspectionApi inspectionApi;
     private final InspectionDao inspectionDao;
@@ -102,11 +105,40 @@ public class InspectionRepository {
         return result;
     }
 
+    /**
+     * Carga el detalle: intenta primero GET /inspections/{id}/status para sincronizar
+     * buildingId, locationId y estado con el servidor; si falla, usa Room.
+     */
     public LiveData<Resource<InspectionEntity>> getInspectionById(String inspectionId) {
         MutableLiveData<Resource<InspectionEntity>> result = new MutableLiveData<>();
         result.setValue(Resource.loading());
 
         executor.execute(() -> {
+            try {
+                Response<InspectionListResponse> response =
+                        inspectionApi.getInspectionStatus(inspectionId).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    InspectionListResponse dto = response.body();
+                    InspectionEntity entity = inspectionDao.getById(inspectionId);
+                    if (entity != null) {
+                        mergeStatusDtoIntoCachedInspection(entity, dto);
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        entity.updatedAt = sdf.format(new Date());
+                        inspectionDao.update(entity);
+                    } else {
+                        entity = mapListDtoToNewEntity(dto);
+                        inspectionDao.insert(entity);
+                    }
+                    InspectionEntity out = entity;
+                    mainHandler.post(() -> result.setValue(Resource.success(out)));
+                    return;
+                }
+                logGetInspectionByIdFailure(inspectionId, response);
+            } catch (Exception e) {
+                Log.w(TAG, "getInspectionById: network error id=" + inspectionId, e);
+            }
+
             InspectionEntity inspection = inspectionDao.getById(inspectionId);
             if (inspection != null) {
                 mainHandler.post(() -> result.setValue(Resource.success(inspection)));
@@ -117,6 +149,78 @@ public class InspectionRepository {
         });
 
         return result;
+    }
+
+    /** Actualiza campos del servidor sin borrar datos locales solo en Room (p. ej. template). */
+    private void mergeStatusDtoIntoCachedInspection(InspectionEntity existing,
+                                                    InspectionListResponse dto) {
+        if (dto.getBuildingId() != null && !dto.getBuildingId().isEmpty()) {
+            existing.buildingId = dto.getBuildingId();
+        }
+        if (dto.getBuildingName() != null) {
+            existing.buildingName = dto.getBuildingName();
+        }
+        if (dto.getLocationId() != null && !dto.getLocationId().isEmpty()) {
+            existing.locationId = dto.getLocationId();
+        }
+        if (dto.getType() != null) {
+            existing.type = dto.getType();
+        }
+        if (dto.getScheduledDate() != null) {
+            existing.scheduledDate = dto.getScheduledDate();
+        }
+        if (dto.getNotes() != null) {
+            existing.notes = dto.getNotes();
+        }
+        String serverStatus = dto.getStatus();
+        if (statusPriority(serverStatus) >= statusPriority(existing.status)) {
+            existing.status = serverStatus;
+        }
+        existing.result = dto.getResult();
+        if (dto.isSigned()) {
+            existing.signed = true;
+            existing.signer = dto.getSigner();
+            existing.signDate = dto.getSignDate();
+        }
+        if (dto.getCreatedByEmail() != null && !dto.getCreatedByEmail().isEmpty()) {
+            existing.createdByEmail = dto.getCreatedByEmail();
+        }
+    }
+
+    private InspectionEntity mapListDtoToNewEntity(InspectionListResponse dto) {
+        InspectionEntity entity = new InspectionEntity();
+        entity.id = dto.getId() != null ? dto.getId() : "";
+        entity.buildingId = dto.getBuildingId();
+        entity.buildingName = dto.getBuildingName();
+        entity.type = dto.getType();
+        entity.status = dto.getStatus();
+        entity.scheduledDate = dto.getScheduledDate();
+        entity.approvalDate = null;
+        entity.result = dto.getResult();
+        entity.notes = dto.getNotes();
+        entity.signer = dto.getSigner();
+        entity.signed = dto.isSigned();
+        entity.signDate = dto.getSignDate();
+        entity.startedAt = null;
+        entity.inspectionReportId = null;
+        entity.inspectionTemplateId = null;
+        entity.coverPageId = null;
+        entity.createdAt = null;
+        entity.updatedAt = null;
+        entity.locationId = dto.getLocationId();
+        entity.createdByEmail = dto.getCreatedByEmail();
+        return entity;
+    }
+
+    private void logGetInspectionByIdFailure(String inspectionId, Response<?> response) {
+        String msg = response != null ? ("code=" + response.code()) : "null response";
+        try {
+            if (response != null && response.errorBody() != null) {
+                msg += " body=" + response.errorBody().string();
+            }
+        } catch (Exception ignored) {
+        }
+        Log.w(TAG, "getInspectionById: HTTP failed id=" + inspectionId + " " + msg);
     }
 
     public LiveData<Resource<List<InspectionEntity>>> getAllInspections() {

@@ -2,14 +2,17 @@ package com.example.tup_final.data.repository;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.tup_final.data.entity.DeviceEntity;
+import com.example.tup_final.data.entity.LocationEntity;
 import com.example.tup_final.data.entity.TestEntity;
 import com.example.tup_final.data.entity.ZoneEntity;
 import com.example.tup_final.data.local.DeviceDao;
+import com.example.tup_final.data.local.LocationDao;
 import com.example.tup_final.data.local.TestDao;
 import com.example.tup_final.data.local.ZoneDao;
 import com.example.tup_final.data.remote.DeviceTypesApi;
@@ -46,25 +49,32 @@ import retrofit2.Response;
 @Singleton
 public class InspectionTestsRepository {
 
+    private static final String TAG = "InspectionTestsRepo";
+    private static final int MAX_HTTP_ATTEMPTS = 2;
+    private static final int RETRY_DELAY_MS = 750;
+
     private final ZonesApi zonesApi;
     private final LocationApi locationApi;
     private final DeviceTypesApi deviceTypesApi;
     private final ZoneDao zoneDao;
     private final DeviceDao deviceDao;
     private final TestDao testDao;
+    private final LocationDao locationDao;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Inject
     public InspectionTestsRepository(ZonesApi zonesApi, LocationApi locationApi,
                                     DeviceTypesApi deviceTypesApi,
-                                    ZoneDao zoneDao, DeviceDao deviceDao, TestDao testDao) {
+                                    ZoneDao zoneDao, DeviceDao deviceDao, TestDao testDao,
+                                    LocationDao locationDao) {
         this.zonesApi = zonesApi;
         this.locationApi = locationApi;
         this.deviceTypesApi = deviceTypesApi;
         this.zoneDao = zoneDao;
         this.deviceDao = deviceDao;
         this.testDao = testDao;
+        this.locationDao = locationDao;
     }
 
     /**
@@ -81,21 +91,15 @@ public class InspectionTestsRepository {
             try {
                 List<String> locationIds = new ArrayList<>();
                 if (buildingId != null && !buildingId.isEmpty()) {
-                    Response<List<LocationListResponse>> locResponse =
-                            locationApi.getLocations(buildingId).execute();
-                    if (locResponse.isSuccessful() && locResponse.body() != null) {
-                        for (LocationListResponse loc : locResponse.body()) {
-                            if (loc.getId() != null) {
-                                locationIds.add(loc.getId());
-                            }
-                        }
-                    } else {
+                    List<String> fetched = fetchLocationIdsWithRetry(buildingId);
+                    if (fetched == null) {
                         List<DeviceEntity> fromCache = loadDevicesFromRoom(buildingId, new ArrayList<>());
                         mainHandler.post(() -> result.setValue(fromCache.isEmpty()
                                 ? Resource.error("No se pudieron cargar ubicaciones. Verificá tu conexión.")
                                 : Resource.success(fromCache)));
                         return;
                     }
+                    locationIds = fetched;
                 } else if (locationId != null && !locationId.isEmpty()) {
                     locationIds.add(locationId);
                 }
@@ -103,18 +107,11 @@ public class InspectionTestsRepository {
                 List<DeviceEntity> allDevices = new ArrayList<>();
                 boolean anyLocationFailed = false;
                 for (String locId : locationIds) {
-                    try {
-                        Response<List<ZoneWithDevicesResponse>> response =
-                                zonesApi.getZonesWithDevicesAndTests(locId, inspectionId).execute();
-                        if (response.isSuccessful() && response.body() != null) {
-                            List<ZoneWithDevicesResponse> zones = response.body();
-                            persistToRoom(zones, locId, inspectionId, buildingId);
-                            List<DeviceEntity> flat = flattenZonesToDevices(zones, buildingId);
-                            allDevices.addAll(flat);
-                        } else {
-                            anyLocationFailed = true;
-                        }
-                    } catch (Exception ignored) {
+                    List<ZoneWithDevicesResponse> zones = fetchZonesWithRetry(locId, inspectionId);
+                    if (zones != null) {
+                        persistToRoom(zones, locId, inspectionId, buildingId);
+                        allDevices.addAll(flattenZonesToDevices(zones, buildingId));
+                    } else {
                         anyLocationFailed = true;
                     }
                 }
@@ -141,6 +138,107 @@ public class InspectionTestsRepository {
         });
 
         return result;
+    }
+
+    /**
+     * Lista de location IDs del edificio; null si ambos intentos HTTP fallan.
+     */
+    private List<String> fetchLocationIdsWithRetry(String buildingId) {
+        for (int attempt = 1; attempt <= MAX_HTTP_ATTEMPTS; attempt++) {
+            try {
+                Response<List<LocationListResponse>> locResponse =
+                        locationApi.getLocations(buildingId).execute();
+                if (locResponse.isSuccessful() && locResponse.body() != null) {
+                    List<String> ids = new ArrayList<>();
+                    for (LocationListResponse loc : locResponse.body()) {
+                        if (loc.getId() != null) {
+                            ids.add(loc.getId());
+                        }
+                    }
+                    return ids;
+                }
+                logLocationListFailure(buildingId, attempt, locResponse);
+                sleepRetryGap(attempt);
+            } catch (Exception e) {
+                Log.w(TAG, "fetchLocationIds buildingId=" + buildingId + " attempt=" + attempt, e);
+                if (!sleepRetryGap(attempt)) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Zonas con devices para una location; null si ambos intentos fallan.
+     */
+    private List<ZoneWithDevicesResponse> fetchZonesWithRetry(String locId, String inspectionId) {
+        for (int attempt = 1; attempt <= MAX_HTTP_ATTEMPTS; attempt++) {
+            try {
+                Response<List<ZoneWithDevicesResponse>> response =
+                        zonesApi.getZonesWithDevicesAndTests(locId, inspectionId).execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    return response.body();
+                }
+                logZonesHttpFailure(locId, inspectionId, attempt, response);
+                sleepRetryGap(attempt);
+            } catch (Exception e) {
+                Log.w(TAG, "fetchZones locId=" + locId + " inspectionId=" + inspectionId
+                        + " attempt=" + attempt, e);
+                if (!sleepRetryGap(attempt)) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** @return false si se debe abortar (interrupción). */
+    private boolean sleepRetryGap(int attemptCompleted) {
+        if (attemptCompleted >= MAX_HTTP_ATTEMPTS) {
+            return true;
+        }
+        try {
+            Thread.sleep(RETRY_DELAY_MS);
+            return true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.w(TAG, "retry sleep interrupted", e);
+            return false;
+        }
+    }
+
+    private void logLocationListFailure(String buildingId, int attempt,
+                                        Response<List<LocationListResponse>> response) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("getLocations failed buildingId=").append(buildingId).append(" attempt=").append(attempt);
+        if (response != null) {
+            sb.append(" code=").append(response.code());
+            try {
+                if (response.errorBody() != null) {
+                    sb.append(" errorBody=").append(response.errorBody().string());
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        Log.w(TAG, sb.toString());
+    }
+
+    private void logZonesHttpFailure(String locId, String inspectionId, int attempt,
+                                     Response<List<ZoneWithDevicesResponse>> response) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("getZones failed locId=").append(locId).append(" inspectionId=").append(inspectionId)
+                .append(" attempt=").append(attempt);
+        if (response != null) {
+            sb.append(" code=").append(response.code());
+            try {
+                if (response.errorBody() != null) {
+                    sb.append(" errorBody=").append(response.errorBody().string());
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        Log.w(TAG, sb.toString());
     }
 
     private List<DeviceEntity> loadDevicesFromRoom(String buildingId, List<String> locationIds) {
@@ -235,7 +333,9 @@ public class InspectionTestsRepository {
 
                 if (response.isSuccessful() && response.body() != null) {
                     ZoneWithDevicesResponse z = response.body();
-                    ZoneEntity ze = new ZoneEntity(z.getId(), z.getLocationId(), z.getName(), z.getDetails());
+                    String zLoc = z.getLocationId() != null ? z.getLocationId() : locationId;
+                    ensureLocationInRoom(zLoc, null);
+                    ZoneEntity ze = new ZoneEntity(z.getId(), zLoc, z.getName(), z.getDetails());
                     zoneDao.insert(ze);
 
                     ZoneUiModel model = new ZoneUiModel(
@@ -391,16 +491,23 @@ public class InspectionTestsRepository {
 
     private void persistToRoom(List<ZoneWithDevicesResponse> dtos,
                                String locationId, String inspectionId, String buildingId) {
+        ensureLocationInRoom(locationId, buildingId);
         for (ZoneWithDevicesResponse z : dtos) {
-            ZoneEntity ze = new ZoneEntity(z.getId(), z.getLocationId(), z.getName(), z.getDetails());
+            String zLocId = z.getLocationId() != null && !z.getLocationId().isEmpty()
+                    ? z.getLocationId() : locationId;
+            ensureLocationInRoom(zLocId, buildingId);
+            ZoneEntity ze = new ZoneEntity(z.getId(), zLocId, z.getName(), z.getDetails());
             zoneDao.upsert(ze);
 
             if (z.getDevices() != null) {
                 for (DeviceWithTestsResponse d : z.getDevices()) {
+                    String dLocId = d.getLocationId() != null && !d.getLocationId().isEmpty()
+                            ? d.getLocationId() : zLocId;
+                    ensureLocationInRoom(dLocId, buildingId);
                     DeviceEntity de = new DeviceEntity();
                     de.id = d.getId();
                     de.zoneId = d.getZoneId();
-                    de.locationId = d.getLocationId();
+                    de.locationId = dLocId;
                     de.buildingId = buildingId;
                     de.name = d.getName();
                     de.deviceCategory = d.getDeviceCategory();
@@ -425,6 +532,26 @@ public class InspectionTestsRepository {
                 }
             }
         }
+    }
+
+    /**
+     * ZoneEntity y DeviceEntity tienen FK a locations.id; sin esta fila, upsert falla con SQLITE_CONSTRAINT_FOREIGNKEY.
+     */
+    private void ensureLocationInRoom(String locId, String buildingId) {
+        if (locId == null || locId.isEmpty()) {
+            return;
+        }
+        if (locationDao.getById(locId) != null) {
+            return;
+        }
+        LocationEntity le = new LocationEntity();
+        le.id = locId;
+        le.buildingId = buildingId;
+        le.name = "";
+        le.details = null;
+        le.createdAt = null;
+        le.updatedAt = null;
+        locationDao.insert(le);
     }
 
     private List<ZoneUiModel> loadFromRoom(String locationId, String inspectionId) {

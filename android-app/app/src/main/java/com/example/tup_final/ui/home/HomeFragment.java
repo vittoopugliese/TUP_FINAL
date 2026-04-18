@@ -91,6 +91,14 @@ public class HomeFragment extends Fragment {
         setupFragmentResultListener();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (viewModel != null) {
+            viewModel.loadInspections();
+        }
+    }
+
     private void setupFab(View view) {
         view.findViewById(R.id.fab_create_inspection).setOnClickListener(v ->
                 NavHostFragment.findNavController(HomeFragment.this)

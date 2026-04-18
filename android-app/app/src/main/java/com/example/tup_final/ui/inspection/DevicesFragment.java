@@ -28,6 +28,8 @@ public class DevicesFragment extends Fragment {
     private FragmentDevicesBinding binding;
     private DeviceAdapter adapter;
     private boolean devicesLoadTriggered = false;
+    /** True si la última carga falló; permite reintentar al volver a la pestaña Devices. */
+    private boolean devicesLoadNeedsRetry = false;
 
     @Nullable
     @Override
@@ -78,6 +80,7 @@ public class DevicesFragment extends Fragment {
 
             case SUCCESS:
                 binding.progressDevices.setVisibility(View.GONE);
+                devicesLoadNeedsRetry = false;
                 List<DeviceEntity> data = resource.getData();
                 if (data != null && !data.isEmpty()) {
                     adapter.submitList(data);
@@ -95,7 +98,33 @@ public class DevicesFragment extends Fragment {
                 binding.recyclerDevices.setVisibility(View.GONE);
                 binding.textEmpty.setVisibility(View.VISIBLE);
                 binding.textEmpty.setText(resource.getMessage());
+                devicesLoadTriggered = false;
+                devicesLoadNeedsRetry = true;
                 break;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!devicesLoadNeedsRetry || binding == null) {
+            return;
+        }
+        try {
+            InspectionDetailViewModel vm = new ViewModelProvider(requireParentFragment())
+                    .get(InspectionDetailViewModel.class);
+            Resource<InspectionEntity> r = vm.getInspection().getValue();
+            if (r != null && r.getStatus() == Resource.Status.SUCCESS && r.getData() != null) {
+                InspectionEntity inv = r.getData();
+                String inspectionId = vm.getCurrentInspectionId();
+                if (inspectionId != null && (inv.locationId != null || inv.buildingId != null)) {
+                    devicesLoadNeedsRetry = false;
+                    devicesLoadTriggered = true;
+                    vm.loadDevices(inspectionId, inv.locationId, inv.buildingId);
+                }
+            }
+        } catch (IllegalStateException ignored) {
+            // requireParentFragment no disponible aún
         }
     }
 
@@ -103,5 +132,6 @@ public class DevicesFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        devicesLoadTriggered = false;
     }
 }
