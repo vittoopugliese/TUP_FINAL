@@ -1,11 +1,83 @@
 /**
- * Slide 16
+ * Slide 15
  */
 export const meta = {
-  index: 16,
-  title: "InspectionsApp - Cierre",
+  index: 15,
+  title: "Demostración — Alex (2)",
 };
 
-export const styles = "* {\r\n            margin: 0;\r\n            padding: 0;\r\n            box-sizing: border-box;\r\n        }\r\n\r\n        body {\r\n            margin: 0;\r\n            padding: 0;\r\n            overflow: hidden;\r\n            font-family: 'Roboto', sans-serif;\r\n            background: var(--color-body-bg);\r\n        }\r\n\r\n        .slide-container {\r\n            position: relative;\r\n            width: 1280px;\r\n            height: 720px;\r\n            overflow: hidden;\r\n            background: linear-gradient(135deg, var(--slide-bg-1) 0%, var(--slide-bg-2) 50%, var(--slide-bg-3) 100%);\r\n        }\r\n\r\n        .bg-pattern {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            background-image:\r\n                radial-gradient(circle at 20% 80%, rgba(var(--color-success-rgb), 0.1) 0%, transparent 50%),\r\n                radial-gradient(circle at 80% 20%, rgba(var(--color-success-light-rgb), 0.1) 0%, transparent 50%);\r\n            opacity: 0.6;\r\n        }\r\n\r\n        .grid-overlay {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            background-image:\r\n                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),\r\n                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);\r\n            background-size: 50px 50px;\r\n            opacity: 0.3;\r\n        }\r\n\r\n        .content-wrapper {\r\n            position: relative;\r\n            width: 100%;\r\n            height: 100%;\r\n            padding: 60px 80px;\r\n            z-index: 10;\r\n            display: flex;\r\n            flex-direction: column;\r\n            align-items: center;\r\n            justify-content: center;\r\n        }\r\n\r\n        .logo-container {\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 20px;\r\n            margin-bottom: 40px;\r\n        }\r\n\r\n        .logo-icon {\r\n            width: 80px;\r\n            height: 80px;\r\n            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);\r\n            border-radius: 16px;\r\n            display: flex;\r\n            align-items: center;\r\n            justify-content: center;\r\n            color: white;\r\n            font-size: 40px;\r\n            box-shadow: 0 10px 30px rgba(var(--color-success-light-rgb), 0.3);\r\n        }\r\n\r\n        .logo-text {\r\n            font-family: 'Montserrat', sans-serif;\r\n            font-size: 48px;\r\n            font-weight: 800;\r\n            color: white;\r\n            margin: 0;\r\n            background: linear-gradient(135deg, #ffffff 0%, var(--color-success-light) 100%);\r\n            -webkit-background-clip: text;\r\n            -webkit-text-fill-color: transparent;\r\n            background-clip: text;\r\n        }\r\n\r\n        .tagline {\r\n            font-size: 24px;\r\n            color: rgba(255, 255, 255, 0.9);\r\n            text-align: center;\r\n            margin-bottom: 20px;\r\n            font-weight: 300;\r\n        }\r\n\r\n        .highlight {\r\n            color: var(--color-success-light);\r\n            font-weight: 600;\r\n        }\r\n\r\n        .cta-container {\r\n            background: rgba(255, 255, 255, 0.05);\r\n            border: 1px solid rgba(255, 255, 255, 0.1);\r\n            border-radius: 16px;\r\n            padding: 30px 50px;\r\n            margin: 30px 0;\r\n            text-align: center;\r\n        }\r\n\r\n        .cta-text {\r\n            font-size: 20px;\r\n            color: white;\r\n            margin-bottom: 20px;\r\n            font-weight: 500;\r\n        }\r\n\r\n        .cta-button {\r\n            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);\r\n            color: white;\r\n            padding: 16px 40px;\r\n            border-radius: 30px;\r\n            font-size: 18px;\r\n            font-weight: 600;\r\n            display: inline-flex;\r\n            align-items: center;\r\n            gap: 12px;\r\n            cursor: pointer;\r\n            transition: all 0.3s ease;\r\n            box-shadow: 0 4px 15px rgba(var(--color-success-light-rgb), 0.3);\r\n        }\r\n\r\n        .cta-button:hover {\r\n            transform: translateY(-2px);\r\n            box-shadow: 0 8px 25px rgba(var(--color-success-light-rgb), 0.4);\r\n        }\r\n\r\n        .team-info {\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 20px;\r\n            margin-top: 40px;\r\n            padding: 15px 30px;\r\n            background: rgba(255, 255, 255, 0.05);\r\n            border-radius: 12px;\r\n        }\r\n\r\n        .team-label {\r\n            font-size: 14px;\r\n            color: rgba(255, 255, 255, 0.7);\r\n        }\r\n\r\n        .team-name {\r\n            font-size: 16px;\r\n            font-weight: 600;\r\n            color: white;\r\n        }\r\n\r\n        .delivery-info {\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 10px;\r\n            margin-top: 20px;\r\n            font-size: 14px;\r\n            color: rgba(255, 255, 255, 0.6);\r\n        }\r\n\r\n        .delivery-date {\r\n            color: var(--color-success-light);\r\n            font-weight: 600;\r\n        }\r\n\r\n        .floating-elements {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            pointer-events: none;\r\n            overflow: hidden;\r\n        }\r\n\r\n        .floating-icon {\r\n            position: absolute;\r\n            color: rgba(var(--color-success-light-rgb), 0.1);\r\n            font-size: 24px;\r\n            animation: float 6s ease-in-out infinite;\r\n        }\r\n\r\n        @keyframes float {\r\n\r\n            0%,\r\n            100% {\r\n                transform: translateY(0) rotate(0deg);\r\n            }\r\n\r\n            50% {\r\n                transform: translateY(-20px) rotate(5deg);\r\n            }\r\n        }\r\n\r\n        .success-check {\r\n            width: 60px;\r\n            height: 60px;\r\n            background: rgba(var(--color-success-light-rgb), 0.2);\r\n            border-radius: 50%;\r\n            display: flex;\r\n            align-items: center;\r\n            justify-content: center;\r\n            color: var(--color-success-light);\r\n            font-size: 28px;\r\n            margin: 0 auto 20px;\r\n        }";
+export const styles = `
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-export const html = "<div class=\"slide-container\">\r\n        <div class=\"bg-pattern\"></div>\r\n        <div class=\"grid-overlay\"></div>\r\n        <div class=\"floating-elements\">\r\n            <i class=\"fas fa-check-circle floating-icon\" style=\"top: 15%; left: 10%;\"></i>\r\n            <i class=\"fas fa-shield-alt floating-icon\" style=\"top: 25%; right: 15%;\"></i>\r\n            <i class=\"fas fa-fire-extinguisher floating-icon\" style=\"bottom: 20%; left: 20%;\"></i>\r\n            <i class=\"fas fa-mobile-alt floating-icon\" style=\"bottom: 30%; right: 10%;\"></i>\r\n        </div>\r\n        <div class=\"content-wrapper\">\r\n            <div class=\"logo-container\">\r\n\r\n                <div class=\"logo-text\">InspectionsApp</div>\r\n            </div>\r\n            <div class=\"tagline\">\r\n                Inspecciones de Seguridad contra Incendios, <span class=\"highlight\">Totalmente Digitales</span>\r\n            </div>\r\n            <div class=\"cta-container\">\r\n                <div class=\"cta-text\">\r\n                    ¿Listo para eliminar el papel y ganar <span class=\"highlight\">trazabilidad total</span>?\r\n                </div>\r\n                <div class=\"cta-button\">\r\n                    <i class=\"fas fa-rocket\"></i>\r\n                    <span>Solicite una demo</span>\r\n                    <i class=\"fas fa-arrow-right\"></i>\r\n                </div>\r\n            </div>\r\n            <div class=\"team-info\">\r\n                <div class=\"team-label\">Equipo:</div>\r\n                <div class=\"team-name\">19 - Alex, Nahuel y Vittorio</div>\r\n                <div style=\"flex: 1;\"></div>\r\n                <div class=\"team-label\">Entrega:</div>\r\n                <div class=\"team-name\">15/01/2026</div>\r\n            </div>\r\n            <div class=\"delivery-info\">\r\n</div>\r\n        </div>\r\n    </div>";
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    background: var(--color-body-bg);
+  }
+
+  .slide-container {
+    width: 1280px;
+    height: 720px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--slide-bg-1) 0%, var(--slide-bg-2) 50%, var(--slide-bg-3) 100%);
+    color: white;
+  }
+
+  .content-wrapper {
+    width: 1160px;
+    height: 620px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .main-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .video-frame {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  }
+
+  .demo-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 16px;
+    background: #000;
+  }
+`;
+
+export const html = `
+  <div class="slide-container">
+    <div class="content-wrapper">
+      <h1 class="main-title">Completar una Inspección fallida</h1>
+      <div class="video-frame">
+        <video class="demo-video" autoplay muted loop playsinline>
+          <source src="assets/alex3.mp4" type="video/mp4" />
+        </video>
+      </div>
+    </div>
+  </div>
+`;

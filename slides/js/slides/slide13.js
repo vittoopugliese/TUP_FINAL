@@ -1,83 +1,12 @@
 /**
- * Slide 13
+ * Slide 14
  */
 export const meta = {
-  index: 13,
-  title: "Demostración — Alex",
-};
-
-export const styles = `
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    font-family: 'Roboto', sans-serif;
-    background: var(--color-body-bg);
-  }
-
-  .slide-container {
-    width: 1280px;
-    height: 720px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--slide-bg-1) 0%, var(--slide-bg-2) 50%, var(--slide-bg-3) 100%);
-    color: white;
-  }
-
-  .content-wrapper {
-    width: 1160px;
-    height: 620px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .main-title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 36px;
-    font-weight: 700;
-    text-align: center;
-  }
-
-  .video-frame {
-    width: 100%;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px;
-    border-radius: 24px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
-  }
-
-  .demo-video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 16px;
-    background: #000;
-  }
-`;
-
-export const html = `
-  <div class="slide-container">
-    <div class="content-wrapper">
-      <h1 class="main-title">Crear Nueva Inspección</h1>
-      <div class="video-frame">
-        <video class="demo-video" autoplay muted loop playsinline>
-          <source src="assets/alex1.mp4" type="video/mp4" />
-        </video>
-      </div>
-    </div>
-  </div>
-`;
+    index: 14,
+    title: "Flujo del Proceso - InspectionsApp",
+  };
+  
+  export const styles = "* {\r\n            margin: 0;\r\n            padding: 0;\r\n            box-sizing: border-box;\r\n        }\r\n\r\n        body {\r\n            margin: 0;\r\n            padding: 0;\r\n            overflow: hidden;\r\n            font-family: 'Roboto', sans-serif;\r\n            background: var(--color-body-bg);\r\n        }\r\n\r\n        .slide-container {\r\n            position: relative;\r\n            width: 1280px;\r\n            height: 720px;\r\n            overflow: hidden;\r\n            background: linear-gradient(135deg, var(--slide-bg-1) 0%, var(--slide-bg-2) 50%, var(--slide-bg-3) 100%);\r\n        }\r\n\r\n        .bg-pattern {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            background-image:\r\n                radial-gradient(circle at 20% 80%, rgba(var(--color-success-rgb), 0.1) 0%, transparent 50%),\r\n                radial-gradient(circle at 80% 20%, rgba(var(--color-success-light-rgb), 0.1) 0%, transparent 50%);\r\n            opacity: 0.6;\r\n        }\r\n\r\n        .grid-overlay {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            background-image:\r\n                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),\r\n                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);\r\n            background-size: 50px 50px;\r\n            opacity: 0.3;\r\n        }\r\n\r\n        .content-wrapper {\r\n            position: relative;\r\n            width: 100%;\r\n            height: 100%;\r\n            padding: 40px 60px;\r\n            z-index: 10;\r\n        }\r\n\r\n        .header {\r\n            display: flex;\r\n            justify-content: space-between;\r\n            align-items: center;\r\n            margin-bottom: 30px;\r\n        }\r\n\r\n        .title-section {\r\n            display: flex;\r\n            align-items: center;\r\n            gap: 15px;\r\n        }\r\n\r\n        .title-icon {\r\n            width: 50px;\r\n            height: 50px;\r\n            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);\r\n            border-radius: 12px;\r\n            display: flex;\r\n            align-items: center;\r\n            justify-content: center;\r\n            color: white;\r\n            font-size: 24px;\r\n        }\r\n\r\n        .main-title {\r\n            font-family: 'Montserrat', sans-serif;\r\n            font-size: 32px;\r\n            font-weight: 700;\r\n            color: white;\r\n            margin: 0;\r\n        }\r\n\r\n        .subtitle {\r\n            font-size: 14px;\r\n            color: rgba(255, 255, 255, 0.7);\r\n            margin-top: 5px;\r\n        }\r\n\r\n        .process-flow {\r\n            display: flex;\r\n            align-items: flex-start;\r\n            justify-content: center;\r\n            gap: 12px;\r\n            margin-top: 20px;\r\n        }\r\n\r\n        .process-step {\r\n            flex: 1;\r\n            background: rgba(255, 255, 255, 0.05);\r\n            border: 1px solid rgba(255, 255, 255, 0.1);\r\n            border-radius: 14px;\r\n            padding: 22px 18px;\r\n            display: flex;\r\n            flex-direction: column;\r\n            align-items: center;\r\n            text-align: center;\r\n            position: relative;\r\n            transition: all 0.3s ease;\r\n            min-height: 320px;\r\n        }\r\n\r\n        .process-step:hover {\r\n            background: rgba(255, 255, 255, 0.08);\r\n            border-color: rgba(var(--color-success-light-rgb), 0.3);\r\n            transform: translateY(-4px);\r\n        }\r\n\r\n        .step-number {\r\n            width: 40px;\r\n            height: 40px;\r\n            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%);\r\n            border-radius: 50%;\r\n            display: flex;\r\n            align-items: center;\r\n            justify-content: center;\r\n            color: white;\r\n            font-family: 'Montserrat', sans-serif;\r\n            font-size: 18px;\r\n            font-weight: 700;\r\n            margin-bottom: 12px;\r\n            box-shadow: 0 4px 15px rgba(var(--color-success-light-rgb), 0.3);\r\n        }\r\n\r\n        .step-icon {\r\n            width: 50px;\r\n            height: 50px;\r\n            background: rgba(var(--color-success-rgb), 0.15);\r\n            border-radius: 12px;\r\n            display: flex;\r\n            align-items: center;\r\n            justify-content: center;\r\n            color: var(--color-success-light);\r\n            font-size: 22px;\r\n            margin-bottom: 14px;\r\n        }\r\n\r\n        .step-title {\r\n            font-family: 'Montserrat', sans-serif;\r\n            font-size: 15px;\r\n            font-weight: 700;\r\n            color: white;\r\n            margin-bottom: 8px;\r\n        }\r\n\r\n        .step-desc {\r\n            font-size: 12px;\r\n            color: rgba(255, 255, 255, 0.75);\r\n            line-height: 1.5;\r\n            margin-bottom: 12px;\r\n        }\r\n\r\n        .step-role {\r\n            display: inline-flex;\r\n            align-items: center;\r\n            gap: 6px;\r\n            padding: 5px 14px;\r\n            border-radius: 20px;\r\n            font-size: 11px;\r\n            font-weight: 600;\r\n            margin-top: auto;\r\n        }\r\n\r\n        .role-inspector {\r\n            background: rgba(52, 152, 219, 0.2);\r\n            color: #5DADE2;\r\n        }\r\n\r\n        .role-operator {\r\n            background: rgba(241, 196, 15, 0.2);\r\n            color: #F1C40F;\r\n        }\r\n\r\n        .role-both {\r\n            background: rgba(155, 89, 182, 0.2);\r\n            color: #BB8FCE;\r\n        }\r\n\r\n        .step-arrow {\r\n            display: flex;\r\n            align-items: center;\r\n            color: rgba(255, 255, 255, 0.25);\r\n            font-size: 22px;\r\n            padding-top: 140px;\r\n        }\r\n\r\n        .floating-elements {\r\n            position: absolute;\r\n            top: 0;\r\n            left: 0;\r\n            width: 100%;\r\n            height: 100%;\r\n            pointer-events: none;\r\n            overflow: hidden;\r\n        }\r\n\r\n        .floating-icon {\r\n            position: absolute;\r\n            color: rgba(var(--color-success-light-rgb), 0.1);\r\n            font-size: 20px;\r\n            animation: float 6s ease-in-out infinite;\r\n        }\r\n\r\n        @keyframes float {\r\n\r\n            0%,\r\n            100% {\r\n                transform: translateY(0) rotate(0deg);\r\n            }\r\n\r\n            50% {\r\n                transform: translateY(-20px) rotate(5deg);\r\n            }\r\n        }\r\n\r\n        .bottom-bar {\r\n            position: absolute;\r\n            bottom: 30px;\r\n            left: 60px;\r\n            right: 60px;\r\n            display: flex;\r\n            justify-content: center;\r\n            align-items: center;\r\n        }\r\n\r\n        .bottom-note {\r\n            font-size: 13px;\r\n            color: rgba(255, 255, 255, 0.5);\r\n            font-style: italic;\r\n        }";
+  
+  export const html = "<div class=\"slide-container\">\r\n        <div class=\"bg-pattern\"></div>\r\n        <div class=\"grid-overlay\"></div>\r\n        <div class=\"floating-elements\">\r\n            <i class=\"fas fa-clipboard-list floating-icon\" style=\"top: 15%; left: 8%;\"></i>\r\n            <i class=\"fas fa-user-check floating-icon\" style=\"top: 20%; right: 12%;\"></i>\r\n            <i class=\"fas fa-tasks floating-icon\" style=\"bottom: 25%; left: 15%;\"></i>\r\n        </div>\r\n        <div class=\"content-wrapper\">\r\n            <div class=\"header\">\r\n                <div class=\"title-section\">\r\n                    <div class=\"title-icon\">\r\n                        <i class=\"fas fa-route\"></i>\r\n                    </div>\r\n                    <div>\r\n                        <div class=\"main-title\">Flujo del Proceso de Inspección</div>\r\n                        <div class=\"subtitle\">5 pasos desde la creación hasta el informe final</div>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"process-flow\">\r\n                <div class=\"process-step\">\r\n                    <div class=\"step-number\">1</div>\r\n                    <div class=\"step-icon\">\r\n                        <i class=\"fas fa-plus-circle\"></i>\r\n                    </div>\r\n                    <div class=\"step-title\">Creación</div>\r\n                    <div class=\"step-desc\">El inspector crea una nueva inspección definiendo la ubicación, el tipo de dispositivo y los tests a realizar.</div>\r\n                    <div class=\"step-role role-inspector\">\r\n                        <i class=\"fas fa-user-shield\"></i>\r\n                        <span>Inspector</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"step-arrow\">\r\n                    <i class=\"fas fa-chevron-right\"></i>\r\n                </div>\r\n                <div class=\"process-step\">\r\n                    <div class=\"step-number\">2</div>\r\n                    <div class=\"step-icon\">\r\n                        <i class=\"fas fa-user-plus\"></i>\r\n                    </div>\r\n                    <div class=\"step-title\">Asignación</div>\r\n                    <div class=\"step-desc\">El inspector asigna la inspección a un operador y/o a sí mismo, definiendo los roles de cada participante.</div>\r\n                    <div class=\"step-role role-inspector\">\r\n                        <i class=\"fas fa-user-shield\"></i>\r\n                        <span>Inspector</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"step-arrow\">\r\n                    <i class=\"fas fa-chevron-right\"></i>\r\n                </div>\r\n                <div class=\"process-step\">\r\n                    <div class=\"step-number\">3</div>\r\n                    <div class=\"step-icon\">\r\n                        <i class=\"fas fa-clipboard-check\"></i>\r\n                    </div>\r\n                    <div class=\"step-title\">Ejecución</div>\r\n                    <div class=\"step-desc\">El operador completa cada test de la inspección en campo, registrando valores, observaciones y evidencia fotográfica.</div>\r\n                    <div class=\"step-role role-both\">\r\n                        <i class=\"fas fa-users\"></i>\r\n                        <span>Operador / Inspector</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"step-arrow\">\r\n                    <i class=\"fas fa-chevron-right\"></i>\r\n                </div>\r\n                <div class=\"process-step\">\r\n                    <div class=\"step-number\">4</div>\r\n                    <div class=\"step-icon\">\r\n                        <i class=\"fas fa-search\"></i>\r\n                    </div>\r\n                    <div class=\"step-title\">Revisión y Firma</div>\r\n                    <div class=\"step-desc\">El inspector revisa los resultados de todos los tests y firma la inspección, validando oficialmente los resultados.</div>\r\n                    <div class=\"step-role role-inspector\">\r\n                        <i class=\"fas fa-user-shield\"></i>\r\n                        <span>Inspector</span>\r\n                    </div>\r\n                </div>\r\n                <div class=\"step-arrow\">\r\n                    <i class=\"fas fa-chevron-right\"></i>\r\n                </div>\r\n                <div class=\"process-step\">\r\n                    <div class=\"step-number\">5</div>\r\n                    <div class=\"step-icon\">\r\n                        <i class=\"fas fa-file-pdf\"></i>\r\n                    </div>\r\n                    <div class=\"step-title\">Informe PDF</div>\r\n                    <div class=\"step-desc\">Luego de firmar, el inspector genera el informe PDF oficial con todos los detalles y resultados de la inspección.</div>\r\n                    <div class=\"step-role role-inspector\">\r\n                        <i class=\"fas fa-user-shield\"></i>\r\n                        <span>Inspector</span>\r\n                    </div>\r\n                </div>\r\n            </div>\r\n            <div class=\"bottom-bar\">\r\n                <div class=\"bottom-note\">Cada paso queda registrado con trazabilidad completa en el sistema</div>\r\n            </div>\r\n        </div>\r\n    </div>";
+  

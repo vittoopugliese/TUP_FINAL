@@ -72,7 +72,7 @@ export const styles = `
 export const html = `
   <div class="slide-container">
     <div class="content-wrapper">
-      <h1 class="main-title">Crear Nueva Inspección</h1>
+      <h1 class="main-title">Completar una Inspección exitosamente</h1>
       <div class="video-frame">
         <video class="demo-video" autoplay muted loop playsinline>
           <source src="assets/alex2.mp4" type="video/mp4" />
