@@ -74,7 +74,7 @@ export const html = `
     <div class="content-wrapper">
       <h1 class="main-title">Firmar Inspección y generar Reporte PDF</h1>
       <div class="video-frame">
-        <video class="demo-video" autoplay muted loop playsinline>
+        <video class="demo-video" autoplay loop playsinline>
           <source src="assets/alex5.mp4" type="video/mp4" />
         </video>
       </div>

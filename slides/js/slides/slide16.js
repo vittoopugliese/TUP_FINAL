@@ -74,7 +74,7 @@ export const html = `
     <div class="content-wrapper">
       <h1 class="main-title">Completar una Inspección fallida</h1>
       <div class="video-frame">
-        <video class="demo-video" autoplay muted loop playsinline>
+        <video class="demo-video" autoplay loop playsinline>
           <source src="assets/alex3.mp4" type="video/mp4" />
         </video>
       </div>

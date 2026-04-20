@@ -74,7 +74,7 @@ export const html = `
     <div class="content-wrapper">
       <h1 class="main-title">Agregar una nueva Ubicación, Zona y Dispositivo</h1>
       <div class="video-frame">
-        <video class="demo-video" autoplay muted loop playsinline>
+        <video class="demo-video" autoplay loop playsinline>
           <source src="assets/alex4.mp4" type="video/mp4" />
         </video>
       </div>

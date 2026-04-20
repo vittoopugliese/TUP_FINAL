@@ -1,4 +1,4 @@
-const TOTAL_SLIDES = 17;
+const TOTAL_SLIDES = 19;
 const SLIDE_WIDTH = 1280;
 const SLIDE_HEIGHT = 720;
 
@@ -14,6 +14,23 @@ const counterEl = document.getElementById("nav-counter");
 
 let currentIndex = 1;
 const slideCache = new Map();
+const VIDEO_PLAYBACK_RATE = 1.25;
+
+function initSlideVideos(container) {
+    container.querySelectorAll("video").forEach((video) => {
+        video.muted = false;
+        video.defaultPlaybackRate = VIDEO_PLAYBACK_RATE;
+        video.playbackRate = VIDEO_PLAYBACK_RATE;
+        const tryPlay = () => {
+            video.play().catch(() => {});
+        };
+        if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+            tryPlay();
+        } else {
+            video.addEventListener("loadedmetadata", tryPlay, { once: true });
+        }
+    });
+}
 
 function parseSlideFromHash() {
     const h = window.location.hash.replace(/^#/, "");
@@ -53,6 +70,7 @@ async function showSlide(n) {
     const mod = await loadSlideModule(n);
     slideStyleEl.textContent = mod.styles;
     slideMount.innerHTML = mod.html;
+    initSlideVideos(slideMount);
     document.title = mod.meta.title;
     updateNav();
     updateScale();
